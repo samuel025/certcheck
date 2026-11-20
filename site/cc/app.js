@@ -11,6 +11,7 @@
   const VIEWS = ["verify", "issue", "manage", "challenge"];
   function route() {
     const h = location.hash;
+    if (!(h.startsWith("#c=") || h.startsWith("#ch=") || ["#issue", "#verify", "#manage"].includes(h))) return;   // landing, game and other pages are handled by ft/landing.js
     let v = h.startsWith("#c=") ? "verify" : h.startsWith("#ch=") ? "challenge" : VIEWS.includes(h.slice(1)) ? h.slice(1) : "issue";
     VIEWS.forEach(n => { $(n + "View").hidden = n !== v; });
     document.querySelectorAll(".tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === v));
@@ -34,8 +35,8 @@
   }
   const FACT = (dt, dd, mono) => { const d = document.createElement("div"), a = document.createElement("dt"), b = document.createElement("dd"); a.textContent = dt; if (dd instanceof Node) b.appendChild(dd); else b.textContent = dd; if (mono) b.className = "mono"; d.append(a, b); return d; };
   function show(state, title, why, facts, note) {
-    const r = $("vResult"); r.hidden = false; r.dataset.state = state;
-    $("vBadge").textContent = state === "valid" ? "✓" : state === "invalid" || state === "revoked" ? "✕" : "!";
+    const r = $("cvResult"); r.hidden = false; r.dataset.state = state;
+    $("cvBadge").textContent = state === "valid" ? "✓" : state === "invalid" || state === "revoked" ? "✕" : "!";
     $("vTitle").textContent = title; $("vWhy").textContent = why; $("vNote").textContent = note || "";
     const f = $("vFacts"); f.replaceChildren(...facts);
   }
@@ -53,7 +54,7 @@
   }
   let vSeq = 0;
   async function runVerify() {
-    const seq = ++vSeq; $("vHint").textContent = ""; $("vResult").hidden = true;
+    const seq = ++vSeq; $("vHint").textContent = ""; $("cvResult").hidden = true;
     let p; try { p = parseInput($("vInput").value); } catch (e) { say($("vHint"), e.message, "bad"); return; }
     const res = await C.verifyCredential(p);
     if (seq !== vSeq) return;

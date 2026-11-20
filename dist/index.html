@@ -4,55 +4,803 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CertCheck — certificates anyone can verify</title>
-<meta name="description" content="Issue certificates that anyone can check forever, with no personal data on-chain and no server to trust. Built on X Layer.">
+<meta name="description" content="Issue certificates anyone can check forever, with no personal data on-chain. Learn circuits and earn a passport verified by TapeOut. Built on X Layer.">
+<link rel="icon" href="data:,">
 <style>
-:root{--void:#0b0e12;--carbon:#181a1d;--slate:#303235;--fog:#5d5e61;--steel:#818284;--silver:#bababb;--bone:#dedede;--green:#00d892;--teal:#002923;--amber:#e8b64a;--coral:#ff6b6b;
- --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;--mono:ui-monospace,SFMono-Regular,"JetBrains Mono","IBM Plex Mono",Menlo,Consolas,monospace}
-*{box-sizing:border-box}html,body{margin:0}body{background:var(--void);color:var(--silver);font:400 15px/1.5 var(--sans);min-height:100vh;display:flex;flex-direction:column}
-a{color:inherit}h1,h2{font-weight:400;color:var(--bone);margin:0}code{font:13px var(--mono);color:var(--bone)}
-.bar{display:flex;align-items:center;gap:28px;padding:18px clamp(16px,4vw,56px);border-bottom:1px solid #1b1e22}
-.logo{display:inline-flex;align-items:center;gap:10px;font:19px var(--mono);color:var(--bone);text-decoration:none}.logo svg{width:30px;height:16px;color:var(--silver)}
-.tabs{display:flex;gap:6px;margin:0 auto}.tabs a{font:12px var(--mono);letter-spacing:.06em;text-transform:uppercase;text-decoration:none;color:var(--steel);padding:8px 14px;border:1px solid transparent}
-.tabs a:hover{color:var(--bone)}.tabs a.on{color:var(--green);border-color:var(--slate)}
-.chip{font:11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--steel);border:1px solid var(--slate);padding:5px 10px}.chip.live{color:var(--green);border-color:#0b4a38}
-main{flex:1;width:100%;max-width:880px;margin:0 auto;padding:44px clamp(16px,4vw,32px) 24px}
-.view h1{font-size:clamp(30px,4.6vw,48px);line-height:1.05;letter-spacing:-.015em;margin-bottom:14px}
-.lede{font-size:clamp(16px,1.5vw,19px);color:var(--steel);max-width:640px;margin:0 0 30px}
-.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}label{font:11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--steel)}
-input[type=text],textarea{width:100%;background:#0a0d11;border:1px solid var(--slate);color:var(--bone);font:14px var(--mono);padding:10px 12px;border-radius:1px}
-input[type=text]:focus,textarea:focus{outline:1px solid var(--green);outline-offset:0}
-textarea{resize:vertical}
-.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0}.row input{flex:1;min-width:220px}
-.btn{display:inline-block;font:12px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:11px 20px;border-radius:1px;cursor:pointer;background:none;color:var(--silver);border:1px solid var(--silver)}
-.btn:hover{color:var(--bone);border-color:var(--bone)}.btn.primary{background:var(--teal);color:var(--green);border-color:var(--teal)}.btn.primary:hover{background:#005441}
-.btn:disabled{opacity:.45;cursor:not-allowed}
-.hint{font-size:13px;color:var(--steel)}.hint.bad,.bad{color:var(--coral)}.hint.ok,.ok{color:var(--green)}
-.note{font-size:13px;color:var(--fog);margin:10px 0 0}
-.step{display:flex;gap:20px;border-top:1px solid #1b1e22;padding:26px 0}.step .num{font:13px var(--mono);color:var(--green);border:1px solid #0b4a38;width:30px;height:30px;display:grid;place-items:center;flex:none}
-.step .body{flex:1;min-width:0}.step h2{font-size:20px;margin-bottom:6px}.sub{margin:0 0 12px;color:var(--steel);font-size:14px}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
-.facts{margin:16px 0}.facts div{display:grid;grid-template-columns:170px 1fr;gap:14px;padding:9px 0;border-bottom:1px solid #1b1e22}.facts dt{font:11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--steel);padding-top:3px}.facts dd{margin:0;color:var(--bone);word-break:break-word}
-.mono{font-family:var(--mono);font-size:13px}
-.tablewrap{max-height:300px;overflow:auto;border:1px solid var(--slate);margin:14px 0 8px}table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:8px 12px;border-bottom:1px solid #1b1e22}th{font:11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--steel);position:sticky;top:0;background:var(--carbon)}
-td .btn{padding:5px 10px;font-size:11px}
-.publish{margin-top:26px;border-top:1px solid #1b1e22;padding-top:22px}.publish h2{font-size:20px;margin-bottom:6px}
-.result{margin-top:26px;border:1px solid var(--slate);padding:24px;background:linear-gradient(180deg,#12151a,#0d1014)}
-.rhead{display:flex;align-items:center;gap:14px;margin-bottom:10px}.rhead h2{font-size:26px}
-.badge{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font:20px var(--mono);border:2px solid currentColor;flex:none}
-.result[data-state=valid]{border-color:#0b4a38}.result[data-state=valid] .badge,.result[data-state=valid] h2{color:var(--green)}
-.result[data-state=invalid] .badge,.result[data-state=invalid] h2,.result[data-state=revoked] .badge,.result[data-state=revoked] h2{color:var(--coral)}
-.result[data-state=unregistered] .badge,.result[data-state=unregistered] h2,.result[data-state=offline] .badge,.result[data-state=offline] h2,.result[data-state=demo] .badge,.result[data-state=demo] h2{color:var(--amber)}
-.foot{border-top:1px solid #1b1e22;padding:22px clamp(16px,4vw,56px);color:var(--fog);font-size:13px}.foot p{max-width:880px;margin:0 auto}
-@media (max-width:700px){.tabs{margin:0}.bar{flex-wrap:wrap;gap:12px}.grid3{grid-template-columns:1fr}.facts div{grid-template-columns:1fr;gap:2px}.step{gap:14px}}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* FirstTape — dark, terminal-grade. Flat surfaces, 1px hairlines, one green LED.
+   No external fonts (TapeKit badge needs zero external assets): system stacks stand in for SuisseIntl / GT America Mono. */
+:root{
+  --void:#0b0e12; --carbon:#181a1d; --graphite:#1f2124; --slate:#303235;
+  --fog:#5d5e61; --steel:#818284; --ash:#a3a4a5; --silver:#bababb; --bone:#dedede;
+  --green:#00d892; --teal:#002923; --emerald:#005441; --magenta:#9f3f53; --violet:#c58aff; --coral:#ff6285;
+  --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"JetBrains Mono","IBM Plex Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--void);color:var(--silver);font:400 14px/1.38 var(--sans)}
+[hidden]{display:none!important}
+a{color:inherit;text-decoration:none}
+h1,h2{font-weight:400;color:var(--bone);margin:0}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px}
+.mono,.tabs button,.btn,.badge,.cap,.links a,.logo,#levelNav button,.k,th,.term-foot,figcaption{font-family:var(--mono)}
 
-/* QR dialog + print sheet */
-dialog{background:var(--carbon);color:var(--silver);border:1px solid var(--slate);padding:0;max-width:min(92vw,460px);width:100%}
-dialog::backdrop{background:rgba(5,7,9,.75)}
-.card{padding:22px}.cardhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.card h2{font-size:26px;overflow-wrap:anywhere}
-.qrbox{background:#fff;padding:8px;margin:14px 0;max-width:340px}.qrbox svg{display:block;width:100%;height:auto}
-.cap{font:11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--steel)}
-#printArea{display:none}
+/* top bar */
+.bar{display:flex;align-items:center;gap:24px;max-width:1200px;margin:0 auto;padding:20px 24px}
+.logo{font-size:20px;color:var(--bone);letter-spacing:.014em}
+.logo .led{color:var(--green)}
+.links{display:flex;gap:24px;margin:0 auto}
+.links a{font-size:12px;letter-spacing:.053em;text-transform:uppercase;color:var(--silver)}
+.links a:hover{color:var(--bone)}
+.cta{display:flex;gap:12px;margin-left:auto}
+.links+.cta{margin-left:0}
+
+/* buttons */
+.btn{display:inline-block;font-size:12px;letter-spacing:.053em;text-transform:uppercase;padding:6px 12px;border-radius:1px;cursor:pointer;line-height:1.4}
+.btn.ghost{background:transparent;color:var(--silver);border:1px solid var(--silver)}
+.btn.ghost:hover{color:var(--bone);border-color:var(--bone)}
+.btn.primary{background:var(--teal);color:var(--green);border:1px solid var(--teal)}
+.btn.primary:hover{background:var(--emerald);border-color:var(--emerald)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn:focus-visible,.tabs button:focus-visible,#levelNav button:focus-visible{outline:1px solid var(--green);outline-offset:2px}
+
+/* badges */
+.badge{display:inline-block;font-size:10px;letter-spacing:.064em;text-transform:uppercase;color:var(--green);background:var(--carbon);padding:2px 8px;border-radius:1px;box-shadow:inset 0 0 0 1px rgba(0,216,146,.15)}
+.badge.muted{color:var(--steel);box-shadow:inset 0 0 0 1px rgba(186,186,187,.15)}
+.cap{font-size:10px;letter-spacing:.064em;text-transform:uppercase;color:var(--steel)}
+
+/* hero */
+.hero{padding-top:24px;padding-bottom:40px;display:flex;flex-direction:column}
+.hero-grid{display:grid;grid-template-columns:5fr 7fr;gap:32px;align-items:start}
+.term{background:var(--carbon);border:1px solid var(--slate);border-radius:1px}
+.tabs{display:flex;border-bottom:1px solid var(--slate)}
+.tabs button{background:none;border:0;border-bottom:1px solid transparent;margin-bottom:-1px;color:var(--silver);font-size:12px;letter-spacing:.053em;text-transform:uppercase;padding:10px 16px;cursor:pointer}
+.tabs button.on{color:var(--green);border-bottom-color:var(--green)}
+.code{margin:0;padding:16px;font:13px/1.6 var(--mono);color:var(--silver);white-space:pre-wrap;word-break:break-word;min-height:176px}
+.code .p{color:var(--green)}.code .k{color:var(--violet)}.code .v{color:var(--coral)}.code .c{color:#006d4a}
+.term-foot{padding:8px 16px;border-top:1px solid var(--slate);font-size:10px;letter-spacing:.064em;color:var(--fog);text-transform:uppercase}
+.render{margin:0}
+.render svg{width:100%;height:auto;display:block;background:var(--void)}
+.svgtxt,.render text{font:11px var(--mono);letter-spacing:.058em}
+figcaption{font-size:10px;letter-spacing:.064em;color:var(--steel);margin-top:8px}
+.hero-copy{margin-top:40px;max-width:560px;order:2}
+.hero-copy .badge{margin-bottom:20px}
+.hero-copy h1{font-size:clamp(40px,6vw,65px);line-height:1.1;letter-spacing:-.005em}
+.lede{font-size:18px;line-height:1.35;color:var(--steel);margin:20px 0 28px;max-width:520px}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+
+/* sections */
+.section{padding-top:80px;padding-bottom:0}
+.section h2{font-size:36px;line-height:1.17;max-width:700px}
+.sub{color:var(--steel);font-size:16px;line-height:1.38;max-width:660px;margin:16px 0 32px}
+.compare{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--slate);border-radius:1px}
+.compare .panel+.panel{border-left:1px solid var(--slate)}
+.panel{padding:20px;background:var(--carbon)}
+.compare .panel{background:transparent}
+.panel svg{width:100%;height:auto;display:block;margin-bottom:16px}
+.panel ul{margin:12px 0 0;padding-left:18px;color:var(--silver);line-height:1.6}
+.lvltable{width:100%;border-collapse:collapse;border:1px solid var(--slate)}
+.lvltable th{font-size:10px;letter-spacing:.064em;text-transform:uppercase;color:var(--steel);text-align:left;padding:10px 16px;border-bottom:1px solid var(--slate);font-weight:400}
+.lvltable td{padding:12px 16px;border-bottom:1px solid var(--slate);color:var(--silver)}
+.lvltable tr:last-child td{border-bottom:0}
+.lvltable td:first-child{font-family:var(--mono);color:var(--steel)}
+.lvltable .where{font-family:var(--mono);font-size:11px;letter-spacing:.058em;text-transform:uppercase;color:var(--steel)}
+.lvltable .where.chain{color:var(--green)}
+.stack{display:grid;grid-template-columns:repeat(2,1fr);border:1px solid var(--slate)}
+.stack>div{padding:20px;display:flex;flex-direction:column;gap:8px;align-items:flex-start;border-bottom:1px solid var(--slate)}
+.stack>div:nth-child(odd){border-right:1px solid var(--slate)}
+.stack>div:nth-last-child(-n+2){border-bottom:0}
+.stack .k{font-size:12px;letter-spacing:.053em;text-transform:uppercase;color:var(--bone)}
+.stack .v{color:var(--steel)}
+.foot{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;max-width:1152px;padding:80px 0 48px;margin:80px auto 0;border-top:1px solid var(--slate)}
+.fine{color:var(--steel);max-width:520px}
+
+/* game */
+.play{display:grid;grid-template-columns:320px 1fr;gap:24px;padding-top:8px;padding-bottom:48px}
+#levelNav{display:flex;gap:4px;flex-wrap:wrap;margin:0 auto}
+#levelNav button{min-width:32px;background:transparent;color:var(--silver);border:1px solid var(--slate);border-radius:1px;font-size:12px;padding:6px 10px;cursor:pointer}
+#levelNav button:disabled{color:var(--fog);cursor:not-allowed}
+#levelNav button.cur{border-color:var(--green);color:var(--green)}
+#levelNav button.done{box-shadow:inset 0 -2px 0 var(--green)}
+#brief{align-self:start;border:1px solid var(--slate);border-radius:1px}
+#brief h2{font-size:25px;line-height:1.28;margin:8px 0 12px}
+#lvlText{color:var(--silver);line-height:1.5;margin:0 0 16px}
+table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(--mono);font-size:12px}
+#truth th,#truth td{border:1px solid var(--slate);padding:4px 8px;text-align:center;font-weight:400;color:var(--silver)}
+#truth th{color:var(--steel);letter-spacing:.053em}
+#truth tr.pass td{color:var(--green);background:rgba(0,216,146,.06)}
+#truth tr.fail td{color:var(--coral);background:rgba(255,98,133,.06)}
+#actions{display:flex;gap:8px;flex-wrap:wrap}
+#msg{min-height:1.4em;margin:16px 0 0;font-size:14px}
+#msg.ok{color:var(--green)}#msg.bad{color:var(--coral)}
+#msg a{color:var(--green);text-decoration:underline;text-underline-offset:2px}
+.hint{color:var(--fog);font-size:12px;margin:12px 0 0}
+#board{width:100%;height:auto;background:var(--void);border:1px solid var(--slate);border-radius:1px;touch-action:none;
+  background-image:radial-gradient(var(--slate) 1px,transparent 1px);background-size:24px 24px}
+.port{fill:var(--carbon);stroke:var(--steel);stroke-width:1.5;cursor:pointer}
+.port:hover,.port.sel{fill:var(--green);stroke:var(--green)}
+.gate rect{fill:var(--carbon);stroke:var(--slate);stroke-width:1;cursor:move}
+.gate:hover rect{stroke:var(--steel)}
+.gate text,.io text{fill:var(--silver);font:11px var(--mono);letter-spacing:.058em;pointer-events:none;text-anchor:middle}
+.wire{stroke:var(--steel);stroke-width:2;fill:none;cursor:pointer}
+.wire:hover{stroke:var(--coral)}
+
+@media (max-width:900px){
+  .hero-grid{grid-template-columns:1fr}
+  .hero-copy{order:0;margin:8px 0 32px}
+
+  .links{display:none}.cta{margin-left:auto}
+  .compare{grid-template-columns:1fr}.compare .panel+.panel{border-left:0;border-top:1px solid var(--slate)}
+  .stack{grid-template-columns:1fr}.stack>div:nth-child(odd){border-right:0}.stack>div:nth-last-child(-n+2){border-bottom:1px solid var(--slate)}.stack>div:last-child{border-bottom:0}
+  .play{grid-template-columns:1fr}
+  .bar{flex-wrap:wrap;gap:12px}#levelNav{order:3;width:100%;margin:0}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* ===== motion + interactivity (all disabled under prefers-reduced-motion) ===== */
+.btn,.links a,.tabs button,#levelNav button{transition:color .15s,border-color .15s,background .15s}
+.logo .led{animation:led 3.2s ease-in-out infinite}
+@keyframes led{0%,100%{opacity:1}50%{opacity:.45}}
+.badge{position:relative}
+.hero-copy .badge::before{content:"";display:inline-block;width:6px;height:6px;margin-right:8px;background:var(--green);vertical-align:1px;animation:led 2s ease-in-out infinite}
+
+/* hero entrance */
+.hero-copy>*{animation:rise .6s cubic-bezier(.2,.7,.2,1) both}
+.hero-copy>:nth-child(2){animation-delay:.08s}.hero-copy>:nth-child(3){animation-delay:.16s}.hero-copy>:nth-child(4){animation-delay:.24s}
+.term{animation:rise .6s .05s cubic-bezier(.2,.7,.2,1) both}
+.render{animation:rise .7s .12s cubic-bezier(.2,.7,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* terminal */
+.code .ln{display:block;opacity:0;animation:ln .25s forwards}
+@keyframes ln{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:none}}
+.tcur{display:inline-block;width:7px;height:14px;background:var(--green);vertical-align:-2px;margin-left:2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* live hero circuit */
+.sig{stroke:var(--fog);transition:stroke .25s ease,stroke-width .25s ease}
+.sig.on{stroke:var(--green);stroke-width:2.4}
+.gled{fill:var(--slate);transition:fill .25s}
+.gled.on{fill:var(--green)}
+.tog{cursor:pointer;outline:none}
+.tog rect{fill:var(--carbon);stroke:var(--slate);stroke-width:1;transition:stroke .15s,fill .15s}
+.tog text{fill:var(--silver);font:12px var(--mono);letter-spacing:.053em;text-anchor:middle;pointer-events:none}
+.tog:hover rect,.tog:focus-visible rect{stroke:var(--green)}
+.tog.on rect{fill:var(--teal);stroke:var(--green)}.tog.on text{fill:var(--green)}
+.yout{fill:var(--steel);font:12px var(--mono);letter-spacing:.053em;transition:fill .25s}
+.yout.on{fill:var(--green)}
+.hintpill{margin-left:16px;color:var(--green);animation:led 2s ease-in-out infinite}
+.hintpill.gone{display:none}
+
+/* scroll reveal (only when JS opts in) */
+.js .reveal{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.2,1)}
+.js .reveal.in{opacity:1;transform:none}
+.lvltable tbody tr{transition:background .15s}
+.lvltable tbody tr:hover{background:var(--carbon)}
+.lvltable tbody tr:hover td:first-child{color:var(--green)}
+.js #lvlTable tbody tr{opacity:0;transform:translateX(-6px);transition:opacity .4s ease,transform .4s ease,background .15s}
+.js #lvlTable.in tbody tr{opacity:1;transform:none}
+.compare .panel svg path[stroke="#00d892"]{stroke-dasharray:420;stroke-dashoffset:420}
+.compare.in .panel svg path[stroke="#00d892"]{animation:trace 1.4s .2s ease forwards}
+.compare .panel svg path[stroke="#9f3f53"]{stroke-dasharray:420;stroke-dashoffset:420}
+.compare.in .panel svg path[stroke="#9f3f53"]{animation:trace 1.4s .2s ease forwards}
+@keyframes trace{to{stroke-dashoffset:0}}
+.stack>div{transition:background .15s}.stack>div:hover{background:var(--carbon)}
+
+/* game */
+.wire.on{stroke:var(--green)}
+.gate .gl{fill:var(--slate);transition:fill .2s}.gate .gl.on{fill:var(--green)}
+.io .yo{fill:var(--steel)}.io .yo.on{fill:var(--green)}
+.board-in{animation:rise .4s ease both}
+#truth tr.pass td{animation:rowflash .7s ease both}
+@keyframes rowflash{0%{background:rgba(0,216,146,.28)}100%{background:rgba(0,216,146,.06)}}
+#truth tr.fail td{animation:shake .3s ease both}
+@keyframes shake{25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+#levelNav button.pulse{animation:navpulse .9s ease 2}
+@keyframes navpulse{0%,100%{box-shadow:0 0 0 0 rgba(0,216,146,0)}50%{box-shadow:0 0 0 4px rgba(0,216,146,.25)}}
+#msg.ok{animation:rise .3s ease both}
+.tog.flip rect{animation:flip .25s ease}
+@keyframes flip{50%{stroke-width:3;stroke:var(--green)}}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .js .reveal,.js #lvlTable tbody tr{opacity:1!important;transform:none!important}
+  .code .ln{opacity:1}
+  .compare .panel svg path[stroke="#00d892"],.compare .panel svg path[stroke="#9f3f53"]{stroke-dashoffset:0}
+}
+#truth tr.pass td{animation-delay:calc(var(--i,0)*90ms)}
+.io .tog rect{fill:var(--carbon);stroke:var(--slate)}
+.io .tog:hover rect,.io .tog:focus-visible rect{stroke:var(--green)}
+.io .tog.on rect{fill:var(--teal);stroke:var(--green)}
+.io .tog text{fill:var(--silver);font:12px var(--mono);text-anchor:middle}
+.io .tog.on text{fill:var(--green)}
+.io text.yo{text-anchor:start;font:12px var(--mono)}
+
+/* ===== game redesign: the board is the hero ===== */
+.play{grid-template-columns:340px 1fr;gap:20px}
+#brief{background:linear-gradient(180deg,var(--carbon),var(--void) 70%)}
+#brief h2{font-size:30px;line-height:1.15;margin:6px 0 10px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--slate);margin:0 0 16px}
+.stats>div{padding:10px 10px 8px;display:flex;flex-direction:column;gap:4px}
+.stats>div+div{border-left:1px solid var(--slate)}
+.stats b{font:400 20px/1 var(--mono);color:var(--bone);letter-spacing:.014em;transition:color .2s}
+.stats b.full,.stats b.chain{color:var(--green)}
+.stats b.over{color:var(--coral)}
+#stWhere{font-size:12px;letter-spacing:.053em;line-height:20px}
+#truth tr.match td{color:var(--green)}
+#truth tr.match td:first-child::before{content:"";display:inline-block;width:5px;height:5px;background:var(--green);margin-right:6px;vertical-align:1px}
+#actions .btn.primary{padding:8px 18px}
+#nextBtn{margin-left:8px;vertical-align:middle}
+
+.stage{position:relative;border:1px solid var(--slate);border-radius:1px;background:
+  radial-gradient(ellipse at 15% 0%,rgba(0,216,146,.07),transparent 55%),
+  radial-gradient(ellipse at 100% 100%,rgba(0,84,65,.18),transparent 50%),var(--void);overflow:hidden}
+.stagebar{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:10px 14px;border-bottom:1px solid var(--slate);background:rgba(11,14,18,.6)}
+.coach{font:12px/1.3 var(--mono);letter-spacing:.053em;color:var(--silver);text-transform:uppercase;text-align:right}
+.coach.go{color:var(--green);animation:led 1.2s ease-in-out infinite}
+#board{display:block;border:0;background-color:transparent;
+  background-image:radial-gradient(rgba(93,94,97,.55) 1px,transparent 1.2px);background-size:26px 26px}
+#burst{position:absolute;left:50%;top:55%;width:0;height:0;pointer-events:none}
+#burst i{position:absolute;left:0;top:0;display:block}
+#cleared{position:absolute;inset:auto 0 18% 0;text-align:center;pointer-events:none;opacity:0;transform:translateY(8px)}
+#cleared .big{font:400 clamp(28px,5vw,52px)/1.1 var(--mono);letter-spacing:.08em;color:var(--green)}
+#cleared .cap{margin-top:8px;color:var(--silver)}
+#cleared.show{animation:banner 2.2s ease both}
+@keyframes banner{0%{opacity:0;transform:translateY(14px) scale(.96)}15%{opacity:1;transform:none}75%{opacity:1}100%{opacity:0;transform:translateY(-6px)}}
+
+/* gates: proper NAND symbols */
+.gate .body{fill:var(--carbon);stroke:var(--slate);stroke-width:1.5;cursor:grab;transition:stroke .2s,fill .2s}
+.gate .bub{fill:var(--carbon);stroke:var(--slate);stroke-width:1.5;transition:stroke .2s}
+.gate .pin{stroke:var(--slate);stroke-width:1.5;fill:none;transition:stroke .2s}
+.gate{opacity:.55;transition:opacity .25s}
+.gate.used{opacity:1}
+.gate:hover{opacity:1}
+.gate.used .body,.gate.used .bub,.gate.used .pin{stroke:var(--steel)}
+.gate.hot .body,.gate.hot .bub,.gate.hot .pin{stroke:var(--green)}
+.gate.hot .body{fill:rgba(0,41,35,.55)}
+.gate text{font:9px var(--mono);letter-spacing:.1em;fill:var(--fog);text-anchor:middle}
+.gate.used text{fill:var(--steel)}
+.gate .gl{fill:var(--slate)}.gate .gl.on{fill:var(--green)}
+
+/* signal flows along lit wires */
+.wire{stroke:var(--fog);stroke-width:2.2}
+.wire.on{stroke:var(--green);stroke-width:2.6;stroke-dasharray:8 7;animation:flow .8s linear infinite;filter:drop-shadow(0 0 3px rgba(0,216,146,.55))}
+@keyframes flow{to{stroke-dashoffset:-15}}
+
+/* guidance pulses */
+.port.start,.port.cand{stroke:var(--green);animation:ring 1.1s ease-in-out infinite}
+@keyframes ring{0%,100%{stroke-width:1.5;stroke-opacity:1}50%{stroke-width:6;stroke-opacity:.35}}
+.io .tog rect{width:52px}
+.io text.yo{font-size:14px}
+
+@media (max-width:900px){.play{grid-template-columns:1fr}.stagebar{flex-direction:column;align-items:flex-start;gap:4px}.coach{text-align:left}}
+@media (prefers-reduced-motion:reduce){.wire.on{animation:none;stroke-dasharray:none}.port.start,.port.cand{animation:none}.coach.go{animation:none}}
+
+/* tutorial */
+#tut{position:absolute;left:14px;bottom:14px;width:min(340px,calc(100% - 28px));background:rgba(24,26,29,.96);border:1px solid var(--green);padding:14px 16px;border-radius:1px;animation:rise .35s ease both}
+#tut[hidden]{display:none}
+#tut p{margin:8px 0 12px;color:var(--bone);line-height:1.45;font-size:14px}
+#tut .cap{color:var(--green)}
+.tutdots{display:flex;gap:4px;margin-bottom:10px}
+.tutdots i{display:block;width:24px;height:3px;background:var(--slate)}
+.tutdots i.d{background:var(--green)}
+.tutdots i.c{background:var(--green);animation:led 1.2s ease-in-out infinite}
+.tutrow{display:flex;gap:8px;flex-wrap:wrap}
+.tutring{fill:none;stroke:var(--green);stroke-width:2;animation:tutring 1.2s ease-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes tutring{0%{opacity:1;transform:scale(.7)}100%{opacity:0;transform:scale(1.5)}}
+.tutglow{animation:glowbtn 1.1s ease-in-out infinite}
+@keyframes glowbtn{0%,100%{outline:1px solid rgba(0,216,146,0);outline-offset:2px}50%{outline:1px solid var(--green);outline-offset:5px}}
+@media (prefers-reduced-motion:reduce){.tutring{animation:none;opacity:.8}.tutglow{animation:none;outline:1px solid var(--green);outline-offset:3px}}
+
+/* ===== hero v2: full-bleed hardware shot ===== */
+.hero2{position:relative;min-height:min(900px,100vh);display:flex;flex-direction:column;overflow:hidden;border-bottom:1px solid var(--slate);
+  background:radial-gradient(ellipse 70% 60% at 78% 48%,rgba(0,84,65,.28),transparent 70%),var(--void)}
+.hero2::before{content:"";position:absolute;right:0;top:0;bottom:0;width:30%;pointer-events:none;opacity:.5;
+  background-image:radial-gradient(rgba(163,164,165,.35) 1px,transparent 1.2px);background-size:7px 7px;
+  -webkit-mask-image:linear-gradient(to left,#000,transparent);mask-image:linear-gradient(to left,#000,transparent)}
+.hero2-inner{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;justify-content:space-between;padding-top:8px;padding-bottom:48px;gap:48px}
+.hero2 .term{width:min(400px,100%);background:rgba(24,26,29,.92)}
+.hero2 .hero-copy{margin:0;max-width:600px}
+.heroviz{position:absolute;right:-1%;top:6px;bottom:64px;width:min(60vw,760px);z-index:1;display:flex;align-items:flex-start;justify-content:flex-end}
+#rack{height:100%;width:auto;max-width:100%;display:block;
+  -webkit-mask-image:linear-gradient(to bottom,#000 80%,transparent 99%);mask-image:linear-gradient(to bottom,#000 80%,transparent 99%);animation:rise .9s .1s ease both}
+.figpill{position:absolute;right:24px;top:84px;font:10px var(--mono);letter-spacing:.064em;color:var(--silver);border:1px solid var(--slate);background:rgba(11,14,18,.7);padding:3px 8px;border-radius:1px}
+.rackstat{position:absolute;left:8%;bottom:8px;display:flex;align-items:center;gap:12px;font-family:var(--mono)}
+.rackstat b{font:400 14px var(--mono);color:var(--bone);letter-spacing:.053em}
+.rackleds{display:flex;gap:4px}.rackleds i{display:block;width:9px;height:9px;border:1px solid var(--slate)}
+.rackleds i.on{background:var(--green);border-color:var(--green);box-shadow:0 0 6px rgba(0,216,146,.7)}
+.trace{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+.trace path{fill:none;stroke:var(--slate);stroke-width:1;vector-effect:non-scaling-stroke}
+.trace path.pulse{stroke:var(--green);stroke-width:1.6;stroke-dasharray:.07 .93;stroke-dashoffset:0;animation:pulse 3.4s linear infinite}
+@keyframes pulse{from{stroke-dashoffset:.07}to{stroke-dashoffset:-.93}}
+.wmstrip{position:relative;z-index:2;display:flex;align-items:center;gap:32px;padding-top:18px;padding-bottom:22px;border-top:1px solid var(--slate);background:rgba(11,14,18,.75)}
+.wm{display:flex;gap:44px;flex-wrap:wrap}
+.wm span{font:400 15px var(--mono);letter-spacing:.22em;color:var(--fog);transition:color .2s}
+.wm span:hover{color:var(--bone)}
+
+/* rack parts */
+#rack .cab .front{fill:url(#metal);stroke:#2a2d31;stroke-width:1;transition:stroke .2s}
+#rack .cab:hover .front{stroke:var(--green)}
+#rack .cab{cursor:pointer}
+#rack .cab .lbl{font:10px var(--mono);letter-spacing:.1em;fill:var(--steel);text-anchor:middle;transition:fill .2s}
+#rack .cab:hover .lbl{fill:var(--green)}
+#rack .strip{animation:flick var(--d,3s) steps(1) var(--o,0s) infinite}
+@keyframes flick{0%{opacity:1}35%{opacity:.5}40%{opacity:1}72%{opacity:.78}77%{opacity:1}}
+#rack .leds{filter:drop-shadow(0 0 3px rgba(0,216,146,.55))}
+#rack .nameplate{font:400 26px var(--mono);letter-spacing:.08em;fill:var(--green);filter:drop-shadow(0 0 4px rgba(0,216,146,.6))}
+#rack .statusdot{animation:led 2.4s ease-in-out infinite}
+
+/* try-it section */
+.trygrid{display:grid;grid-template-columns:5fr 7fr;gap:48px;align-items:center}
+.trygrid .render{animation:none}
+.ticks{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.ticks li{padding-left:22px;position:relative;color:var(--silver)}
+.ticks li::before{content:"";position:absolute;left:0;top:7px;width:8px;height:8px;background:var(--green)}
+
+@media (max-width:900px){
+  .hero2{min-height:0}
+  .hero2-inner{order:1}.heroviz{position:relative;right:auto;top:auto;bottom:auto;width:100%;height:420px;order:2;justify-content:center;margin-top:8px}.wmstrip{order:3}
+  #rack{height:100%}
+  .figpill{right:12px;top:auto;bottom:34px}.rackstat{left:12px}
+  .trace{display:none}
+  .hero2{flex-direction:column}
+  .hero2-inner{padding-bottom:16px;gap:24px}
+  .wm{gap:20px}.wm span{font-size:12px}.wmstrip{flex-direction:column;align-items:flex-start;gap:12px}
+  .trygrid{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){#rack .strip,#rack .statusdot,.trace path.pulse{animation:none}}
+
+/* hero v2 layout fixes */
+.hero2-inner{width:100%;align-self:center}
+.hero2 .hero-copy{max-width:520px}
+.heroviz{right:0;width:min(56vw,680px)}
+.figpill{right:28px;top:78px}
+.wmstrip{width:100%;max-width:none;margin:0;padding-left:max(24px,calc((100% - 1200px)/2 + 24px));padding-right:max(24px,calc((100% - 1200px)/2 + 24px))}
+@media (max-width:900px){.heroviz{width:100%}.wmstrip{padding-left:24px;padding-right:24px}}
+
+/* ===== gamification: HUD, map, badges, toasts ===== */
+.hud{display:flex;align-items:center;gap:24px;padding-top:4px;padding-bottom:14px;flex-wrap:wrap}
+.hudstat{display:flex;flex-direction:column;gap:3px}
+.hudstat b{font:400 16px/1 var(--mono);color:var(--bone);letter-spacing:.03em}
+.xpwrap{flex:1;min-width:180px;max-width:420px;display:flex;flex-direction:column;gap:5px}
+.xpbar{height:6px;background:var(--carbon);border:1px solid var(--slate);border-radius:1px;overflow:hidden}
+.xpfill{height:100%;width:0;background:var(--green);transition:width .6s cubic-bezier(.2,.7,.2,1);box-shadow:0 0 8px rgba(0,216,146,.6)}
+.hudbtns{margin-left:auto;display:flex;gap:8px}
+.hudbtns .btn{padding:4px 10px;font-size:11px}
+.meta{margin:-6px 0 14px;line-height:1.5;color:var(--steel)}
+#msg .stars{color:var(--green);letter-spacing:.1em;margin:0 6px}
+#msg .xp{font-family:var(--mono);color:var(--green);margin-right:6px}
+.starsbig{font:400 clamp(22px,3.2vw,34px)/1 var(--mono);color:var(--green);letter-spacing:.3em;margin-top:10px;text-shadow:0 0 12px rgba(0,216,146,.55)}
+#levelNav{gap:3px}
+#levelNav button{min-width:28px;padding:5px 7px}
+#levelNav button.wstart{margin-left:10px}
+
+/* toasts */
+#toasts{position:fixed;right:16px;top:70px;z-index:60;display:flex;flex-direction:column;gap:8px;max-width:min(340px,calc(100vw - 32px));pointer-events:none}
+.toast{background:rgba(24,26,29,.97);border:1px solid var(--slate);border-left:3px solid var(--green);padding:10px 14px;border-radius:1px;display:flex;flex-direction:column;gap:3px;animation:toastin .35s cubic-bezier(.2,.7,.2,1) both}
+.toast b{font:400 13px var(--mono);letter-spacing:.05em;color:var(--bone)}
+.toast span{font-size:12px;color:var(--steel)}
+.toast.ach{border-color:var(--green);background:rgba(0,41,35,.96)}.toast.ach b{color:var(--green)}
+.toast.xp b{color:var(--green)}
+.toast.out{opacity:0;transform:translateX(12px);transition:opacity .35s,transform .35s}
+@keyframes toastin{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+
+/* map overlay */
+.mapov{position:fixed;inset:0;z-index:50;background:rgba(5,7,10,.88);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:32px 16px;animation:rise .25s ease both}
+.mapov[hidden]{display:none}
+.mapbox{width:100%;max-width:960px;background:var(--void);border:1px solid var(--slate);padding:24px;border-radius:1px}
+.maphead{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.maphead h2{font-size:25px}
+.daily{display:flex;justify-content:space-between;align-items:center;gap:16px;border:1px solid var(--green);background:rgba(0,41,35,.45);padding:14px 18px;margin-bottom:24px}
+.daily .dtitle{font-size:20px;color:var(--bone);margin:4px 0 2px}.daily .dsub{color:var(--silver)}
+.world{margin-bottom:24px}.world h3{font:400 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin:0 0 4px}
+.sub2{margin:0 0 12px;color:var(--steel)}
+.nodes{display:flex;flex-wrap:wrap;gap:8px}
+.node{display:flex;flex-direction:column;gap:4px;align-items:flex-start;min-width:132px;padding:10px 12px;background:var(--carbon);border:1px solid var(--slate);border-radius:1px;color:var(--silver);cursor:pointer;text-align:left;transition:border-color .15s,background .15s,transform .15s}
+.node:hover:not(:disabled){border-color:var(--green);transform:translateY(-2px)}
+.node b{font:400 18px var(--mono);color:var(--bone)}
+.node .nt{font-size:13px}.node .ns{font:400 11px var(--mono);letter-spacing:.1em;color:var(--steel)}
+.node.cleared{border-color:rgba(0,216,146,.45)}.node.cleared .ns{color:var(--green)}
+.node.lock{opacity:.45;cursor:not-allowed}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.badge2{border:1px solid var(--slate);padding:10px 12px;display:flex;flex-direction:column;gap:3px;opacity:.5;border-radius:1px;transition:opacity .2s,border-color .2s}
+.badge2 b{font:400 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--silver)}
+.badge2 span{font-size:12px;color:var(--steel)}
+.badge2.got{opacity:1;border-color:var(--green);background:rgba(0,41,35,.4)}.badge2.got b{color:var(--green)}
+.badge2:hover{opacity:1}
+
+/* landing: ladder + world rows */
+.ladder{display:flex;gap:0;border:1px solid var(--slate);margin:0 0 24px;flex-wrap:wrap}
+.rung{flex:1;min-width:130px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;border-right:1px solid var(--slate);position:relative}
+.rung:last-child{border-right:0}
+.rung b{font:400 13px var(--mono);letter-spacing:.05em;color:var(--silver)}.rung span{font:400 11px var(--mono);letter-spacing:.1em;color:var(--fog)}
+.rung.past b{color:var(--green)}
+.rung.now{background:rgba(0,41,35,.5)}.rung.now b{color:var(--green)}.rung.now::after{content:"YOU";position:absolute;right:10px;top:10px;font:10px var(--mono);letter-spacing:.1em;color:var(--green)}
+.lvltable tr.whead td{background:var(--carbon);font:400 11px var(--mono);letter-spacing:.08em;color:var(--green);padding:10px 16px}
+.lvltable tr.whead:hover{background:var(--carbon)}
+.starcell{font-family:var(--mono);color:var(--fog);letter-spacing:.1em}.starcell.got{color:var(--green)}
+@media (max-width:900px){.hudbtns{margin-left:0}.hud{gap:14px}#toasts{top:auto;bottom:16px}.rung{min-width:45%}}
+@media (prefers-reduced-motion:reduce){.xpfill{transition:none}.node:hover:not(:disabled){transform:none}}
+
+/* ===== judges + verify pages ===== */
+.pg{padding-top:24px;padding-bottom:80px;max-width:960px}
+.pgh{font-size:clamp(32px,5vw,48px);line-height:1.1;margin:14px 0 12px}
+.pgh2{font-size:25px;line-height:1.28;margin:48px 0 14px}
+.lede2{font-size:18px;line-height:1.4;color:var(--silver);max-width:720px;margin:0 0 28px}
+.statrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));border:1px solid var(--slate);margin:0 0 8px}
+.statrow>div{padding:14px;display:flex;flex-direction:column;gap:6px}.statrow>div+div{border-left:1px solid var(--slate)}
+.statrow b{font:400 22px/1 var(--mono);color:var(--bone)}.statrow b.ok{color:var(--green)}.statrow b.small{font-size:13px;line-height:1.6}
+.mono{font-family:var(--mono)}
+.jt td{vertical-align:top;line-height:1.45}.jt td:first-child{font-family:var(--sans);color:var(--bone);white-space:nowrap}
+.jt code,.faq code,.ticks code{font:12px var(--mono);color:var(--green);background:var(--carbon);padding:1px 5px;border-radius:1px}
+.st{display:inline-block;font:400 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:1px;white-space:nowrap;background:var(--carbon);color:var(--steel);box-shadow:inset 0 0 0 1px rgba(186,186,187,.2)}
+.st.live,.st.test{color:var(--green);box-shadow:inset 0 0 0 1px rgba(0,216,146,.3)}
+.st.plan{color:var(--silver);box-shadow:inset 0 0 0 1px rgba(186,186,187,.35)}
+.st.no{color:var(--coral);box-shadow:inset 0 0 0 1px rgba(255,98,133,.3)}
+.faq details{border:1px solid var(--slate);margin-bottom:8px;border-radius:1px;background:var(--carbon)}
+.faq summary{cursor:pointer;padding:12px 16px;color:var(--bone);list-style:none;display:flex;justify-content:space-between}
+.faq summary::after{content:"+";color:var(--green);font:400 16px var(--mono)}.faq details[open] summary::after{content:"–"}
+.faq p{margin:0;padding:0 16px 14px;color:var(--silver);line-height:1.5}
+.ulink{color:var(--green);text-decoration:underline;text-underline-offset:3px}.ulink:hover{color:var(--bone)}
+.notice{border:1px solid var(--slate);border-left:3px solid var(--steel);padding:10px 14px;margin:0 0 16px;color:var(--silver);background:var(--carbon)}
+.vform{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.vform input{flex:1;min-width:260px;background:var(--carbon);border:1px solid var(--slate);color:var(--bone);font:13px var(--mono);padding:9px 12px;border-radius:1px}
+.vform input:focus{outline:1px solid var(--green);border-color:var(--green)}
+#vMsg{min-height:1.4em;color:var(--silver)}#vMsg.bad{color:var(--coral)}
+#vResult{border:1px solid var(--slate);padding:18px;margin:12px 0 8px;background:var(--carbon)}
+.vcount{margin:6px 0 14px}.vcount b{font:400 44px/1 var(--mono);color:var(--green)}.vcount span{font:400 16px var(--mono);color:var(--steel);margin-left:6px}
+.vworld{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px}.vworld .cap{width:150px}
+.vtile{display:inline-flex;align-items:center;justify-content:center;width:30px;height:28px;border:1px solid var(--slate);font:400 12px var(--mono);color:var(--fog)}
+.vtile.on{background:var(--teal);border-color:var(--green);color:var(--green)}
+@media (max-width:900px){.jt td:first-child{white-space:normal}.vworld .cap{width:100%}}
+
+/* sponsor dashboard */
+.vlevels{border:1px solid var(--slate);padding:14px 16px;background:var(--carbon)}
+.vlh{margin:12px 0 6px;color:var(--green)}.vlh:first-child{margin-top:0}
+.vlrow{display:grid;grid-template-columns:minmax(180px,260px) 1fr 40px;gap:12px;align-items:center;padding:4px 0}
+.vln{font-size:13px;color:var(--silver);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vlbar{display:block;height:8px;background:var(--void);border:1px solid var(--slate)}
+.vlbar i{display:block;height:100%;background:var(--green);box-shadow:0 0 6px rgba(0,216,146,.5);transition:width .6s cubic-bezier(.2,.7,.2,1)}
+.vlc{font:400 13px var(--mono);color:var(--bone);text-align:right}
+@media (max-width:900px){.vlrow{grid-template-columns:1fr 60px 30px}}
+
+.notice.warn{border-left-color:var(--coral);color:var(--bone)}
+
+/* ===== game screen v3: full-width stage that fills the window ===== */
+#game{--gx:clamp(16px,2vw,40px)}
+#game .bar{max-width:none;padding-left:var(--gx);padding-right:var(--gx)}
+#game .hud{max-width:none;padding-left:var(--gx);padding-right:var(--gx)}
+.play2{display:grid;grid-template-columns:minmax(290px,340px) minmax(0,1fr);gap:16px;padding:0 var(--gx) 20px;height:calc(100vh - 128px);min-height:640px}
+.play2 #brief{align-self:stretch;overflow:auto;min-height:0;background:linear-gradient(180deg,var(--carbon),var(--void) 80%)}
+.play2 #brief h2{font-size:34px;margin:6px 0 10px}
+.tlabel{margin:8px 0 6px}
+.how{margin-top:18px;border-top:1px solid var(--slate);padding-top:12px}
+.how summary{cursor:pointer;font:12px var(--mono);letter-spacing:.053em;text-transform:uppercase;color:var(--steel)}
+.how p{color:var(--steel);font-size:13px;line-height:1.5;margin:10px 0 0}
+.stage2{display:flex;flex-direction:column;gap:10px;min-height:0;min-width:0}
+.stage2 .stagebar{border:1px solid var(--slate);background:var(--carbon);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.stage2 .stats{display:flex;border:0;margin:0}
+.stage2 .stats>div{padding:2px 22px 2px 0;margin-right:22px;border-right:1px solid var(--slate);flex-direction:row;align-items:baseline;gap:10px}
+.stage2 .stats>div:last-child{border-right:0;margin-right:0}
+.stage2 .stats b{font-size:18px}
+.boardwrap{position:relative;flex:1 1 auto;min-height:320px;border:1px solid var(--slate);overflow:hidden;background:
+  radial-gradient(ellipse at 15% 0%,rgba(0,216,146,.09),transparent 55%),
+  radial-gradient(ellipse at 100% 100%,rgba(0,84,65,.22),transparent 55%),#080b0f}
+.boardwrap #board{position:absolute;inset:0;width:100%;height:100%;background-image:none;border:0}
+.boardwrap #cleared{inset:auto 0 22% 0}
+.boardwrap #tut{left:18px;bottom:18px}
+.actionbar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;border:1px solid var(--slate);background:var(--carbon);padding:10px 14px}
+.actionbar #msg{flex:1 1 280px;margin:0;min-height:0;font-size:14px;line-height:1.4}
+.actionbar #actions{display:flex;gap:8px;flex-wrap:wrap}
+.actionbar #actions .btn{padding:8px 14px}
+.actionbar #actions .btn.primary{padding:8px 24px}
+.scope{border:1px solid var(--slate);background:#0a0d11;padding:8px 12px 6px}
+.scopehead{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+.scopehint{color:var(--fog)}
+#scope{display:block;width:100%}
+#scope text{font:11px var(--mono);letter-spacing:.05em}
+#scope .sc-name{fill:var(--silver)}
+#scope .sc-val{fill:var(--steel)}#scope .sc-val.on{fill:var(--green)}
+#scope .sc-grid{stroke:rgba(48,50,53,.7);stroke-width:1}
+#scope .sc-row{stroke:rgba(48,50,53,.5);stroke-width:1}
+#scope .sc-in{fill:none;stroke:var(--silver);stroke-width:1.6}
+#scope .sc-out{fill:none;stroke:var(--green);stroke-width:2;filter:drop-shadow(0 0 3px rgba(0,216,146,.5))}
+#scope .sc-exp{fill:none;stroke:var(--steel);stroke-width:1.2;stroke-dasharray:4 4;opacity:.8}
+#scope .sc-bad{fill:none;stroke:var(--coral);stroke-width:2.4}
+#scope .sc-badbg{fill:rgba(255,98,133,.13)}
+#scope .sc-unk{stroke:var(--fog);stroke-width:1.2;stroke-dasharray:2 5;fill:none}
+#scope .sc-now{fill:rgba(0,216,146,.07)}
+#truth tr.cur td{box-shadow:inset 0 1px 0 var(--green),inset 0 -1px 0 var(--green);color:var(--bone)}
+/* board decoration (SVG) */
+#board .rule{stroke:rgba(129,130,132,.35);stroke-width:1}
+#board .rulet{fill:rgba(129,130,132,.45);font:9px var(--mono);letter-spacing:.06em}
+#board .hole{fill:none;stroke:rgba(129,130,132,.4);stroke-width:1.2}
+#board .rail{stroke-width:1;stroke-dasharray:6 6}
+#board .railt{font:10px var(--mono);letter-spacing:.1em}
+#board .wm{fill:rgba(222,222,222,.035);font:400 300px var(--mono);text-anchor:middle;pointer-events:none}
+#board .tcard rect{fill:rgba(24,26,29,.85);stroke:var(--slate)}
+#board .tcard text{fill:var(--silver);font:10px var(--mono);letter-spacing:.1em}
+#board .tcard .tt{fill:var(--bone);font:13px var(--mono)}
+#board .tsym{fill:none;stroke:var(--green);stroke-width:1.6;stroke-linejoin:round}
+#board .ref{fill:rgba(129,130,132,.55);font:9px var(--mono);letter-spacing:.08em;pointer-events:none}
+@media (max-width:1000px){
+  .play2{grid-template-columns:1fr;height:auto;min-height:0}
+  .play2 #brief{overflow:visible}
+  .boardwrap{min-height:420px}
+  .stage2 .stats>div{padding-right:12px;margin-right:12px}
+}
+
+/* left panel fillers */
+.upnext{list-style:none;margin:0 0 16px;padding:0;display:grid;gap:6px}
+.upnext button{width:100%;display:grid;grid-template-columns:30px 1fr auto;gap:8px;align-items:center;text-align:left;background:var(--carbon);border:1px solid var(--slate);color:var(--silver);padding:8px 10px;border-radius:1px;cursor:pointer;transition:border-color .15s,transform .15s}
+.upnext button:hover:not(:disabled){border-color:var(--green);transform:translateX(2px)}
+.upnext b{font:400 13px var(--mono);color:var(--steel)}.upnext .un{font-size:13px}.upnext .us{font:400 10px var(--mono);letter-spacing:.1em;color:var(--steel)}
+.upnext button.got .us{color:var(--green)}.upnext button.lock{opacity:.45;cursor:not-allowed}
+.upnext .upend{color:var(--steel);font-size:13px}
+.dailycard{border:1px solid rgba(0,216,146,.4);background:rgba(0,41,35,.35);padding:12px 14px;margin-bottom:6px;display:flex;flex-direction:column;gap:4px;align-items:flex-start}
+.dailycard .dt{font-size:16px;color:var(--bone)}.dailycard .ds{font-size:12px;color:var(--silver)}.dailycard .btn{margin-top:6px;padding:4px 12px}
+.actionbar #actions{order:-1}
+
+/* ===== hero v4: the card cage (calm hardware: 16 blades = 16 levels) ===== */
+.logo{display:inline-flex;align-items:center;gap:10px}
+.logo .mark{width:30px;height:16px;color:var(--silver);flex:none}
+#landing .bar{max-width:1560px}
+.hero4{position:relative;overflow:hidden;border-bottom:1px solid var(--slate);padding-bottom:40px;background:
+  radial-gradient(ellipse 70% 55% at 18% 0%,rgba(0,216,146,.08),transparent 62%),
+  radial-gradient(ellipse 80% 45% at 50% 100%,rgba(0,84,65,.22),transparent 70%),var(--void)}
+.hero4 .wrap{max-width:1560px}
+.h4top{padding-top:34px}
+.h4top .badge{animation:rise .6s both}
+.h4top h1{font-size:clamp(44px,6.1vw,102px);line-height:.98;letter-spacing:-.018em;margin:16px 0 16px;animation:rise .7s .05s both}
+.h4top .lede{font-size:clamp(16px,1.3vw,21px);line-height:1.4;color:var(--steel);max-width:680px;margin:0 0 22px;animation:rise .7s .12s both}
+.h4top .row{animation:rise .7s .18s both}
+.btn.big{padding:13px 26px;font-size:13px}
+.cagewrap{margin-top:clamp(24px,4vh,44px)}
+.cage{position:relative;border:1px solid var(--slate);background:linear-gradient(180deg,#14171b,#0d1014);padding:20px clamp(16px,2vw,32px) 14px;animation:rise .8s .3s both;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.cage::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:repeating-linear-gradient(90deg,#0b0e12 0 10px,transparent 10px 16px);opacity:.9}
+.screw{position:absolute;width:9px;height:9px;border-radius:50%;border:1px solid #3a3d42;background:#0b0e12}
+.screw.s1{left:8px;top:12px}.screw.s2{right:8px;top:12px}.screw.s3{left:8px;bottom:8px}.screw.s4{right:8px;bottom:8px}
+.chead{display:flex;justify-content:space-between;align-items:center;font:11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--steel);margin:6px 0 18px;gap:16px;flex-wrap:wrap}
+.chead b{font-weight:400;color:var(--bone)}
+.cgroups{display:flex;gap:clamp(12px,2vw,36px);--bh:clamp(190px,25vh,260px)}
+.cgrp{flex:var(--n);min-width:0}
+.cslots{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:clamp(5px,.7vw,10px);align-items:end}
+.cgl{margin-top:12px;display:flex;justify-content:space-between;font:10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--fog);border-top:1px solid var(--slate);padding-top:8px;gap:8px}
+.blade{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:space-between;height:var(--bh);padding:14px 0 12px;
+  background:linear-gradient(90deg,#0f1215,#171a1e 50%,#0f1215);border:1px solid #23272c;cursor:pointer;color:inherit;font:inherit;
+  transition:transform .3s cubic-bezier(.2,.7,.2,1),border-color .2s,box-shadow .3s;animation:bladein .7s calc(.45s + var(--i) * 45ms) cubic-bezier(.2,.7,.2,1) both}
+@keyframes bladein{from{opacity:0;transform:translateY(-34px)}to{opacity:1;transform:none}}
+.blade:hover:not(.lock),.blade:focus-visible{transform:translateY(-10px);border-color:var(--green);outline:none}
+.blade.on{border-color:rgba(0,216,146,.45);box-shadow:inset 0 0 0 1px rgba(0,216,146,.1),0 0 22px rgba(0,216,146,.12)}
+.blade.lock{opacity:.5;cursor:not-allowed}
+.bled{display:block;width:58%;max-width:44px;height:10px;background:#14201c;border:1px solid #1f2d28;transition:background .25s,box-shadow .25s}
+.blade.on .bled{background:var(--green);border-color:#7dffd6;box-shadow:0 0 14px rgba(0,216,146,.85)}
+.blade.scan .bled{background:#1d7c5d;box-shadow:0 0 10px rgba(0,216,146,.4)}.blade.on.scan .bled{background:#7dffd6}
+.bst{display:flex;gap:5px;margin-top:10px}
+.bst i{display:block;width:7px;height:7px;border-radius:50%;border:1px solid #2c3035;background:#07090c}
+.bst i.f{background:var(--green);border-color:#7dffd6;box-shadow:0 0 6px rgba(0,216,146,.8)}
+.bname{writing-mode:vertical-rl;transform:rotate(180deg);font:13px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--steel);white-space:nowrap;flex:1;display:flex;align-items:center;justify-content:center;max-height:60%}
+.blade.on .bname{color:var(--bone)}
+.bnum{font:15px var(--mono);letter-spacing:.06em;color:var(--fog)}.blade.on .bnum{color:var(--bone)}
+.bhandle{display:block;width:26px;height:5px;border:1px solid #30343a;margin-top:8px;background:#0b0e12}
+.btip{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);white-space:nowrap;background:var(--carbon);border:1px solid var(--slate);padding:5px 11px;font:11px var(--mono);letter-spacing:.06em;color:var(--bone);opacity:0;pointer-events:none;transition:opacity .15s;z-index:5}
+.blade:hover .btip,.blade:focus-visible .btip{opacity:1}
+.cfoot{margin-top:14px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:11px var(--mono);letter-spacing:.1em;color:var(--fog);text-transform:uppercase}
+@media (max-width:900px){
+  .cgroups{flex-direction:column;--bh:170px}.cgrp{flex:none}
+  .h4top{padding-top:32px}
+}
+@media (prefers-reduced-motion:reduce){.blade{animation:none!important}.blade:hover:not(.lock){transform:none}.h4top .badge,.h4top h1,.h4top .lede,.h4top .row,.cage{animation:none!important}}
+
+/* ===== game screen v4: clean. One focus (the board), quiet chrome ===== */
+#game{--gx:clamp(16px,2vw,36px)}
+.gbar{display:flex;align-items:center;gap:20px;padding:12px var(--gx);border-bottom:1px solid #1b1e22}
+.gbar .logo{font-size:17px}.gbar .logo .mark{width:24px;height:13px}
+#game #levelNav{display:flex;gap:3px;align-items:center;margin:0 auto;flex-wrap:nowrap}
+#game #levelNav button{width:15px;height:9px;min-width:0;padding:0;font-size:0;line-height:0;border:1px solid #30343a;background:transparent;border-radius:0;cursor:pointer;color:transparent;transition:background .2s,border-color .2s,transform .15s}
+#game #levelNav button:hover:not(:disabled){border-color:var(--green);transform:scaleY(1.6)}
+#game #levelNav button.done{background:rgba(0,216,146,.55);border-color:var(--green);box-shadow:none}
+#game #levelNav button.cur{outline:1px solid var(--bone);outline-offset:3px;border-color:var(--bone)}
+#game #levelNav button.cur.done{border-color:var(--green)}
+#game #levelNav button:disabled{opacity:.3;cursor:not-allowed}
+#game #levelNav button.wstart{margin-left:10px}
+.gright{display:flex;align-items:center;gap:12px}
+.rankchip{display:flex;align-items:center;gap:10px;font:12px var(--mono);letter-spacing:.04em;color:var(--bone)}
+.rankchip .xpbar{width:86px;height:4px;background:#14171b;border:0;display:block;overflow:hidden}
+#xpFill{display:block;height:100%;width:0;background:var(--green);transition:width .6s cubic-bezier(.2,.7,.2,1)}
+.rankchip .cap{color:var(--steel)}
+.btn.sm{padding:5px 11px;font-size:11px}
+.menuwrap{position:relative}
+.menu{position:absolute;right:0;top:calc(100% + 8px);width:240px;background:var(--carbon);border:1px solid var(--slate);padding:10px;display:flex;flex-direction:column;gap:2px;z-index:40;animation:rise .2s both}
+.menu[hidden]{display:none}
+.mstats{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:6px 10px;align-items:baseline;padding:4px 6px 10px;border-bottom:1px solid var(--slate);margin-bottom:6px}
+.mstats b{font:14px var(--mono);color:var(--bone)}
+.mi{display:block;width:100%;text-align:left;background:none;border:0;color:var(--silver);font:12px var(--mono);letter-spacing:.05em;text-transform:uppercase;padding:9px 6px;cursor:pointer;border-radius:1px}
+.mi:hover{background:#1f2328;color:var(--bone)}.mi[hidden]{display:none}
+.menu .how{margin:6px 0 0;border-top:1px solid var(--slate);padding-top:8px}
+.play3{display:grid;grid-template-columns:minmax(250px,300px) minmax(0,1fr);height:calc(100vh - 57px);min-height:600px}
+#game #brief{border:0;border-right:1px solid #1b1e22;background:none;padding:28px 26px;overflow:auto;align-self:stretch}
+#game #brief h2{font-size:38px;margin:8px 0 12px;letter-spacing:-.01em}
+#game #lvlText{font-size:15px;line-height:1.5;color:var(--silver);margin:0 0 14px}
+#game #lvlMeta{margin:0 0 22px;color:var(--fog);line-height:1.6}
+.stage3{display:flex;flex-direction:column;min-width:0;min-height:0}
+#game .boardwrap{flex:1 1 auto;min-height:300px;border:0;position:relative;overflow:hidden;background:radial-gradient(ellipse at 20% 0%,rgba(0,216,146,.05),transparent 60%),var(--void)}
+#game .boardwrap #board{position:absolute;inset:0;width:100%;height:100%;border:0;background-color:transparent;background-image:radial-gradient(rgba(93,94,97,.35) 1px,transparent 1.2px);background-size:30px 30px}
+.coach{position:absolute;left:22px;top:16px;font:11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--steel);text-align:left;max-width:60%;animation:none}
+.coach.go{color:var(--green)}
+.readout{position:absolute;right:22px;top:16px;display:flex;gap:18px;font:11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fog)}
+.readout b{font-weight:400;color:var(--bone);margin-left:6px;font-size:13px}.readout b.full{color:var(--green)}.readout b.over{color:var(--coral)}
+.readout #stWhere.chain{color:var(--green)}
+.actionbar{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:12px 22px;border:0;border-top:1px solid #1b1e22;background:none}
+.actionbar #actions{display:flex;gap:8px;flex-wrap:wrap}
+.actionbar #actions .btn{padding:9px 16px}.actionbar #actions .btn.primary{padding:9px 28px}
+.actionbar #msg{flex:1 1 240px;margin:0;font-size:14px;line-height:1.4;min-height:0}
+#game .scope{border:0;border-top:1px solid #1b1e22;background:none;padding:0 22px}
+#game .scope summary{display:flex;justify-content:space-between;gap:12px;cursor:pointer;list-style:none;padding:10px 0}
+#game .scope summary::-webkit-details-marker{display:none}
+#game .scope summary .cap:first-child::before{content:"▸  ";color:var(--green)}
+#game .scope[open] summary .cap:first-child::before{content:"▾  "}
+#game .scope[open] #scope{padding-bottom:8px}
+@media (max-width:1000px){
+  .play3{grid-template-columns:1fr;height:auto;min-height:0}
+  #game #brief{border-right:0;border-bottom:1px solid #1b1e22;padding:20px var(--gx)}
+  #game .boardwrap{min-height:420px}
+  .rankchip .xpbar,.rankchip .cap{display:none}
+  .gbar{flex-wrap:wrap}#game #levelNav{order:3;width:100%;margin:0;justify-content:center}
+  .readout{display:none}.coach{max-width:90%}
+}
+
+/* board look restored (rulers, rails, watermark, target card) on top of the clean layout */
+#game .boardwrap #board{background-image:none}
+.coach{top:78px}.readout{top:78px}
+
+/* ===== game screen v5: COMPACT by default (a box about half the width, just the gates inside). Wide / details / waveforms are opt-in from the menu. ===== */
+.mgroup{margin-top:6px;border-top:1px solid var(--slate);padding-top:8px;display:flex;flex-direction:column;gap:2px}
+.mgroup>.cap{padding:2px 6px}
+.mi[aria-pressed="true"]{color:var(--green)}
+#game:not(.wide) .gbar{max-width:1180px;margin:0 auto;border-bottom:0}
+#game:not(.wide) .play3{max-width:1180px;margin:0 auto;height:auto;min-height:calc(100vh - 66px);align-content:center;grid-template-columns:290px minmax(0,1fr);column-gap:36px;row-gap:0;padding:0 var(--gx) 40px}
+#game:not(.wide) #brief{border:0;padding:0;overflow:visible;align-self:center}
+#game:not(.wide) #brief h2{font-size:42px}
+#game:not(.wide) .stage3{gap:16px;align-self:center}
+#game:not(.wide) .boardwrap{flex:none;width:100%;aspect-ratio:800/480;min-height:0;border:1px solid var(--slate);background:radial-gradient(ellipse at 20% 0%,rgba(0,216,146,.06),transparent 60%),#0a0d11}
+#game:not(.wide) .actionbar{padding:0;border:0}
+#game:not(.wide) .scope{padding:0;border-top:1px solid #1b1e22}
+#game:not(.wide):not(.detail) .boardwrap #board{background-image:radial-gradient(rgba(93,94,97,.35) 1px,transparent 1.2px);background-size:26px 26px}
+#game:not(.wide) .coach{top:14px;left:16px;max-width:62%}
+#game:not(.wide) .readout{top:14px;right:16px}
+#game:not(.wide).detail .coach,#game:not(.wide).detail .readout{top:50px}
+#game.wide:not(.detail) .boardwrap #board{background-image:radial-gradient(rgba(93,94,97,.35) 1px,transparent 1.2px);background-size:30px 30px}
+@media (max-width:1000px){
+  #game:not(.wide) .play3{grid-template-columns:1fr;min-height:0;row-gap:20px;padding-top:12px}
+  #game:not(.wide) #brief{padding:0}
+  #game:not(.wide) .boardwrap{aspect-ratio:auto;height:430px}
+}
+
+/* ===== game screen v6: bigger box (~60% of the window) + lesson NUMBERS in the top bar ===== */
+#game:not(.wide) .gbar{max-width:1560px}
+#game:not(.wide) .play3{max-width:1560px;grid-template-columns:300px minmax(0,1fr);column-gap:40px}
+#game:not(.wide) .boardwrap{max-height:calc(100vh - 235px)}
+/* numbered level buttons */
+#game #levelNav{gap:4px}
+#game #levelNav button{width:30px;height:28px;font:13px var(--mono);line-height:1;color:var(--steel);letter-spacing:.02em;border:1px solid #2a2d31;background:transparent}
+#game #levelNav button:hover:not(:disabled){transform:none;border-color:var(--green);color:var(--bone)}
+#game #levelNav button.done{background:rgba(0,216,146,.12);border-color:rgba(0,216,146,.55);color:var(--green)}
+#game #levelNav button.cur{outline:0;border-color:var(--bone);color:var(--bone);background:#1b1f24}
+#game #levelNav button.cur.done{border-color:var(--green);color:var(--green);background:rgba(0,216,146,.18)}
+#game #levelNav button:disabled{opacity:.35}
+#game #levelNav button.wstart{margin-left:12px}
+@media (max-width:1000px){#game #levelNav{flex-wrap:wrap;justify-content:center}#game #levelNav button{width:26px;height:26px;font-size:12px}}
+@media (max-width:1000px){
+  #game:not(.wide) .play3,.play3{grid-template-columns:minmax(0,1fr)}
+  .actionbar{padding-left:var(--gx);padding-right:var(--gx)}
+  #game:not(.wide) .actionbar{padding:0}
+  .actionbar #actions .btn{padding:9px 12px}.actionbar #actions .btn.primary{padding:9px 18px}
+  #game .scope summary{flex-wrap:wrap}
+}
+
+/* v7: biggest box, analyzer open by default (via prefs), smaller objects inside */
+#game:not(.wide) .gbar,#game:not(.wide) .play3{max-width:1800px}
+#game:not(.wide) .play3{grid-template-columns:260px minmax(0,1fr);column-gap:28px;padding-bottom:16px;align-content:start}
+#game:not(.wide) .boardwrap{aspect-ratio:auto;height:calc(100vh - 340px);min-height:380px;max-height:none}
+@media (max-width:1000px){#game:not(.wide) .boardwrap{height:430px}}
+.fxcmp{display:block;margin-top:6px;font-size:13px;color:var(--steel)}
+
+/* paste & optimize panel */
+#impPanel{border-top:1px solid #1b1e22;padding:12px 0 6px;display:flex;flex-direction:column;gap:8px}
+#game:not(.wide) #impPanel{padding-left:0}
+#game.wide #impPanel{padding:12px 22px 6px}
+.imphead{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.impnote{color:var(--fog)}
+#impHex{width:100%;background:#0a0d11;border:1px solid var(--slate);color:var(--bone);font:12px var(--mono);padding:8px 10px;resize:vertical;border-radius:1px}
+.improw{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font:11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--steel)}
+.improw select{background:#0a0d11;color:var(--bone);border:1px solid var(--slate);font:12px var(--mono);padding:4px 6px;margin-left:4px}
+#impMsg{margin:0;font-size:13px;line-height:1.5;color:var(--silver)}#impMsg.bad{color:var(--coral)}#impMsg.ok{color:var(--green)}
+</style>
+<style>
+.cc{--void:#0b0e12;--carbon:#181a1d;--slate:#303235;--fog:#5d5e61;--steel:#818284;--silver:#bababb;--bone:#dedede;--green:#00d892;--teal:#002923;--amber:#e8b64a;--coral:#ff6b6b;
+ --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;--mono:ui-monospace,SFMono-Regular,"JetBrains Mono","IBM Plex Mono",Menlo,Consolas,monospace}
+.cc *{box-sizing:border-box}
+.cc,.cc{margin:0}
+.cc{background:var(--void);color:var(--silver);font:400 15px/1.5 var(--sans);min-height:100vh;display:flex;flex-direction:column}
+.cc a{color:inherit}
+.cc h1,.cc h2{font-weight:400;color:var(--bone);margin:0}
+.cc code{font:13px var(--mono);color:var(--bone)}
+.cc .bar{display:flex;align-items:center;gap:28px;padding:18px clamp(16px,4vw,56px);border-bottom:1px solid #1b1e22}
+.cc .logo{display:inline-flex;align-items:center;gap:10px;font:19px var(--mono);color:var(--bone);text-decoration:none}
+.cc .logo svg{width:30px;height:16px;color:var(--silver)}
+.cc .tabs{display:flex;gap:6px;margin:0 auto}
+.cc .tabs a{font:12px var(--mono);letter-spacing:.06em;text-transform:uppercase;text-decoration:none;color:var(--steel);padding:8px 14px;border:1px solid transparent}
+.cc .tabs a:hover{color:var(--bone)}
+.cc .tabs a.on{color:var(--green);border-color:var(--slate)}
+.cc .chip{font:11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--steel);border:1px solid var(--slate);padding:5px 10px}
+.cc .chip.live{color:var(--green);border-color:#0b4a38}
+.cc main{flex:1;width:100%;max-width:880px;margin:0 auto;padding:44px clamp(16px,4vw,32px) 24px}
+.cc .view h1{font-size:clamp(30px,4.6vw,48px);line-height:1.05;letter-spacing:-.015em;margin-bottom:14px}
+.cc .lede{font-size:clamp(16px,1.5vw,19px);color:var(--steel);max-width:640px;margin:0 0 30px}
+.cc .field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.cc label{font:11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--steel)}
+.cc input[type=text],.cc textarea{width:100%;background:#0a0d11;border:1px solid var(--slate);color:var(--bone);font:14px var(--mono);padding:10px 12px;border-radius:1px}
+.cc input[type=text]:focus,.cc textarea:focus{outline:1px solid var(--green);outline-offset:0}
+.cc textarea{resize:vertical}
+.cc .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0}
+.cc .row input{flex:1;min-width:220px}
+.cc .btn{display:inline-block;font:12px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:11px 20px;border-radius:1px;cursor:pointer;background:none;color:var(--silver);border:1px solid var(--silver)}
+.cc .btn:hover{color:var(--bone);border-color:var(--bone)}
+.cc .btn.primary{background:var(--teal);color:var(--green);border-color:var(--teal)}
+.cc .btn.primary:hover{background:#005441}
+.cc .btn:disabled{opacity:.45;cursor:not-allowed}
+.cc .hint{font-size:13px;color:var(--steel)}
+.cc .hint.bad,.cc .bad{color:var(--coral)}
+.cc .hint.ok,.cc .ok{color:var(--green)}
+.cc .note{font-size:13px;color:var(--fog);margin:10px 0 0}
+.cc .step{display:flex;gap:20px;border-top:1px solid #1b1e22;padding:26px 0}
+.cc .step .num{font:13px var(--mono);color:var(--green);border:1px solid #0b4a38;width:30px;height:30px;display:grid;place-items:center;flex:none}
+.cc .step .body{flex:1;min-width:0}
+.cc .step h2{font-size:20px;margin-bottom:6px}
+.cc .sub{margin:0 0 12px;color:var(--steel);font-size:14px}
+.cc .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+.cc .facts{margin:16px 0}
+.cc .facts div{display:grid;grid-template-columns:170px 1fr;gap:14px;padding:9px 0;border-bottom:1px solid #1b1e22}
+.cc .facts dt{font:11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--steel);padding-top:3px}
+.cc .facts dd{margin:0;color:var(--bone);word-break:break-word}
+.cc .mono{font-family:var(--mono);font-size:13px}
+.cc .tablewrap{max-height:300px;overflow:auto;border:1px solid var(--slate);margin:14px 0 8px}
+.cc table{width:100%;border-collapse:collapse;font-size:13px}
+.cc th,.cc td{text-align:left;padding:8px 12px;border-bottom:1px solid #1b1e22}
+.cc th{font:11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--steel);position:sticky;top:0;background:var(--carbon)}
+.cc td .btn{padding:5px 10px;font-size:11px}
+.cc .publish{margin-top:26px;border-top:1px solid #1b1e22;padding-top:22px}
+.cc .publish h2{font-size:20px;margin-bottom:6px}
+.cc .result{margin-top:26px;border:1px solid var(--slate);padding:24px;background:linear-gradient(180deg,#12151a,#0d1014)}
+.cc .rhead{display:flex;align-items:center;gap:14px;margin-bottom:10px}
+.cc .rhead h2{font-size:26px}
+.cc .badge{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font:20px var(--mono);border:2px solid currentColor;flex:none}
+.cc .result[data-state=valid]{border-color:#0b4a38}
+.cc .result[data-state=valid] .badge,.cc .result[data-state=valid] h2{color:var(--green)}
+.cc .result[data-state=invalid] .badge,.cc .result[data-state=invalid] h2,.cc .result[data-state=revoked] .badge,.cc .result[data-state=revoked] h2{color:var(--coral)}
+.cc .result[data-state=unregistered] .badge,.cc .result[data-state=unregistered] h2,.cc .result[data-state=offline] .badge,.cc .result[data-state=offline] h2,.cc .result[data-state=demo] .badge,.cc .result[data-state=demo] h2{color:var(--amber)}
+.cc .foot{border-top:1px solid #1b1e22;padding:22px clamp(16px,4vw,56px);color:var(--fog);font-size:13px}
+.cc .foot p{max-width:880px;margin:0 auto}
+@media (max-width:700px){
+.cc .tabs{margin:0}
+.cc .bar{flex-wrap:wrap;gap:12px}
+.cc .grid3{grid-template-columns:1fr}
+.cc .facts div{grid-template-columns:1fr;gap:2px}
+.cc .step{gap:14px}
+}
+@media (prefers-reduced-motion:reduce){
+.cc *{animation:none!important;transition:none!important}
+}
+.cc dialog{background:var(--carbon);color:var(--silver);border:1px solid var(--slate);padding:0;max-width:min(92vw,460px);width:100%}
+.cc dialog::backdrop{background:rgba(5,7,9,.75)}
+.cc .card{padding:22px}
+.cc .cardhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.cc .card h2{font-size:26px;overflow-wrap:anywhere}
+.cc .qrbox{background:#fff;padding:8px;margin:14px 0;max-width:340px}
+.cc .qrbox svg{display:block;width:100%;height:auto}
+.cc .cap{font:11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--steel)}
+.cc #printArea{display:none}
 @media print{
   body{background:#fff;color:#000}
   body>*:not(#printArea){display:none!important}
@@ -61,33 +809,348 @@ dialog::backdrop{background:rgba(5,7,9,.75)}
   .pcert h2{font:600 34px system-ui,sans-serif;margin:0 0 6px;color:#000}.pcert p{color:#333;margin:0}
   .pcert .qrbox{max-width:260px;margin:24px auto;padding:0}.pfoot{font:11px ui-monospace,monospace;overflow-wrap:anywhere}
 }
-
-/* skill challenge + board */
-.check{display:flex;gap:10px;align-items:flex-start;font:14px var(--sans);letter-spacing:0;text-transform:none;color:var(--silver);cursor:pointer}.check input{margin-top:4px}
-.chgrid{display:grid;grid-template-columns:200px 1fr;gap:24px;margin:18px 0;align-items:start}
-#chTable{border-collapse:collapse;font:15px var(--mono)}#chTable th,#chTable td{padding:7px 14px;text-align:center;border:1px solid var(--slate)}#chTable tr.ok td{background:rgba(0,216,146,.14);color:var(--green)}#chTable tr.bad td{background:rgba(255,107,107,.10);color:var(--coral)}
-.boardbox{border:1px solid var(--slate);background:#0a0d11;background-image:radial-gradient(rgba(93,94,97,.35) 1px,transparent 1.2px);background-size:26px 26px}
-#chBoard{display:block;width:100%;height:auto;touch-action:none}
-#chBoard .wire{fill:none;stroke:#4a4d52;stroke-width:3}#chBoard .wire.on{stroke:var(--green);stroke-dasharray:9 7;animation:flow .8s linear infinite}#chBoard .wirehit{fill:none;stroke:transparent;stroke-width:14;cursor:pointer}
-@keyframes flow{to{stroke-dashoffset:-16}}
-#chBoard .gate .body{fill:#14171b;stroke:#4a4d52;stroke-width:2;cursor:grab}#chBoard .gate.used .body{stroke:#6b6e73}#chBoard .gate.hot .body{stroke:var(--green);fill:rgba(0,41,35,.6)}
-#chBoard .gate .bub{fill:#14171b;stroke:#4a4d52;stroke-width:2}#chBoard .gate text{font:11px var(--mono);letter-spacing:.12em;fill:#7a7c80;pointer-events:none}
-#chBoard .port{fill:#0b0e12;stroke:#818284;stroke-width:2;cursor:pointer}#chBoard .port:hover{stroke:var(--green)}#chBoard .port.sel{fill:var(--green)}#chBoard .port.cand{stroke:var(--green);stroke-dasharray:3 2}
-#chBoard .tog rect{fill:var(--carbon);stroke:var(--slate);stroke-width:1.5;cursor:pointer}#chBoard .tog text{fill:var(--silver);font:14px var(--mono);pointer-events:none}#chBoard .tog.on rect{fill:var(--teal);stroke:var(--green)}#chBoard .tog.on text{fill:var(--green)}
-#chBoard .yo{font:16px var(--mono);fill:var(--steel)}#chBoard .yo.on{fill:var(--green)}
-#subRows td.ok{color:var(--green)}#subRows td.bad{color:var(--coral)}
-@media (max-width:700px){.chgrid{grid-template-columns:1fr}}
+.cc .check{display:flex;gap:10px;align-items:flex-start;font:14px var(--sans);letter-spacing:0;text-transform:none;color:var(--silver);cursor:pointer}
+.cc .check input{margin-top:4px}
+.cc .chgrid{display:grid;grid-template-columns:200px 1fr;gap:24px;margin:18px 0;align-items:start}
+.cc #chTable{border-collapse:collapse;font:15px var(--mono)}
+.cc #chTable th,.cc #chTable td{padding:7px 14px;text-align:center;border:1px solid var(--slate)}
+.cc #chTable tr.ok td{background:rgba(0,216,146,.14);color:var(--green)}
+.cc #chTable tr.bad td{background:rgba(255,107,107,.10);color:var(--coral)}
+.cc .boardbox{border:1px solid var(--slate);background:#0a0d11;background-image:radial-gradient(rgba(93,94,97,.35) 1px,transparent 1.2px);background-size:26px 26px}
+.cc #chBoard{display:block;width:100%;height:auto;touch-action:none}
+.cc #chBoard .wire{fill:none;stroke:#4a4d52;stroke-width:3}
+.cc #chBoard .wire.on{stroke:var(--green);stroke-dasharray:9 7;animation:ccflow .8s linear infinite}
+.cc #chBoard .wirehit{fill:none;stroke:transparent;stroke-width:14;cursor:pointer}
+@keyframes ccflow{to{stroke-dashoffset:-16}}
+.cc #chBoard .gate .body{fill:#14171b;stroke:#4a4d52;stroke-width:2;cursor:grab}
+.cc #chBoard .gate.used .body{stroke:#6b6e73}
+.cc #chBoard .gate.hot .body{stroke:var(--green);fill:rgba(0,41,35,.6)}
+.cc #chBoard .gate .bub{fill:#14171b;stroke:#4a4d52;stroke-width:2}
+.cc #chBoard .gate text{font:11px var(--mono);letter-spacing:.12em;fill:#7a7c80;pointer-events:none}
+.cc #chBoard .port{fill:#0b0e12;stroke:#818284;stroke-width:2;cursor:pointer}
+.cc #chBoard .port:hover{stroke:var(--green)}
+.cc #chBoard .port.sel{fill:var(--green)}
+.cc #chBoard .port.cand{stroke:var(--green);stroke-dasharray:3 2}
+.cc #chBoard .tog rect{fill:var(--carbon);stroke:var(--slate);stroke-width:1.5;cursor:pointer}
+.cc #chBoard .tog text{fill:var(--silver);font:14px var(--mono);pointer-events:none}
+.cc #chBoard .tog.on rect{fill:var(--teal);stroke:var(--green)}
+.cc #chBoard .tog.on text{fill:var(--green)}
+.cc #chBoard .yo{font:16px var(--mono);fill:var(--steel)}
+.cc #chBoard .yo.on{fill:var(--green)}
+.cc #subRows td.ok{color:var(--green)}
+.cc #subRows td.bad{color:var(--coral)}
+@media (max-width:700px){
+.cc .chgrid{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
+<div id="landing">
+  <header class="bar">
+    <a class="logo" href="#"><svg class="mark" viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><circle cx="7" cy="8" r="2.4" fill="#00d892"/><circle cx="15" cy="8" r="2.4" fill="none" stroke="#5d5e61"/><circle cx="23" cy="8" r="2.4" fill="#00d892"/></svg><span class="wordmark">firsttape</span></a>
+    <nav class="links" aria-label="Sections">
+      <a href="#how">How it works</a>
+      <a href="#levels">Levels</a>
+      <a href="#progress">Ranks</a>
+      <a href="#judges">For judges</a>
+      <a href="#learners">Verify</a>
+      <a href="#stack">Stack</a>
+      <a href="#sponsor">Sponsor</a>
+    </nav>
+    <div class="cta">
+      <a class="btn ghost" href="#under">How it checks</a>
+      <a class="btn primary" href="#play">Open course</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero4">
+    <div class="wrap h4top">
+      <span class="badge" id="demoBadge">Levels 1–5 · no wallet</span>
+      <h1>Learn lean circuits.<br>Then mine on FabX.</h1>
+      <p class="lede">Build every logic gate from one gate. Sixteen levels, four worlds, and a real FabX task at the end: prove your design here, then build it on FabX to mine $FAB. The first five need no wallet.</p>
+      <div class="row">
+        <a class="btn primary big" href="#play" id="startBtn">Start level 1</a>
+        <a class="btn ghost big" href="#how">How it works</a>
+      </div>
+    </div>
+    <div class="wrap cagewrap">
+      <div class="cage" role="group" aria-label="The 16 levels as blades in a card cage. Lit blades are levels you have cleared; dots show your stars.">
+        <i class="screw s1"></i><i class="screw s2"></i><i class="screw s3"></i><i class="screw s4"></i>
+        <div class="chead"><b>FIRSTTAPE · CARD CAGE</b><span id="rackNum">0/16 · NEWCOMER</span></div>
+        <div class="cgroups" id="cage"></div>
+        <div class="cfoot"><span>One blade per level. A lit blade is cleared; the dots are your stars.</span><span>Click a blade to play it</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="under" class="wrap section trygrid">
+    <div>
+      <h2>See what the check does.</h2>
+      <p class="sub">Every level asks one question: does your circuit give the right answer for every input? In the browser that is a truth-table comparison. From level 6 the same table is checked on X Layer: a contract runs your circuit on the processor and compares every row.</p>
+      <ul class="ticks"><li>Levels 1–5: checked in your browser, no wallet</li><li>Levels 6–16: your circuit is taped out and checked on X Layer</li><li>The check itself is a free read; you pay only the tape-out fee</li></ul>
+    </div>
+    <div class="term" id="term" aria-label="Example output">
+          <div class="tabs" role="tablist">
+            <button role="tab" class="on" data-tab="browser">Browser</button>
+            <button role="tab" data-tab="chain">On-chain</button>
+            <button role="tab" data-tab="mining">Mining</button>
+          </div>
+          <pre class="code" id="termBody"></pre>
+          <div class="term-foot">Illustrative. Commands and endpoints are real; values are examples.</div>
+        </div>
+  </section>
+
+    <section id="how" class="wrap section">
+      <h2>Static guides don't check your work.</h2>
+      <p class="sub">Most beginner material for TapeOut is a page you read. FirstTape is a circuit you build, with an answer that is verified.</p>
+      <div class="compare">
+        <div class="panel">
+          <svg viewBox="0 0 420 150" aria-hidden="true">
+            <g fill="none" stroke="#303235" stroke-dasharray="3 4"><rect x="10" y="10" width="400" height="130"/><path d="M10 75H410M140 10V140M280 10V140"/></g>
+            <path d="M20 40H140V110H410" fill="none" stroke="#9f3f53" stroke-width="2"/>
+            <text x="268" y="100" fill="#9f3f53" class="svgtxt">NO FEEDBACK</text>
+          </svg>
+          <div class="cap">READING A GUIDE</div>
+          <ul><li>Diagrams of gates, no way to wire one.</li><li>Nothing tells you if your circuit is right.</li><li>Mining feels like a separate world.</li></ul>
+        </div>
+        <div class="panel">
+          <svg viewBox="0 0 420 150" aria-hidden="true">
+            <g fill="none" stroke="#303235" stroke-dasharray="3 4"><rect x="10" y="10" width="400" height="130"/><path d="M10 75H410M140 10V140M280 10V140"/></g>
+            <path d="M20 40H140V110H410" fill="none" stroke="#00d892" stroke-width="2"/>
+            <text x="268" y="100" fill="#00d892" class="svgtxt">ROWS MATCH</text>
+          </svg>
+          <div class="cap">WIRING A CIRCUIT</div>
+          <ul><li>Wire NAND gates on a live board.</li><li>Every truth-table row turns green or red.</li><li>From level 4, X Layer checks your circuit.</li></ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="levels" class="wrap section">
+      <h2>Sixteen levels. Four worlds.</h2>
+      <p class="sub">Each level unlocks the next. Beat par for three stars, then take on real FabX mining tasks in the last world.</p>
+      <table class="lvltable" id="lvlTable"><thead><tr><th>Level</th><th>Circuit</th><th>Checked</th><th>Par</th><th>Best</th></tr></thead><tbody></tbody></table>
+    </section>
+
+    <section id="progress" class="wrap section">
+      <h2>Earn stars. Climb the ranks.</h2>
+      <p class="sub">Use fewer gates than par for three stars. Every clear earns XP, a daily streak adds up, and badges mark the moments worth showing off. Progress lives in your browser.</p>
+      <div class="ladder" id="rankLadder"></div>
+      <div class="badges" id="badgeGrid"></div>
+    </section>
+
+    <section id="stack" class="wrap section">
+      <h2>What it runs on.</h2>
+      <p class="sub">Only things that exist today are marked live. The rest are marked as planned.</p>
+      <div class="stack">
+        <div><span class="k">X Layer</span><span class="v">Circuits are read with the free eval call</span><span class="badge">Tested on a fork</span></div>
+        <div><span class="k">LessonVerifier</span><span class="v">Records level progress on a pass</span><span class="badge" id="verBadge">Not deployed</span></div>
+        <div><span class="k">FabX</span><span class="v">Levels 14–16 are real FabX tasks (GC-001, GC-003, GC-006)</span><span class="badge">Live API</span></div>
+        <div><span class="k">DeWEB + TapeKit</span><span class="v">Single-file on-chain hosting</span><span class="badge muted">Planned</span></div>
+      </div>
+    </section>
+
+    <section id="sponsor" class="wrap section">
+      <h2>Reach learners at the moment they're ready to mine.</h2>
+      <p class="sub">Ecosystem projects can sponsor a branded level. Learners who finish it arrive warm. This is a plan, not a live product: no sponsor has signed yet.</p>
+    </section>
+  </main>
+
+  <footer class="foot wrap">
+    <div><span class="logo"><svg class="mark" viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><circle cx="7" cy="8" r="2.4" fill="#00d892"/><circle cx="15" cy="8" r="2.4" fill="none" stroke="#5d5e61"/><circle cx="23" cy="8" r="2.4" fill="#00d892"/></svg><span class="wordmark">firsttape</span></span></div>
+    <div class="fine"><a class="ulink" href="#judges">For judges</a> · <a class="ulink" href="#learners">Verify a learner on-chain</a><br>Built for the X Layer Build X hackathon. Circuits, processors and mining by TapeOut and FabX.</div>
+  </footer>
+</div>
+
+<!-- ============ GAME ============ -->
+<div id="game" hidden>
+  <header class="gbar">
+    <a class="logo" href="#"><svg class="mark" viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><circle cx="7" cy="8" r="2.4" fill="#00d892"/><circle cx="15" cy="8" r="2.4" fill="none" stroke="#5d5e61"/><circle cx="23" cy="8" r="2.4" fill="#00d892"/></svg><span class="wordmark">firsttape</span></a>
+    <nav id="levelNav" aria-label="Levels"></nav>
+    <div class="gright">
+      <div class="rankchip" title="Your rank"><span id="hudRank">Newcomer</span><span class="xpbar"><i id="xpFill"></i></span><span id="xpText" class="cap">0 / 250 XP</span></div>
+      <button id="mapBtn" class="btn ghost sm">Map</button>
+      <div class="menuwrap">
+        <button id="menuBtn" class="btn ghost sm" aria-haspopup="true" aria-expanded="false" aria-label="More">⋯</button>
+        <div id="menu" class="menu" hidden>
+          <div class="mstats"><span class="cap">Stars</span><b id="hudStars">0</b><span class="cap">Streak</span><b id="hudStreak">0d</b></div>
+          <button id="tutBtn" class="mi" hidden>Replay tutorial</button>
+          <button id="cardBtn" class="mi" hidden>Share card</button>
+          <button id="impBtn" class="mi">Paste &amp; optimize a netlist</button>
+          <button id="soundBtn" class="mi">Sound off</button>
+          <div class="mgroup"><span class="cap">View</span>
+            <button id="prefWide" class="mi" aria-pressed="false">Wide layout: off</button>
+            <button id="prefDetail" class="mi" aria-pressed="false">Board details: off</button>
+            <button id="prefScope" class="mi" aria-pressed="false">Waveforms open: off</button>
+          </div>
+          <a class="mi" href="#">Back to overview</a>
+          <details class="how"><summary>How to play</summary><p>Click an output dot, then an input dot to wire. Click a wire to remove it. Drag gates to move them. Click an input chip (A, B…) to flip it 0/1 and watch the signal. Press <b>Run all inputs</b> to test every row and see the waveforms below the board.</p></details>
+        </div>
+      </div>
+    </div>
+  </header>
+  <main class="play3">
+    <aside id="brief">
+      <div class="cap" id="lvlCap">MISSION</div>
+      <h2 id="lvlTitle"></h2>
+      <p id="lvlText"></p>
+      <p id="lvlMeta" class="cap meta"></p>
+      <table id="truth"></table>
+    </aside>
+    <section class="stage3">
+      <div class="boardwrap" id="boardwrap">
+        <svg id="board" viewBox="0 0 800 480" preserveAspectRatio="xMidYMid meet" aria-label="circuit board"></svg>
+        <div id="coach" class="coach"></div>
+        <div class="readout"><span>Rows <b id="stRows">0/0</b></span><span>Gates <b id="stGates">0</b></span><span id="stWhere">BROWSER</span></div>
+        <div id="burst" aria-hidden="true"></div>
+        <div id="tut" hidden role="dialog" aria-live="polite" aria-label="Tutorial">
+        <div class="tutdots" id="tutDots" aria-hidden="true"></div>
+        <div class="cap" id="tutStep"></div>
+        <p id="tutText"></p>
+        <div class="tutrow"><button id="tutNext" class="btn primary" hidden></button><button id="tutSkip" class="btn ghost">Skip tutorial</button></div>
+      </div>
+        <div id="cleared" aria-hidden="true"><div class="big" id="clearedBig">LEVEL CLEARED</div><div id="clearedStars" class="starsbig"></div><div id="clearedSub" class="cap"></div></div>
+      </div>
+      <div class="actionbar">
+        <div id="actions">
+          <button id="checkBtn" class="btn primary">Check</button>
+          <button id="runBtn" class="btn ghost">▶ Run</button>
+          <button id="addGate" class="btn ghost">+ Gate</button>
+          <button class="btn ghost" id="delGate" title="Remove the last gate (or double-click / right-click any gate)">− Gate</button>
+          <button id="clearBtn" class="btn ghost">Reset</button>
+          <button id="fabxBtn" class="btn ghost" hidden title="Copies your circuit as a hex netlist and opens the FabX canvas">Copy for FabX</button>
+          <button id="chainBtn" class="btn primary" hidden>Tape out &amp; submit on X Layer</button>
+        </div>
+        <p id="msg" role="status"></p>
+      </div>
+      <section id="impPanel" hidden aria-label="Paste and optimize a netlist">
+        <div class="imphead"><span class="cap">Paste &amp; optimize</span><span class="cap impnote">Paste a hex netlist (for example from fabx.tech), see it as gates, strip redundant ones, copy it back. Nothing is sent anywhere.</span></div>
+        <textarea id="impHex" rows="2" spellcheck="false" placeholder="0x00000002000002…  (7 bytes per NAND)"></textarea>
+        <div class="improw">
+          <label>Inputs <select id="impIn"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option></select></label>
+          <label>Outputs <select id="impOut"><option selected>1</option><option>2</option><option>3</option><option>4</option></select></label>
+          <button id="impLoad" class="btn ghost sm" type="button">Load on board</button>
+          <button id="impOpt" class="btn primary sm" type="button">Optimize board</button>
+          <button id="impCopy" class="btn ghost sm" type="button">Copy hex</button>
+        </div>
+        <p id="impMsg" role="status"></p>
+      </section>
+      <details class="scope" id="scopeBox">
+        <summary><span class="cap">Logic analyzer</span><span class="cap scopehint">Flip an input or press Run. Dashed line = what the output should be; red = mismatch.</span></summary>
+        <svg id="scope" role="img" aria-label="Waveforms of the inputs and outputs"></svg>
+      </details>
+    </section>
+  </main>
+</div>
+
+<!-- ============ VERIFY ============ -->
+<div id="verify" hidden>
+  <header class="bar"><a class="logo" href="#"><svg class="mark" viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><circle cx="7" cy="8" r="2.4" fill="#00d892"/><circle cx="15" cy="8" r="2.4" fill="none" stroke="#5d5e61"/><circle cx="23" cy="8" r="2.4" fill="#00d892"/></svg><span class="wordmark">firsttape</span></a>
+    <div class="cta"><a class="btn ghost" href="#judges">For judges</a><a class="btn primary" href="#play">Open course</a></div></header>
+  <main class="wrap pg">
+    <span class="badge" id="vBadge">Reads the chain directly</span>
+    <h1 class="pgh">Verify a learner on X Layer</h1>
+    <p class="sub">Paste any wallet address. This page calls the LessonVerifier contract itself: no server, nothing to trust but the chain.</p>
+    <div id="vState" class="notice" hidden></div>
+    <form id="vForm" class="vform">
+      <input id="vAddr" placeholder="0x… wallet address" spellcheck="false" autocomplete="off" aria-label="Wallet address">
+      <button class="btn primary" id="vGo" type="submit">Check</button>
+      <button class="btn ghost" id="vMine" type="button">Use my wallet</button>
+    </form>
+    <p id="vMsg" role="status"></p>
+    <section id="vResult" hidden>
+      <div class="cap">CLEARED ON X LAYER</div>
+      <div class="vcount"><b id="vCount">0</b><span id="vOf"></span></div>
+      <div id="vTiles" class="vtiles"></div>
+      <a id="vLink" class="ulink" target="_blank" rel="noopener">View this address on the explorer</a>
+    </section>
+    <h2 class="pgh2">Network stats</h2>
+    <div class="stats statrow"><div><span class="cap">Learners</span><b id="sLearners">—</b></div><div><span class="cap">Levels cleared</span><b id="sClears">—</b></div><div><span class="cap">Verifier</span><b id="sVerifier" class="mono small">—</b></div></div>
+    <h2 class="pgh2">Sponsor dashboard: unique wallets per level</h2>
+    <p class="sub">What a sponsor would buy against: how many different wallets cleared each level, read from the chain. Wallets are not people, since one person can use several wallets.</p>
+    <div id="vLevels" class="vlevels"></div>
+    <h2 class="pgh2">Recent learners</h2>
+    <table class="lvltable" id="vBoard"><thead><tr><th>#</th><th>Wallet</th><th>Levels cleared</th></tr></thead><tbody></tbody></table>
+    <p class="hint" id="vBoardNote"></p>
+  </main>
+</div>
+
+<!-- ============ JUDGES ============ -->
+<div id="judges" hidden>
+  <header class="bar"><a class="logo" href="#"><svg class="mark" viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><circle cx="7" cy="8" r="2.4" fill="#00d892"/><circle cx="15" cy="8" r="2.4" fill="none" stroke="#5d5e61"/><circle cx="23" cy="8" r="2.4" fill="#00d892"/></svg><span class="wordmark">firsttape</span></a>
+    <div class="cta"><a class="btn ghost" href="#learners">Verify on-chain</a><a class="btn primary" href="#play">Open course</a></div></header>
+  <main class="wrap pg">
+    <span class="badge">Checkable claims</span>
+    <h1 class="pgh">For judges</h1>
+    <p class="lede2">FirstTape: learn circuits by building them. From level 6, X Layer checks your circuit. The course ends in real FabX bounties. Everything below can be checked, and where something is not live, it says so.</p>
+
+    <div id="jNetWarn" class="notice warn" hidden>This deployment is <b>not on X Layer</b>. It is a rehearsal environment. The hackathon requires X Layer, so it does not count as the submission unless the organizers say so.</div>
+
+    <div class="stats statrow">
+      <div><span class="cap">Deployed on X Layer</span><b id="jDeploy">NOT YET</b></div>
+      <div><span class="cap">Learners on-chain</span><b id="jLearners">—</b></div>
+      <div><span class="cap">Levels cleared on-chain</span><b id="jClears">—</b></div>
+      <div><span class="cap">Levels</span><b id="jLevels">16</b></div>
+    </div>
+
+    <h2 class="pgh2">The five criteria</h2>
+    <table class="lvltable jt"><thead><tr><th>Criterion</th><th>What we show</th><th>Status</th></tr></thead><tbody>
+      <tr><td>Commercial potential</td><td>Sponsored levels, and a sponsor-funded faucet: one flat-fee mint (0.00066 OKB or 0.01 BEM, depending on the processor) funds thousands of free NAND claims (measured on a fork). No sponsor has signed yet.</td><td><span class="st plan">Plan, no sponsor</span></td></tr>
+      <tr><td>Innovation</td><td>A course where a contract checks your circuit by running it through the processor's free <code>eval</code>. Novelty against other entries has not been checked against the leaderboard, so we do not claim "first".</td><td><span class="st test">Built</span></td></tr>
+      <tr><td>Ecosystem integration</td><td>X Layer processor and circuits (tape-out and eval). FabX's task bank: levels 14–16 target real tasks. DeWEB and TapeKit: single-file build is ready, publishing is not done. TapeCode and TapeSend are not used.</td><td><span class="st plan">Partial</span></td></tr>
+      <tr><td>Product readiness and UX</td><td>16 levels and a sandbox, a guided tutorial, stars, XP and ranks, a mobile layout, all tested in a real browser. Contracts are tested on a fork of live X Layer.</td><td><span class="st" id="jReady">Tested on a fork</span></td></tr>
+      <tr><td>Demo</td><td>A learner goes from a first puzzle to a verified on-chain level and a FabX hand-off.</td><td><span class="st no">Not recorded yet</span></td></tr>
+    </tbody></table>
+
+    <h2 class="pgh2">What is real today</h2>
+    <table class="lvltable jt"><thead><tr><th>Item</th><th>Status</th><th>How to check it</th></tr></thead><tbody>
+      <tr><td>Browser game: 16 levels and a sandbox</td><td><span class="st test">Built</span></td><td><code>node tests/smoke-all-levels.mjs</code> solves all 16 through the real UI</td></tr>
+      <tr><td>Every level is solvable at its par</td><td><span class="st test">Tested</span></td><td><code>node tests/solutions.js</code></td></tr>
+      <tr><td>On-chain checks for levels 6–16</td><td><span class="st test">Tested on a fork</span></td><td><code>forge test --match-test everyLevelPassesOnChain</code> on a fork of live X Layer</td></tr>
+      <tr><td>Wallet flow: faucet, tape-out, submit</td><td><span class="st test">Tested on a fork</span></td><td><code>tests/e2e-fork.mjs</code> (stand-in wallet; a real wallet extension is untested)</td></tr>
+      <tr><td>Deployed contracts on X Layer</td><td><span class="st no" id="jDeploy2">Not yet</span></td><td>The <a class="ulink" href="#learners">Verify page</a> reads them once deployed</td></tr>
+      <tr><td>Hosted on DeWEB with the TapeKit badge</td><td><span class="st no">Not yet</span></td><td><code>dist/index.html</code> is a single file with no external assets</td></tr>
+      <tr><td>FabX mining</td><td><span class="st plan">Hand-off only</span></td><td>We verify a circuit matching the task and link to fabx.tech. Mining needs FabX's own mint, commit and tape-out flow, so a circuit made here cannot be claimed there. We do not send FabX transactions. $FAB rewards come from FabX, depend on the network, and are not guaranteed.</td></tr>
+      <tr><td>Sponsors</td><td><span class="st no">None yet</span></td><td>Outreach is drafted, not sent</td></tr>
+      <tr><td>Real learners</td><td><span class="st no" id="jLearners2">None counted</span></td><td>Counted on-chain once deployed (see the Verify page)</td></tr>
+    </tbody></table>
+
+    <h2 class="pgh2">Questions you will ask</h2>
+    <div class="faq">
+      <details><summary>Who pays?</summary><p>Sponsors would pay per verified graduate of their bounty level, or fund the faucet. A free pilot comes first. No sponsor has agreed yet, so this is a plan. Learners pay only gas and the 0.0013 OKB tape-out fee, and no BEM, because the faucet hands out NAND.</p></details>
+      <details><summary>Why would a learner stay?</summary><p>Each level unlocks the next. You earn stars for beating par, XP and ranks, a daily streak and badges. The last world is real FabX tasks instead of a certificate; on FabX, leaner circuits earn more $FAB (not guaranteed).</p></details>
+      <details><summary>Is the content correct?</summary><p>Every level's answer is a truth table. A solver proves each level is solvable at its par, and from level 6 the contract re-runs your circuit on the processor and compares every row. Levels 1–5 are checked in the browser only.</p></details>
+      <details><summary>What is new here?</summary><p>We have not compared against the leaderboard yet, so we make no claim of being first. What we can show is that the check is on-chain and the course ends in real tasks.</p></details>
+      <details><summary>What can go wrong?</summary><p>The contracts are small and unaudited. The faucet gives one claim per wallet and cannot stop one person using many wallets. Progress in the browser lives in local storage. By default circuits are minted on an existing free processor, not one we own.</p></details>
+    </div>
+
+    <h2 class="pgh2">Sponsor offer (prices are placeholders)</h2>
+    <p class="sub">Nothing here has been tested with a buyer. The numbers are to be set with the first sponsor. The idea is to pay for outcomes: the <a class="ulink" href="#learners">sponsor dashboard</a> shows, straight from the chain, how many different wallets cleared each level.</p>
+    <table class="lvltable jt"><thead><tr><th>Option</th><th>What the sponsor gets</th><th>Price</th></tr></thead><tbody>
+      <tr><td>Pilot (first sponsor)</td><td>A bounty level for your task, built by us, plus the on-chain count of wallets that cleared it</td><td>Free, in exchange for a written yes and permission to publish the numbers</td></tr>
+      <tr><td>Pay per verified graduate</td><td>You pay only when a unique wallet clears your bounty level. The count is public and checkable on the Verify page.</td><td>Placeholder: to be set with the first sponsor</td></tr>
+      <tr><td>Fund the faucet</td><td>Free NAND for new learners, with your name on the faucet</td><td>One flat mint fee covers thousands of claims: 0.00066 OKB on older processors, 0.01 BEM on newer ones (measured on-chain cost, not a price)</td></tr>
+      <tr><td>Level pack</td><td>A set of levels built around your own task bank</td><td>To be agreed</td></tr>
+    </tbody></table>
+
+    <h2 class="pgh2">Check it yourself</h2>
+    <ul class="ticks"><li>Paste any wallet on the <a class="ulink" href="#learners">Verify page</a> to read its progress straight from the contract.</li><li>Run the tests listed above. They need no wallet and spend nothing.</li><li>Read <code>docs/DEPLOY.md</code> for the exact deploy steps and measured costs.</li></ul>
+  </main>
+</div>
+
+<div id="map" class="mapov" hidden role="dialog" aria-modal="true" aria-label="Level map">
+  <div class="mapbox"><div class="maphead"><h2>Mission map</h2><button id="mapClose" class="btn ghost">Close</button></div><div id="mapBody"></div></div>
+</div>
+<div id="toasts" aria-live="polite"></div>
+
+<div id="cc" class="cc" hidden>
 <header class="bar">
-  <a class="logo" href="#issue" aria-label="CertCheck home"><svg viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><path d="M7 8.5l3 3 6-7" fill="none" stroke="#00d892" stroke-width="2"/></svg>certcheck</a>
+  <a class="logo" href="#" aria-label="Home"><svg viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><path d="M7 8.5l3 3 6-7" fill="none" stroke="#00d892" stroke-width="2"/></svg>certcheck</a>
   <nav class="tabs" aria-label="Sections">
-    <a href="#verify" data-tab="verify">Verify</a><a href="#issue" data-tab="issue">Issue</a><a href="#manage" data-tab="manage">Manage</a>
+    <a href="#issue" data-tab="issue">Issue</a><a href="#verify" data-tab="verify">Verify</a><a href="#manage" data-tab="manage">Manage</a><a href="#play" data-tab="learn">Learn circuits</a>
   </nav>
   <span class="chip" id="netChip">…</span>
 </header>
-
 <main>
 <!-- ===== VERIFY ===== -->
 <section id="verifyView" class="view" hidden>
@@ -96,8 +1159,8 @@ dialog::backdrop{background:rgba(5,7,9,.75)}
   <div class="field"><label for="vInput">Certificate link or proof</label>
     <textarea id="vInput" rows="3" spellcheck="false" placeholder="Paste a link ending in #c=… or the proof JSON"></textarea></div>
   <div class="row"><button id="vBtn" class="btn primary" type="button">Verify</button><span class="hint" id="vHint"></span></div>
-  <article id="vResult" class="result" data-state="idle" hidden aria-live="polite">
-    <div class="rhead"><span class="badge" id="vBadge"></span><h2 id="vTitle"></h2></div>
+  <article id="cvResult" class="result" data-state="idle" hidden aria-live="polite">
+    <div class="rhead"><span class="badge" id="cvBadge"></span><h2 id="vTitle"></h2></div>
     <p id="vWhy"></p>
     <dl class="facts" id="vFacts"></dl>
     <p class="note" id="vNote"></p>
@@ -200,11 +1263,1307 @@ dialog::backdrop{background:rgba(5,7,9,.75)}
     <div class="row"><button id="qrDownload" class="btn ghost" type="button">Download QR (SVG)</button><button id="qrPrint" class="btn ghost" type="button">Print</button><span class="hint" id="qrMsg"></span></div>
   </div>
 </dialog>
-<div id="printArea" aria-hidden="true"></div>
 <footer class="foot">
   <p>No personal data is stored on-chain: only a batch fingerprint, a count and a label. The format is public (<code>docs/FORMAT.md</code>), so anyone can write their own verifier. Hackathon MVP, contracts unaudited.</p>
 </footer>
+</div>
+<div id="printArea" aria-hidden="true"></div>
 
+<script>
+// 16 levels in 4 worlds + a sandbox. Rows list inputs MSB-first for display only.
+// On-chain tables are generated by scripts/onchain-levels.js (eval packs input k = bit k, output k = bit k).
+// Worlds 2-4 can also be taped out and submitted on X Layer. `fabx` + `ref` come from FabX's public taskbank (refNand = FabX's reference gate count).
+const f = (n, fn) => Array.from({length: 1 << n}, (_, i) => {
+  const ins = Array.from({length: n}, (_, b) => (i >> (n - 1 - b)) & 1);
+  return [ins, [].concat(fn(...ins))];
+});
+window.WORLDS = [
+  {id: 1, name: "GATES",        sub: "Build every logic gate from NAND. Free, in your browser."},
+  {id: 2, name: "LOGIC",        sub: "Decisions and voting. Your circuits are checked on X Layer."},
+  {id: 3, name: "ARITHMETIC",   sub: "Teach wires to count."},
+  {id: 4, name: "FABX BOUNTIES", sub: "Real FabX mining tasks. Match or beat FabX's reference design."}
+];
+const mk = (id, world, title, text, inputs, outputs, rows, maxGates, extra = {}) =>
+  Object.assign({id, world, title, text, inputs, outputs, rows, maxGates, onchain: world > 1}, extra);
+window.LEVELS = [
+  mk(1, 1, "NOT", "NAND outputs 0 only when both inputs are 1. Build NOT: output the opposite of A. Hint: feed A into both inputs.", ["A"], ["Y"], f(1, a => 1 - a), 1, {fabx: "GC-001", ref: 3}),
+  mk(2, 1, "AND", "Y is 1 only when A and B are both 1. Hint: NAND, then invert.", ["A", "B"], ["Y"], f(2, (a, b) => a & b), 2, {fabx: "GC-003", ref: 4}),
+  mk(3, 1, "OR", "Y is 1 when A or B (or both) is 1. Hint: invert each input first.", ["A", "B"], ["Y"], f(2, (a, b) => a | b), 3, {fabx: "GC-004", ref: 5}),
+  mk(4, 1, "NOR", "Y is 1 only when both A and B are 0. Hint: you already built OR.", ["A", "B"], ["Y"], f(2, (a, b) => 1 - (a | b)), 4, {fabx: "GC-005", ref: 6}),
+  mk(5, 1, "XOR", "Y is 1 when A and B differ. This one is famous: four NANDs, and one feeds two others.", ["A", "B"], ["Y"], f(2, (a, b) => a ^ b), 4, {fabx: "GC-006", ref: 6}),
+
+  mk(6, 2, "XNOR", "Y is 1 when A and B are the same. Hint: XOR, inverted.", ["A", "B"], ["Y"], f(2, (a, b) => 1 - (a ^ b)), 5, {fabx: "GC-007", ref: 7}),
+  mk(7, 2, "Multiplexer", "Y = A when S is 0, B when S is 1. A switch made of logic.", ["S", "A", "B"], ["Y"], f(3, (s, a, b) => s ? b : a), 4, {fabx: "GC-009", ref: 6}),
+  mk(8, 2, "Majority vote", "Y is 1 when at least two of A, B, C are 1. Hint: three pairs, ANDed, then ORed.", ["A", "B", "C"], ["Y"], f(3, (a, b, c) => (a + b + c) >= 2 ? 1 : 0), 6, {fabx: "GC-008", ref: 8}),
+  mk(9, 2, "Parity", "Y is 1 when an odd number of A, B, C are 1. Hint: XOR chains.", ["A", "B", "C"], ["Y"], f(3, (a, b, c) => a ^ b ^ c), 8),
+
+  mk(10, 3, "Comparator", "Y is 1 when A is greater than B (A=1, B=0). Three gates is possible.", ["A", "B"], ["Y"], f(2, (a, b) => a & (1 - b)), 3),
+  mk(11, 3, "Half adder", "Add two bits. Outputs S (sum) and C (carry). Hint: S is XOR and C is AND, and they share a gate.", ["A", "B"], ["S", "C"], f(2, (a, b) => [a ^ b, a & b]), 5),
+  mk(12, 3, "Full adder", "Add A + B + Cin. Outputs S and Cout. A classic nine-gate design exists.", ["A", "B", "Cin"], ["S", "Cout"], f(3, (a, b, c) => [a ^ b ^ c, (a & b) | (c & (a ^ b))]), 9),
+  mk(13, 3, "2-bit adder", "Boss level. Add the 2-bit numbers (A1 A0) + (B1 B0). Outputs S0, S1 and carry C. Chain a half adder into a full adder.", ["A0", "A1", "B0", "B1"], ["S0", "S1", "C"],
+    f(4, (a0, a1, b0, b1) => { const s = (a0 + 2 * a1) + (b0 + 2 * b1); return [s & 1, (s >> 1) & 1, (s >> 2) & 1]; }), 14),
+
+  mk(14, 4, "Bounty GC-001 · Inverter", "FabX task GC-001: a single-bit inverter. FabX's reference uses 3 gates. Prove the design here; then build the same circuit on fabx.tech to claim the task.", ["A"], ["Y"], f(1, a => 1 - a), 1, {fabx: "GC-001", ref: 3, graduation: true}),
+  mk(15, 4, "Bounty GC-003 · AND gate", "FabX task GC-003: a two-input AND. FabX's reference uses 4 gates.", ["A", "B"], ["Y"], f(2, (a, b) => a & b), 2, {fabx: "GC-003", ref: 4, graduation: true}),
+  mk(16, 4, "Bounty GC-006 · XOR gate", "FabX task GC-006: a two-input XOR. FabX's reference uses 6 gates. Can you beat it?", ["A", "B"], ["Y"], f(2, (a, b) => a ^ b), 4, {fabx: "GC-006", ref: 6, graduation: true})
+];
+// Free build: no goal, the truth table of whatever you wire is computed live. Not part of progression.
+window.SANDBOX = {id: 99, world: 0, title: "Sandbox", text: "Free build. Wire anything from A, B, C. The truth table shows what your circuit actually does.", inputs: ["A", "B", "C"], outputs: ["Y"], rows: [], maxGates: 0, onchain: false, sandbox: true};
+</script>
+<script>
+// Progression layer: XP, ranks, stars, daily streak, daily challenge, badges, toasts, optional sound.
+// Everything is local (localStorage). No server, no tracking.
+(() => {
+  const KEY = "ft_prog";
+  const RANKS = [
+    {name: "Newcomer", xp: 0}, {name: "Wirer", xp: 250}, {name: "Gatekeeper", xp: 700},
+    {name: "Logic Smith", xp: 1400}, {name: "Chip Architect", xp: 2400}, {name: "Tape-out Legend", xp: 3600}
+  ];
+  const BASE = [0, 100, 150, 200, 300];           // XP for first clear, by world
+  const ACH = [
+    {id: "first_light", name: "First Light", desc: "Clear level 1", test: p => !!p.best[1]},
+    {id: "gatekeeper", name: "Gatekeeper", desc: "Clear every level in World 1", test: p => [1, 2, 3, 4, 5].every(i => p.best[i])},
+    {id: "under_par", name: "Under Par", desc: "Earn 3 stars on any level", test: p => Object.values(p.best).some(b => b.stars === 3)},
+    {id: "perfectionist", name: "Perfectionist", desc: "Earn 3 stars on 8 levels", test: p => Object.values(p.best).filter(b => b.stars === 3).length >= 8},
+    {id: "first_try", name: "First Try", desc: "Clear a level on your first check", test: (p, c) => !!(c && c.firstTry)},
+    {id: "speedster", name: "Speedster", desc: "Clear a level in under 45 seconds", test: (p, c) => !!(c && c.seconds < 45)},
+    {id: "beat_ref", name: "Beat the Reference", desc: "Use fewer gates than FabX's reference design", test: (p, c) => !!(c && c.ref && c.used < c.ref)},
+    {id: "adder", name: "Counting Wires", desc: "Clear the full adder", test: p => !!p.best[12]},
+    {id: "boss", name: "Boss Slayer", desc: "Clear the 2-bit adder", test: p => !!p.best[13]},
+    {id: "graduate", name: "Bounty Hunter", desc: "Clear a FabX bounty", test: p => [14, 15, 16].some(i => p.best[i])},
+    {id: "on_chain", name: "On-Chain", desc: "Tape out a circuit on X Layer", test: p => Object.keys(p.chain).length > 0},
+    {id: "streak3", name: "On a Roll", desc: "Play 3 days in a row", test: p => p.streak.n >= 3},
+    {id: "tinkerer", name: "Tinkerer", desc: "Build a working circuit in the sandbox", test: p => !!p.sandbox}
+  ];
+
+  const fresh = () => ({xp: 0, best: {}, ach: {}, chain: {}, streak: {last: "", n: 0}, daily: {date: "", done: false}, sandbox: false});
+  const load = () => { try { return Object.assign(fresh(), JSON.parse(localStorage.getItem(KEY) || "{}")); } catch { return fresh(); } };
+  const save = p => { try { localStorage.setItem(KEY, JSON.stringify(p)); } catch {} };
+  const ymd = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const today = () => ymd(new Date());
+  const yesterday = () => { const d = new Date(); d.setDate(d.getDate() - 1); return ymd(d); };
+
+  function rank(xp) {
+    let i = 0; RANKS.forEach((r, k) => { if (xp >= r.xp) i = k; });
+    const cur = RANKS[i], next = RANKS[i + 1];
+    return {index: i, name: cur.name, next: next ? next.name : null, floor: cur.xp, ceil: next ? next.xp : cur.xp,
+      pct: next ? Math.round(100 * (xp - cur.xp) / (next.xp - cur.xp)) : 100};
+  }
+  const starsFor = (L, used) => !L.maxGates || used <= L.maxGates ? 3 : used <= L.maxGates + 2 ? 2 : 1;
+  const starStr = n => "★".repeat(n) + "☆".repeat(3 - n);
+  // Today's daily challenge: picked from levels you can actually play, then pinned for the whole day.
+  function dailyLevel() {
+    const p = load(), t = today();
+    let doneIds = []; try { doneIds = JSON.parse(localStorage.getItem("ft_done") || "[]"); } catch {}
+    if (p.daily.date === t && p.daily.id) return window.LEVELS.find(l => l.id === p.daily.id) || window.LEVELS[0];
+    const pool = window.LEVELS.filter(l => l.id === 1 || p.best[l.id - 1] || doneIds.includes(l.id - 1));
+    let h = 0; for (const ch of t) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+    const lvl = pool[h % pool.length];
+    p.daily = {date: t, id: lvl.id, done: p.daily.date === t ? p.daily.done : false}; save(p);
+    return lvl;
+  }
+
+  // ---- toasts ----
+  function toast(title, sub, cls = "") {
+    let box = document.getElementById("toasts");
+    if (!box) { box = document.createElement("div"); box.id = "toasts"; box.setAttribute("aria-live", "polite"); document.body.appendChild(box); }
+    const t = document.createElement("div"); t.className = "toast " + cls;
+    const a = document.createElement("b"); a.textContent = title; t.appendChild(a);
+    if (sub) { const s = document.createElement("span"); s.textContent = sub; t.appendChild(s); }
+    box.appendChild(t);
+    setTimeout(() => { t.classList.add("out"); setTimeout(() => t.remove(), 400); }, 3800);
+  }
+
+  // ---- sound (off by default) ----
+  let ctx = null, soundOn = false;
+  try { soundOn = localStorage.getItem("ft_sound") === "1"; } catch {}
+  function beep(kind) {
+    if (!soundOn) return;
+    try {
+      ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+      const notes = {wire: [[520, 0, .06]], bad: [[170, 0, .16, "sawtooth"]], ok: [[523, 0, .09], [659, .09, .09], [784, .18, .16]],
+        level: [[523, 0, .1], [659, .1, .1], [784, .2, .1], [1046, .3, .28]], ach: [[880, 0, .08], [1318, .1, .18]]}[kind] || [];
+      notes.forEach(([f, at, dur, type]) => {
+        const o = ctx.createOscillator(), g = ctx.createGain(), t = ctx.currentTime + at;
+        o.type = type || "square"; o.frequency.value = f; g.gain.setValueAtTime(0.04, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + dur + 0.02);
+      });
+    } catch {}
+  }
+  function toggleSound() { soundOn = !soundOn; try { localStorage.setItem("ft_sound", soundOn ? "1" : "0"); } catch {} if (soundOn) beep("ok"); return soundOn; }
+
+  function unlock(p, ctxInfo) {
+    const got = [];
+    ACH.forEach(a => { if (!p.ach[a.id] && a.test(p, ctxInfo)) { p.ach[a.id] = Date.now(); got.push(a); } });
+    return got;
+  }
+  function touchStreak(p) {
+    const t = today();
+    if (p.streak.last !== t) { p.streak.n = p.streak.last === yesterday() ? p.streak.n + 1 : 1; p.streak.last = t; }
+  }
+
+  // Record a successful clear. Returns what happened so the UI can celebrate.
+  function record(L, used, seconds, firstTry) {
+    const p = load(), before = rank(p.xp), prev = p.best[L.id], stars = starsFor(L, used), lines = [];
+    let xp = 0;
+    if (!prev) { const b = BASE[L.world] || 100; xp += b; lines.push(`Clear +${b}`); }
+    const gain = Math.max(0, stars - (prev ? prev.stars : 1));
+    if (gain) { xp += 50 * gain; lines.push(`Stars +${50 * gain}`); }
+    if (firstTry && !prev) { xp += 25; lines.push("First try +25"); }
+    const dl = dailyLevel(); Object.assign(p, {daily: load().daily});   // re-read: dailyLevel() may have pinned today's pick
+    if (L.id === dl.id && !p.daily.done && used <= (L.maxGates || 99)) { xp += 50; lines.push("Daily +50"); p.daily.done = true; }
+    p.best[L.id] = {gates: prev ? Math.min(prev.gates, used) : used, stars: prev ? Math.max(prev.stars, stars) : stars, time: prev ? Math.min(prev.time || 1e9, seconds) : seconds};
+    touchStreak(p); p.xp += xp;
+    const ach = unlock(p, {firstTry, seconds, used, ref: L.ref});
+    save(p);
+    const after = rank(p.xp);
+    ach.forEach((a, i) => setTimeout(() => { toast("Badge unlocked: " + a.name, a.desc, "ach"); beep("ach"); }, 900 + i * 700));
+    return {xp, lines, stars, firstClear: !prev, rankUp: after.index > before.index ? after : null, ach, streak: p.streak.n, total: p.xp};
+  }
+  function chainDone(L) {
+    const p = load(); let xp = 0;
+    if (!p.chain[L.id]) { p.chain[L.id] = 1; xp = 150; p.xp += xp; }
+    const ach = unlock(p, null); save(p);
+    ach.forEach((a, i) => setTimeout(() => toast("Badge unlocked: " + a.name, a.desc, "ach"), 600 + i * 700));
+    if (xp) toast("+150 XP", "First on-chain tape-out for this level", "xp");
+    return xp;
+  }
+  function sandboxUsed() {
+    const p = load(); if (p.sandbox) return;
+    p.sandbox = true; p.xp += 40; const ach = unlock(p, null); save(p);
+    toast("+40 XP", "First working sandbox circuit", "xp");
+    ach.forEach((a, i) => setTimeout(() => toast("Badge unlocked: " + a.name, a.desc, "ach"), 700 + i * 700));
+  }
+
+  window.FT_GAME = {
+    RANKS, ACH, load, save, rank, starsFor, starStr, dailyLevel, today, record, chainDone, sandboxUsed, toast, beep, toggleSound,
+    soundOn: () => soundOn,
+    totalStars: () => Object.values(load().best).reduce((a, b) => a + b.stars, 0),
+    best: id => load().best[id] || null
+  };
+})();
+</script>
+<script>
+// Encodes the board's NAND graph into a TapeOut netlist (verified on X Layer fork).
+// board: {inputs:[names], outputs:[names], nodes:[{id,kind:'in'|'out'|'nand'}], wires:[{from,to,toPort}]}
+// Returns {hex, nIn, nOut, gates} or {error}.
+window.encodeNetlist = function (L, nodes, wires) {
+  const nIn = L.inputs.length, nOut = L.outputs.length;
+  const nands = nodes.filter(n => n.kind === "nand");
+  const ref = new Map(); // node id -> ref number
+  nodes.filter(n => n.kind === "in").forEach((n, i) => ref.set(n.id, 2 + i));
+  const src = (id, port) => wires.find(w => w.to === id && w.toPort === port);
+  // topological order (gates only reference earlier refs)
+  const order = [], seen = new Set(), visiting = new Set();
+  const visit = n => {
+    if (seen.has(n.id)) return true; if (visiting.has(n.id)) return false;
+    visiting.add(n.id);
+    for (const p of ["in0", "in1"]) {
+      const w = src(n.id, p); if (!w) return null;
+      const f = nodes.find(x => x.id === w.from);
+      if (f.kind === "nand") { const r = visit(f); if (r !== true) return r; }
+    }
+    visiting.delete(n.id); seen.add(n.id); order.push(n); return true;
+  };
+  // outputs must be the LAST nOut gates, in output order
+  const outs = nodes.filter(n => n.kind === "out"), drivers = [];
+  for (const o of outs) {
+    const w = src(o.id, "in0"); if (!w) return {error: "Output " + o.name + " is not wired."};
+    const d = nodes.find(x => x.id === w.from);
+    if (d.kind !== "nand") return {error: "Output " + o.name + " must come from a gate."};
+    drivers.push(d);
+  }
+  for (const d of drivers) { const r = visit(d); if (r === null) return {error: "A gate input is unwired."}; if (r === false) return {error: "Loop detected."}; }
+  const rest = order.filter(g => !drivers.includes(g)), final = [...rest, ...drivers];
+  if (new Set(drivers).size !== drivers.length) return {error: "Each output needs its own gate."};
+  final.forEach((g, i) => ref.set(g.id, 2 + nIn + i));
+  const b3 = n => n.toString(16).padStart(6, "0");
+  let hex = "0x";
+  for (const g of final) {
+    const a = ref.get(src(g.id, "in0").from), b = ref.get(src(g.id, "in1").from);
+    hex += "00" + b3(a) + b3(b);
+  }
+  return {hex, nIn, nOut, gates: final.length};
+};
+
+// ---- Import / lint / optimize (pure functions; ref numbering as in encodeNetlist: 0/1 constants, 2.. inputs, then gates) ----
+// decodeNetlist("0x00...", nIn, nOut) -> {gates:[{a,b}]} or {error}
+window.decodeNetlist = function (text, nIn, nOut) {
+  let h = String(text || "").trim().replace(/^0x/i, "").replace(/\s+/g, "");
+  if (!h) return {error: "Paste a hex netlist first."};
+  if (!/^[0-9a-f]+$/i.test(h)) return {error: "That is not hex. Paste only the netlist bytes (0x00…)."};
+  if (h.length % 14) return {error: `Netlist length must be a multiple of 7 bytes (one NAND = 7 bytes); got ${h.length / 2} bytes. LATCH circuits are not supported here.`};
+  const gates = [];
+  for (let i = 0; i < h.length; i += 14) {
+    if (h.slice(i, i + 2) !== "00") return {error: `Gate ${i / 14 + 1} is not a plain NAND (opcode ${h.slice(i, i + 2)}). Only NAND netlists load here.`};
+    const a = parseInt(h.slice(i + 2, i + 8), 16), b = parseInt(h.slice(i + 8, i + 14), 16), k = i / 14, lim = 2 + nIn + k;
+    if (a < 2 || b < 2) return {error: `Gate ${k + 1} uses a constant input. The board has no constants; tie it to an input instead.`};
+    if (a >= lim || b >= lim) return {error: `Gate ${k + 1} points at a signal that does not exist yet (inputs: ${nIn}).`};
+    gates.push({a, b});
+  }
+  if (!gates.length) return {error: "Empty netlist."};
+  if (nOut > gates.length) return {error: `${nOut} outputs need at least ${nOut} gates.`};
+  return {gates};
+};
+window.encodeGates = function (gates) {
+  const b3 = n => n.toString(16).padStart(6, "0");
+  return "0x" + gates.map(g => "00" + b3(g.a) + b3(g.b)).join("");
+};
+// optimizeNetlist(gates, nIn, nOut) -> {gates, hex, removed, steps}. Never changes behaviour:
+//  1) drop gates that feed no output, 2) NAND(NAND(y,y),NAND(y,y)) -> y, 3) merge gates with identical inputs.
+window.optimizeNetlist = function (gates0, nIn, nOut) {
+  const base = 2 + nIn, n0 = gates0.length;
+  let G = gates0.map(g => ({a: g.a, b: g.b})), steps = [];
+  const outIdx = new Set(); for (let i = n0 - nOut; i < n0; i++) outIdx.add(i);
+  const alias = new Map(); // ref -> ref
+  const res = r => { while (alias.has(r)) r = alias.get(r); return r; };
+  const gi = r => r - base; // gate index of a ref (>=0 means gate)
+  let changed = true, guard = 0;
+  while (changed && guard++ < 200) {
+    changed = false;
+    for (let i = 0; i < G.length; i++) {
+      if (outIdx.has(i) || alias.has(base + i)) continue;
+      const a = res(G[i].a), b = res(G[i].b);
+      if (a === b && gi(a) >= 0 && !alias.has(a)) {
+        const h = G[gi(a)], ha = res(h.a), hb = res(h.b);
+        if (ha === hb) { alias.set(base + i, ha); steps.push(`Gate ${i + 1} is a double inverter (NOT of NOT): replaced by its source.`); changed = true; continue; }
+      }
+      for (let j = 0; j < i; j++) {
+        if (alias.has(base + j)) continue;
+        const c = res(G[j].a), d = res(G[j].b);
+        if ((a === c && b === d) || (a === d && b === c)) { alias.set(base + i, base + j); steps.push(`Gate ${i + 1} duplicates gate ${j + 1}: merged.`); changed = true; break; }
+      }
+    }
+  }
+  // reachability from outputs after aliasing
+  const live = new Set(), walk = r => { r = res(r); const k = gi(r); if (k < 0 || live.has(k)) return; live.add(k); walk(G[k].a); walk(G[k].b); };
+  outIdx.forEach(i => { live.add(i); walk(G[i].a); walk(G[i].b); });
+  for (let i = 0; i < G.length; i++) if (!live.has(i) && !alias.has(base + i)) steps.push(`Gate ${i + 1} feeds no output: removed.`);
+  const keep = [...live].sort((x, y) => x - y), newIdx = new Map(keep.map((k, n) => [k, n]));
+  const remap = r => { r = res(r); const k = gi(r); return k < 0 ? r : base + newIdx.get(k); };
+  const out = keep.map(k => ({a: remap(G[k].a), b: remap(G[k].b)}));
+  return {gates: out, hex: window.encodeGates(out), removed: n0 - out.length, steps};
+};
+// Evaluate a gate list for all input rows -> array of output-bit arrays (used to prove optimize() keeps behaviour)
+window.evalGates = function (gates, nIn, nOut) {
+  const rows = [];
+  for (let m = 0; m < (1 << nIn); m++) {
+    const v = {0: 0, 1: 1}; for (let k = 0; k < nIn; k++) v[2 + k] = (m >> k) & 1;
+    gates.forEach((g, i) => { v[2 + nIn + i] = 1 - (v[g.a] & v[g.b]); });
+    rows.push(Array.from({length: nOut}, (_, o) => v[2 + nIn + gates.length - nOut + o]));
+  }
+  return rows;
+};
+</script>
+<script>
+// Generated by scripts/deploy.sh on 2026-11-19T20:47Z. Chain 196.
+window.FT_CONFIG = {
+  network: "mainnet", chainName: "X Layer", currency: {name: "OKB", symbol: "OKB", decimals: 18},
+  chainId: 196, rpc: "https://rpc.xlayer.tech", explorer: "https://www.oklink.com/xlayer",
+  verifier:   "0x7F6f07f40e14E9A8D2E2b77170Fe748Bd9C4d6d9",
+  faucet:     "0xBC58802002307fD80048e93A6475335eC65a4f39",
+  circuits:   "0x9e2849c04a513fe64db07521cbe52d078d905c0e",
+  transistors:"0xd0faafc5b9149cae7bd9af64070fee33c46ed619",
+  tapeoutFeeWei: "1300000000000000"
+};
+</script>
+<script>
+// Minimal X Layer wallet flow, no dependencies. Encoding verified against `cast` (see tests/encode.test.js).
+(() => {
+  const C = window.FT_CONFIG, ZERO = /^0x0+$/;
+  const SEL = {claim: "0x4e71d92d", claimed: "0xc884ef83", tapeout: "0x7bd3ac1d", submit: "0x4ce93cc8", progress: "0xda8589a2", balanceOf: "0x00fdd58e"};
+  const w = n => BigInt(n).toString(16).padStart(64, "0");
+  const addr = a => a.toLowerCase().replace("0x", "").padStart(64, "0");
+  const enc = {
+    tapeout: (hex, nIn, nOut) => {
+      const data = hex.replace("0x", ""), len = data.length / 2;
+      return SEL.tapeout + w(96) + w(nIn) + w(nOut) + w(len) + data.padEnd(Math.ceil(len / 32) * 64, "0");
+    },
+    submit: (level, id) => SEL.submit + w(level) + w(id),
+    claimed: a => SEL.claimed + addr(a),
+    balanceOf: (a, id) => SEL.balanceOf + addr(a) + w(id)
+  };
+  const deployed = () => !ZERO.test(C.verifier) && !ZERO.test(C.circuits);
+  const eth = () => window.ethereum;
+  const call = (to, data) => eth().request({method: "eth_call", params: [{to, data}, "latest"]});
+
+  async function ensureChain() {
+    const want = "0x" + C.chainId.toString(16);
+    if ((await eth().request({method: "eth_chainId"})) === want) return;
+    try { await eth().request({method: "wallet_switchEthereumChain", params: [{chainId: want}]}); }
+    catch (e) {
+      if (e.code !== 4902) throw e;
+      await eth().request({method: "wallet_addEthereumChain", params: [{chainId: want, chainName: C.chainName || "X Layer", rpcUrls: [C.rpc], nativeCurrency: C.currency || {name: "OKB", symbol: "OKB", decimals: 18}, blockExplorerUrls: [C.explorer]}]});
+    }
+  }
+  async function connect() {
+    if (!eth()) throw new Error("No wallet found. Install an EVM wallet such as OKX Wallet or MetaMask.");
+    const [a] = await eth().request({method: "eth_requestAccounts"}); await ensureChain(); return a;
+  }
+  async function waitReceipt(hash) {
+    for (let i = 0; i < 90; i++) {
+      const r = await eth().request({method: "eth_getTransactionReceipt", params: [hash]});
+      if (r) { if (r.status !== "0x1") throw new Error("Transaction failed: " + hash); return r; }
+      await new Promise(r => setTimeout(r, 2000));
+    }
+    throw new Error("Timed out waiting for " + hash);
+  }
+  const send = async (from, to, data, value) => waitReceipt(await eth().request({method: "eth_sendTransaction", params: [{from, to, data, value: value ? "0x" + BigInt(value).toString(16) : "0x0"}]}));
+  const TRANSFER = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
+
+  // Whole on-chain step for one level. say(msg) reports progress. Returns {circuitId, tapeoutTx, submitTx}.
+  async function tapeoutAndSubmit(L, net, account, say) {
+    const faucetOn = !ZERO.test(C.faucet), tokensOn = !ZERO.test(C.transistors);   // some processors (e.g. a mock) have no transistor tokens
+    if (tokensOn && faucetOn && BigInt(await call(C.faucet, enc.claimed(account))) === 0n) {
+      const have = BigInt(await call(C.transistors, enc.balanceOf(account, 0)));
+      if (have < BigInt(net.gates)) { say("Claiming free NAND transistors…"); await send(account, C.faucet, SEL.claim); }
+    }
+    const have = tokensOn ? BigInt(await call(C.transistors, enc.balanceOf(account, 0))) : BigInt(net.gates);
+    if (have < BigInt(net.gates)) throw new Error(`You need ${net.gates} NAND transistors but hold ${have}. Claim from the faucet or mint some.`);
+    say("Taping out your circuit (confirm in wallet)…");
+    const r = await send(account, C.circuits, enc.tapeout(net.hex, net.nIn, net.nOut), C.tapeoutFeeWei);
+    const log = r.logs.find(l => l.address.toLowerCase() === C.circuits.toLowerCase() && l.topics[0] === TRANSFER && l.topics.length === 4);
+    if (!log) throw new Error("Tape-out succeeded but no circuit id found in logs.");
+    const circuitId = BigInt(log.topics[3]);
+    say(`Circuit #${circuitId} created. Submitting to the verifier…`);
+    const s = await send(account, C.verifier, enc.submit(L.id, circuitId));
+    return {circuitId, tapeoutTx: r.transactionHash, submitTx: s.transactionHash};
+  }
+  window.FT_CHAIN = {enc, deployed, connect, tapeoutAndSubmit, explorerTx: h => `${C.explorer}/tx/${h}`};
+})();
+</script>
+<script>
+// Share card: draws a 1200x630 PNG on a canvas from local progress. No network, no dependencies.
+window.FT_CARD = {
+  draw(levels, done, circuits) {
+    const c = document.createElement("canvas"); c.width = 1200; c.height = 630;
+    const g = c.getContext("2d"), N = levels.length, G = window.FT_GAME, p = G ? G.load() : {xp: 0, best: {}};
+    const mono = "ui-monospace,SFMono-Regular,Menlo,monospace", sans = "system-ui,sans-serif";
+    g.fillStyle = "#0b0e12"; g.fillRect(0, 0, 1200, 630);
+    g.strokeStyle = "#303235"; g.lineWidth = 2; g.strokeRect(24, 24, 1152, 582);
+    g.fillStyle = "#00d892"; g.font = `bold 64px ${mono}`; g.fillText("f", 70, 120);
+    g.fillStyle = "#dedede"; g.fillText("irsttape", 106, 120);
+    g.fillStyle = "#818284"; g.font = `26px ${sans}`; g.fillText("Learn circuits from NAND gates, then mine them.", 70, 168);
+    const n = done.length, rk = G ? G.rank(p.xp) : {name: ""};
+    g.fillStyle = "#dedede"; g.font = `bold 110px ${mono}`; g.fillText(`${n}/${N}`, 70, 300);
+    g.fillStyle = "#818284"; g.font = `28px ${sans}`; g.fillText("levels cleared", 360, 300);
+    if (G) { g.fillStyle = "#00d892"; g.font = `bold 34px ${mono}`; g.fillText(`${rk.name.toUpperCase()}  ·  ${p.xp} XP  ·  ${G.totalStars()} ★`, 70, 360); }
+    levels.forEach((L, i) => {            // two rows of level tiles, stars underneath
+      const col = i % 8, row = Math.floor(i / 8), x = 70 + col * 138, y = 395 + row * 74, ok = done.includes(L.id), b = p.best[L.id];
+      g.fillStyle = ok ? "#00d892" : "#181a1d"; g.fillRect(x, y, 118, 40);
+      g.fillStyle = ok ? "#04111f" : "#5d5e61"; g.font = `bold 24px ${mono}`; g.textAlign = "center"; g.fillText(L.id, x + 59, y + 28);
+      if (b && G) { g.fillStyle = "#00d892"; g.font = `16px ${mono}`; g.fillText(G.starStr(b.stars), x + 59, y + 60); }
+      g.textAlign = "left";
+    });
+    const ids = Object.entries(circuits || {}).sort((a, b) => a[0] - b[0]);
+    g.fillStyle = "#5d5e61"; g.font = `20px ${mono}`;
+    g.fillText(ids.length ? "X Layer circuits: " + ids.map(([l, id]) => `L${l}=#${id}`).join("  ") : "Played in the browser", 70, 580);
+    g.fillText(location.host && location.protocol !== "file:" ? location.host : "", 900, 580);
+    return c;
+  },
+  download(levels, done, circuits) {
+    const a = document.createElement("a");
+    a.href = this.draw(levels, done, circuits).toDataURL("image/png"); a.download = "firsttape-progress.png"; a.click();
+  }
+};
+</script>
+<script>
+(() => {
+  const NS = "http://www.w3.org/2000/svg";
+  const board = document.getElementById("board");
+  const $ = id => document.getElementById(id);
+  const G = window.FT_GAME;
+  const REDUCE = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const jget = (k, d) => { try { return JSON.parse(localStorage.getItem(k) || d); } catch { return JSON.parse(d); } };
+  const jset = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+  const store = { get: () => jget("ft_done", "[]"), set: v => jset("ft_done", v) };
+  const circuitsStore = { get: () => jget("ft_circuits", "{}"), set: v => jset("ft_circuits", v) };
+  const ALL = [...LEVELS, SANDBOX], SB = LEVELS.length;      // sandbox lives at the end, outside progression
+
+  let W = 800, H = 480;                                     // logical board size: W adapts to the window so the circuit fills it
+  const S = 0.9, gateW = 70 * S, gateH = 50 * S;           // S scales the gate symbol; ports use the same scale
+  let probe = {}, justCleared = 0, nodes = [], wires = [], pending = null, nextId = 1, cur = 0, t0 = 0, fails = 0;
+  let done = store.get();
+  // View preferences (remembered): compact box by default; everything else is opt-in from the menu.
+  const prefs = Object.assign({wide: false, detail: false, scope: true}, jget("ft_prefs", "{}"));
+  let autoOpen = false;
+  const tut = {active: false, intro: false, flipped: false, checked: false, force: false};
+
+  const el = (tag, attrs = {}, parent = board) => {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    parent.appendChild(e); return e;
+  };
+
+  // ---------- level setup ----------
+  // Node model: {id, kind:'in'|'out'|'nand', x, y, name}. Ports: 'out' of in/nand, 'in0','in1' of nand, 'in0' of out.
+  function load(i) {
+    cur = i; const L = ALL[i];
+    wires = []; pending = null; nextId = 1; nodes = []; probe = {}; L.inputs.forEach(n => probe[n] = 0);
+    t0 = performance.now(); fails = 0; stopRun(); scope.samples = [];
+    fit();
+    const lane = (k, n) => 70 + (k + 0.5) * ((H - 140) / Math.max(n, 1));
+    L.inputs.forEach((n, k) => nodes.push({id: nextId++, kind: "in", name: n, x: 56, y: lane(k, L.inputs.length)}));
+    L.outputs.forEach((n, k) => nodes.push({id: nextId++, kind: "out", name: n, x: W - 56, y: lane(k, L.outputs.length)}));
+    // Pre-place gates in a tidy grid so the board is never empty; extras are one click away.
+    const k = L.sandbox ? 4 : Math.min(L.maxGates || 2, 9), rows = k <= 1 ? 1 : k <= 4 ? 2 : 3, cols = Math.ceil(k / rows);
+    for (let g = 0; g < k; g++) {
+      const c = Math.floor(g / rows), r = g % rows;
+      nodes.push({id: nextId++, kind: "nand",
+        x: cols === 1 ? (W - gateW) / 2 : (W < 800 ? 140 : 210) + c * Math.max(60, (W - 2 * (W < 800 ? 140 : 210) - gateW) / (cols - 1)),
+        y: (prefs.detail ? 120 : 64) + (r + 0.5) * ((H - (prefs.detail ? 190 : 134)) / rows) - gateH / 2});
+    }
+    tut.active = i === 0 && (tut.force || (!jget("ft_tut", "0") && !done.includes(1)));
+    tut.intro = false; tut.flipped = false; tut.checked = false; tut.force = false;
+    const par = L.maxGates;
+    $("tutBtn").hidden = i !== 0; $("impPanel").hidden = !L.sandbox; $("impMsg").textContent = "";
+    $("lvlCap").textContent = L.sandbox ? "SANDBOX" : `${(WORLDS[L.world - 1] || {}).name || ""} · LEVEL ${String(L.id).padStart(2, "0")} / ${String(LEVELS.length).padStart(2, "0")}`;
+    $("lvlTitle").textContent = L.title;
+    $("lvlText").textContent = L.text + (par ? ` (Par: ${par} gate${par === 1 ? "" : "s"}.)` : "");
+    $("stWhere").textContent = L.sandbox ? "FREE" : L.onchain ? "X LAYER" : "BROWSER";
+    $("stWhere").className = L.onchain ? "chain" : "";
+    $("checkBtn").hidden = !!L.sandbox;
+    $("msg").className = ""; $("msg").textContent = ""; $("chainBtn").hidden = true; $("fabxBtn").hidden = true;
+    if (L.onchain) $("msg").textContent = "On-chain level: pass the local check, then tape out and submit.";
+    $("cleared").classList.remove("show");
+    board.classList.remove("board-in"); void board.getBoundingClientRect(); board.classList.add("board-in");
+    renderTable(); render(); renderNav(); renderHud();
+  }
+
+
+  // ---------- adaptive board + decoration ----------
+  function fit() {
+    const r = board.getBoundingClientRect();
+    const ratio = r.width > 80 && r.height > 80 ? r.width / r.height : 1.9;
+    H = 480; W = Math.round(Math.max(560, Math.min(1500, H * ratio)));
+    board.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  }
+  function refit() {
+    const oldW = W; fit(); if (W === oldW) return;
+    const f = W / oldW;
+    nodes.forEach(n => { if (n.kind === "out") n.x = W - 56; else if (n.kind === "nand") n.x = Math.max(90, Math.min(W - gateW - 100, n.x * f)); });
+    render();
+  }
+  const SYM = {   // standard logic symbols, drawn in a 26x24 box
+    NOT: [["M0,0 L24,12 L0,24 Z"], [0, 0, 24 + 3, 12]], AND: [["M0,0 H12 A12,12 0 0 1 12,24 H0 Z"]], OR: [["M0,0 Q14,0 26,12 Q14,24 0,24 Q8,12 0,0 Z"]],
+    NOR: [["M0,0 Q14,0 26,12 Q14,24 0,24 Q8,12 0,0 Z"], [0, 0, 29, 12]], XOR: [["M4,0 Q18,0 30,12 Q18,24 4,24 Q12,12 4,0 Z", "M0,0 Q8,12 0,24"]],
+    XNOR: [["M4,0 Q18,0 30,12 Q18,24 4,24 Q12,12 4,0 Z", "M0,0 Q8,12 0,24"], [0, 0, 33, 12]]
+  };
+  function decor(L) {
+    if (!prefs.detail) return;
+    const g = el("g", {class: "decor", "pointer-events": "none"});
+    const wm = el("text", {class: "wm", x: W / 2, y: Math.round(H * 0.76)}, g); wm.style.fontSize = Math.round(H * 0.62) + "px"; wm.textContent = L.sandbox ? "∞" : String(L.id).padStart(2, "0");
+    for (let x = 40; x < W; x += 40) { const big = x % 200 === 0; el("line", {class: "rule", x1: x, x2: x, y1: 0, y2: big ? 9 : 5}, g); if (big) { const t = el("text", {class: "rulet", x: x + 3, y: 19}, g); t.textContent = x; } }
+    for (let y = 40; y < H; y += 40) { const big = y % 200 === 0; el("line", {class: "rule", x1: 0, x2: big ? 9 : 5, y1: y, y2: y}, g); if (big) { const t = el("text", {class: "rulet", x: 12, y: y + 3}, g); t.textContent = y; } }
+    [[18, 18], [W - 18, 18], [18, H - 18], [W - 18, H - 18]].forEach(([x, y]) => el("circle", {class: "hole", cx: x, cy: y, r: 6}, g));
+    el("line", {class: "rail", x1: 64, x2: W - 64, y1: 38, y2: 38, stroke: "rgba(0,216,146,.28)"}, g);
+    const vt = el("text", {class: "railt", x: 66, y: 31, fill: "rgba(0,216,146,.6)"}, g); vt.textContent = "VCC  1";
+    el("line", {class: "rail", x1: 64, x2: W - 64, y1: H - 34, y2: H - 34, stroke: "rgba(163,164,165,.22)"}, g);
+    const gt = el("text", {class: "railt", x: 66, y: H - 40, fill: "rgba(163,164,165,.5)"}, g); gt.textContent = "GND  0";
+    const sg = el("text", {class: "railt", x: W - 66, y: H - 40, fill: "rgba(163,164,165,.4)", "text-anchor": "end"}, g); sg.textContent = "FIRSTTAPE · REV A · NAND ONLY";
+    if (L.sandbox) return;
+    // target card: the gate/function you are building
+    const key = L.graduation ? ({"GC-001": "NOT", "GC-003": "AND", "GC-006": "XOR"})[L.fabx] : L.title, c = el("g", {class: "tcard", transform: `translate(${Math.round(W / 2 - 110)},44)`}, g);
+    el("rect", {x: 0, y: 0, width: 220, height: 64}, c);
+    const t1 = el("text", {x: 12, y: 16}, c); t1.textContent = "TARGET";
+    const t2 = el("text", {x: 12, y: 36, class: "tt"}, c); t2.textContent = L.title.replace(/^Bounty /, "").slice(0, 20);
+    const t3 = el("text", {x: 12, y: 54}, c); t3.textContent = `${L.inputs.join(" ")} → ${L.outputs.join(" ")}`.slice(0, 28);
+    if (SYM[key]) {
+      const sg2 = el("g", {transform: "translate(160,20)"}, c);
+      el("path", {class: "tsym", d: SYM[key][0][0]}, sg2); if (SYM[key][0][1]) el("path", {class: "tsym", d: SYM[key][0][1]}, sg2);
+      if (SYM[key][1]) el("circle", {class: "tsym", cx: SYM[key][1][2], cy: SYM[key][1][3], r: 3}, sg2);
+      const ins = key === "NOT" ? [12] : [6, 18], tail = SYM[key][1] ? 32 : 26 + (key.startsWith("X") ? 4 : 0);
+      ins.forEach(y => el("line", {class: "tsym", x1: -10, x2: key.startsWith("X") ? 2 : 0, y1: y, y2: y}, sg2));
+      el("line", {class: "tsym", x1: tail, x2: tail + 12, y1: 12, y2: 12}, sg2);
+    } else {
+      const bx = el("g", {transform: "translate(156,18)"}, c);
+      el("rect", {class: "tsym", x: 0, y: 0, width: 44, height: 28, fill: "none"}, bx);
+      const bt = el("text", {x: 22, y: 18, "text-anchor": "middle"}, bx); bt.textContent = "f( )";
+    }
+  }
+
+  // ---------- logic analyzer ----------
+  const scope = {samples: []}, MAXS = 16;
+  const exOf = L => { const row = L.rows && L.rows.find(([ins]) => ins.every((v, k) => probe[L.inputs[k]] === v)); return row ? row[1] : null; };
+  function snap() {
+    const L = ALL[cur], memo = new Map(), out = {};
+    nodes.filter(n => n.kind === "out").forEach(o => { out[o.name] = evalNode(o, probe, memo); });
+    const ex = exOf(L);
+    return {in: {...probe}, out, exp: ex ? Object.fromEntries(L.outputs.map((nm, k) => [nm, ex[k]])) : null};
+  }
+  function pushSample() { scope.samples.push(snap()); if (scope.samples.length > MAXS) scope.samples.shift(); }
+  function refreshLast() { if (!scope.samples.length) scope.samples.push(snap()); else scope.samples[scope.samples.length - 1] = snap(); }
+  function drawScope() {
+    const svg = $("scope"), L = ALL[cur]; if (!svg) return;
+    const w = Math.max(320, svg.clientWidth || (svg.parentElement && svg.parentElement.clientWidth) || 800), rh = 30, top = 6;
+    const rows = [...L.inputs.map(n => ({n, kind: "in"})), ...L.outputs.map(n => ({n, kind: "out"}))], h = top * 2 + rows.length * rh;
+    svg.setAttribute("viewBox", `0 0 ${w} ${h}`); svg.style.height = h + "px"; svg.innerHTML = "";
+    const x0 = 104, x1 = w - 12, sw = (x1 - x0) / MAXS, S_ = scope.samples, m = S_.length;
+    for (let i = 0; i <= MAXS; i++) el("line", {class: "sc-grid", x1: x0 + i * sw, x2: x0 + i * sw, y1: top, y2: h - top}, svg);
+    if (m) el("rect", {class: "sc-now", x: x0 + (m - 1) * sw, y: top, width: sw, height: h - top * 2}, svg);
+    rows.forEach((r, ri) => {
+      const y0 = top + ri * rh, yHi = y0 + 7, yLo = y0 + rh - 8, yOf = v => v ? yHi : yLo;
+      el("line", {class: "sc-row", x1: 0, x2: w, y1: y0 + rh, y2: y0 + rh}, svg);
+      const last = m ? (r.kind === "in" ? S_[m - 1].in[r.n] : S_[m - 1].out[r.n]) : undefined;
+      const nm = el("text", {class: "sc-name", x: 10, y: y0 + rh / 2 + 4}, svg); nm.textContent = r.n;
+      const vt = el("text", {class: "sc-val" + (last === 1 ? " on" : ""), x: 64, y: y0 + rh / 2 + 4}, svg); vt.textContent = last === undefined ? "?" : last;
+      const vals = S_.map(s => r.kind === "in" ? s.in[r.n] : s.out[r.n]);
+      const wave = (vs) => { let d = "", prev = null; vs.forEach((v, i) => { if (v === undefined) { prev = null; return; } const y = yOf(v), xa = x0 + i * sw, xb = xa + sw; d += prev === null ? `M${xa},${y} H${xb} ` : (prev !== y ? `L${xa},${y} H${xb} ` : `H${xb} `); prev = y; }); return d; };
+      if (r.kind === "out") {
+        const exps = S_.map(s => s.exp ? s.exp[r.n] : undefined);
+        if (exps.some(v => v !== undefined)) el("path", {class: "sc-exp", d: wave(exps)}, svg);
+        vals.forEach((v, i) => { if (exps[i] !== undefined && v !== exps[i]) el("rect", {class: "sc-badbg", x: x0 + i * sw, y: y0 + 1, width: sw, height: rh - 2}, svg); });
+      }
+      vals.forEach((v, i) => { if (v === undefined) el("line", {class: "sc-unk", x1: x0 + i * sw, x2: x0 + (i + 1) * sw, y1: y0 + rh / 2, y2: y0 + rh / 2}, svg); });
+      el("path", {class: r.kind === "in" ? "sc-in" : "sc-out", d: wave(vals)}, svg);
+      if (r.kind === "out") S_.forEach((s, i) => { const e = s.exp && s.exp[r.n], v = s.out[r.n]; if (e !== undefined && v !== undefined && v !== e) el("path", {class: "sc-bad", d: `M${x0 + i * sw},${yOf(v)} H${x0 + (i + 1) * sw}`}, svg); });
+    });
+  }
+  let runT = null;
+  function stopRun() { if (runT) { clearInterval(runT); runT = null; } const b = $("runBtn"); if (b) b.textContent = "▶ Run"; }
+  function runAll() {
+    if (runT) return stopRun();
+    const L = ALL[cur], n = L.inputs.length, total = 1 << n; let i = 0;
+    scope.samples = []; $("runBtn").textContent = "■ Stop"; autoOpen = !$("scopeBox").open; $("scopeBox").open = true;
+    const step = () => {
+      if (i >= total) return stopRun();
+      L.inputs.forEach((nm, k) => { probe[nm] = (i >> (n - 1 - k)) & 1; });
+      tut.flipped = true; pushSample(); i++; render();
+      if (i >= total) setTimeout(stopRun, 500);
+    };
+    step(); runT = setInterval(step, REDUCE ? 250 : 700);
+  }
+
+  function renderNav() {
+    $("cardBtn").hidden = done.length === 0;
+    const nav = $("levelNav"); nav.innerHTML = "";
+    LEVELS.forEach((L, i) => {
+      const b = document.createElement("button");
+      b.textContent = L.id; b.title = `${L.id} · ${L.title}`; b.setAttribute("aria-label", `Level ${L.id}, ${L.title}`);
+      if (i === cur) b.classList.add("cur");
+      if (done.includes(L.id)) b.classList.add("done");
+      if (L.id === justCleared) b.classList.add("pulse");
+      if (i > 0 && LEVELS[i - 1].world !== L.world) b.classList.add("wstart");
+      b.disabled = i > 0 && !done.includes(LEVELS[i - 1].id) && i !== cur;
+      b.onclick = () => load(i);
+      nav.appendChild(b);
+    });
+    justCleared = 0;
+  }
+
+  function renderHud() {
+    const p = G.load(), r = G.rank(p.xp);
+    $("hudRank").textContent = r.name;
+    $("xpFill").style.width = r.pct + "%";
+    $("xpText").textContent = r.next ? `${p.xp} / ${r.ceil} XP` : `${p.xp} XP · MAX`;
+    $("hudStars").textContent = G.totalStars();
+    $("hudStreak").textContent = p.streak.n + "d";
+    $("soundBtn").textContent = G.soundOn() ? "Sound on" : "Sound off";
+    const L = ALL[cur], b = L.sandbox ? null : p.best[L.id];
+    let meta = "";
+    if (b) meta += `BEST ${G.starStr(b.stars)} · ${b.gates} gate${b.gates === 1 ? "" : "s"}`;
+    if (L.maxGates) meta += `${meta ? "  ·  " : ""}★★★ ≤ ${L.maxGates} · ★★ ≤ ${L.maxGates + 2}`;
+    if (L.ref) meta += `${meta ? "  ·  " : ""}FABX ${L.fabx} REF ${L.ref}`;
+    $("lvlMeta").textContent = meta;
+  }
+
+  function renderTable(results) {
+    const L = ALL[cur], t = $("truth"); t.innerHTML = "";
+    if (L.sandbox || !L.rows.length) return;
+    const h = t.insertRow();
+    [...L.inputs, ...L.outputs].forEach(n => { const th = document.createElement("th"); th.textContent = n; h.appendChild(th); });
+    L.rows.forEach(([ins, outs], r) => {
+      const tr = t.insertRow();
+      if (results) { tr.className = results[r] ? "pass" : "fail"; tr.style.setProperty("--i", r); }
+      [...ins, ...outs].forEach(v => tr.insertCell().textContent = v);
+    });
+  }
+
+  // ---------- evaluation ----------
+  const srcOf = (nodeId, port) => wires.find(w => w.to === nodeId && w.toPort === port);
+  function evalNode(n, inputVals, memo, depth = 0) {
+    if (depth > 50) return undefined; // cycle guard
+    if (n.kind === "in") return inputVals[n.name];
+    if (memo.has(n.id)) return memo.get(n.id);
+    const read = port => {
+      const w = srcOf(n.id, port); if (!w) return undefined;
+      return evalNode(nodes.find(x => x.id === w.from), inputVals, memo, depth + 1);
+    };
+    let v;
+    if (n.kind === "nand") { const a = read("in0"), b = read("in1"); v = (a === undefined || b === undefined) ? undefined : (a & b) ^ 1; }
+    else v = read("in0");
+    memo.set(n.id, v); return v;
+  }
+  function rowResults() {
+    const L = ALL[cur], outs = nodes.filter(n => n.kind === "out");
+    return L.rows.map(([ins, expect]) => {
+      const iv = {}; L.inputs.forEach((n, k) => iv[n] = ins[k]);
+      const memo = new Map();
+      return outs.every((o, k) => evalNode(o, iv, memo) === expect[k]);
+    });
+  }
+  // Gates that actually feed an output (only these are counted and taped out).
+  function usedGates() {
+    const used = new Set(), walk = n => {
+      for (const p of ["in0", "in1"]) {
+        const w = srcOf(n.id, p); if (!w) continue;
+        const f = nodes.find(x => x.id === w.from);
+        if (f.kind === "nand" && !used.has(f.id)) { used.add(f.id); walk(f); }
+      }
+    };
+    nodes.filter(n => n.kind === "out").forEach(walk);
+    return used;
+  }
+
+  function check() {
+    const L = ALL[cur];
+    if (L.sandbox) return;
+    const results = rowResults();
+    renderTable(results);
+    const ok = results.every(Boolean), used = usedGates().size, msg = $("msg");
+    if (ok) {
+      const next = cur + 1 < LEVELS.length, seconds = (performance.now() - t0) / 1000;
+      const res = G.record(L, used, seconds, fails === 0);
+      msg.className = "ok";
+      msg.innerHTML = `Correct! ${used} gate${used === 1 ? "" : "s"} used` + (used <= L.maxGates ? " — at or under par." : ".") +
+        (() => { const nt = encodeNetlist(L, nodes, wires); if (nt.error) return ""; const dd = decodeNetlist(nt.hex, nt.nIn, nt.nOut); if (dd.error) return ""; const oo = optimizeNetlist(dd.gates, nt.nIn, nt.nOut); return oo.removed ? ` <span class="fxcmp">Lint: ${oo.removed} redundant gate${oo.removed === 1 ? "" : "s"} could be removed. Open <b>⋯ → Paste &amp; optimize</b> to see which.</span>` : ""; })() +
+        (L.ref ? ` <span class="fxcmp">FabX ${L.fabx} reference: ${L.ref} gates. Yours: ${used} — ${used < L.ref ? "leaner than the reference, which is what earns more $FAB." : used === L.ref ? "matches the reference." : "above the reference; trim gates to compete."}</span>` : "") +
+        ` <span class="stars">${G.starStr(res.stars)}</span> <span class="xp">+${res.xp} XP</span>` +
+        (next ? ` <button id="nextBtn" class="btn primary">Next level →</button>` : "");
+      if (next) $("nextBtn").onclick = () => load(cur + 1);
+      if (!done.includes(L.id)) { done.push(L.id); store.set(done); justCleared = L.id; }
+      renderNav(); renderHud();
+      $("chainBtn").hidden = !L.onchain; $("fabxBtn").hidden = !L.graduation;
+      if (tut.active) { tut.checked = true; render(); }
+      celebrate(L, used, res, seconds);
+    } else {
+      fails++; G.beep("bad");
+      msg.className = "bad"; msg.textContent = `Not yet — ${results.filter(Boolean).length}/${results.length} rows match. Check that every input is wired.`;
+    }
+  }
+
+  // ---------- celebration ----------
+  function banner(big, sub, stars) {
+    $("clearedBig").textContent = big; $("clearedSub").textContent = sub; $("clearedStars").textContent = stars || "";
+    const c = $("cleared"); c.classList.remove("show"); void c.offsetWidth; c.classList.add("show");
+  }
+  function celebrate(L, used, res, seconds) {
+    const m = Math.floor(seconds / 60), s = Math.floor(seconds % 60);
+    banner("LEVEL CLEARED", `${L.title} · ${used} gate${used === 1 ? "" : "s"}${L.maxGates ? " · par " + L.maxGates : ""} · ${m}:${String(s).padStart(2, "0")}`, G.starStr(res.stars));
+    G.beep(res.rankUp ? "level" : "ok");
+    if (res.xp) G.toast(`+${res.xp} XP`, res.lines.join("  ·  "), "xp");
+    if (res.streak > 1 && res.firstClear) G.toast(`${res.streak}-day streak`, "Come back tomorrow to keep it going", "xp");
+    if (res.rankUp) setTimeout(() => { banner("RANK UP", res.rankUp.name.toUpperCase(), ""); burst(); }, 2400);
+    burst();
+  }
+  function burst() {
+    if (REDUCE) return;
+    const box = $("burst"); box.innerHTML = "";
+    for (let i = 0; i < 44; i++) {
+      const p = document.createElement("i"), a = Math.random() * Math.PI * 2, d = 90 + Math.random() * 230, s = 4 + Math.random() * 6;
+      p.style.cssText = `width:${s}px;height:${s}px;background:${Math.random() < 0.7 ? "#00d892" : "#dedede"}`;
+      box.appendChild(p);
+      p.animate([{transform: "translate(0,0) scale(1)", opacity: 1}, {transform: `translate(${Math.cos(a) * d}px,${Math.sin(a) * d - 40}px) scale(.2)`, opacity: 0}],
+        {duration: 900 + Math.random() * 700, easing: "cubic-bezier(.15,.7,.3,1)", fill: "forwards"});
+    }
+    setTimeout(() => { box.innerHTML = ""; }, 1800);
+  }
+
+  // ---------- rendering ----------
+  const portPos = (n, port) => {
+    if (n.kind === "in") return [n.x + 20, n.y];
+    if (n.kind === "out") return [n.x - 20, n.y];
+    if (port === "out") return [n.x + gateW, n.y + gateH / 2];
+    return [n.x, n.y + (port === "in0" ? 14 : 36) * S];
+  };
+  const isInputPort = (n, p) => n.kind === "out" || (n.kind === "nand" && p !== "out");
+  function port(n, p, extra = "") {
+    const [x, y] = portPos(n, p);
+    let cls = "port" + extra;
+    if (pending && pending.id === n.id && pending.port === p) cls += " sel";
+    else if (pending && isInputPort(n, p) && !srcOf(n.id, p) && n.id !== pending.id) cls += " cand";   // where you can plug in
+    const c = el("circle", {cx: x, cy: y, r: 6.5, class: cls});
+    c.addEventListener("click", e => { e.stopPropagation(); clickPort(n, p); });
+  }
+  function clickPort(n, p) {
+    const isOut = p === "out" || n.kind === "in";
+    if (!pending) { if (isOut) { pending = {id: n.id, port: p}; G.beep("wire"); render(); } return; }
+    if (isOut) { pending = {id: n.id, port: p}; render(); return; }
+    if (pending.id === n.id) { pending = null; render(); return; }
+    wires = wires.filter(w => !(w.to === n.id && w.toPort === p)); // one wire per input
+    wires.push({from: pending.id, to: n.id, toPort: p, fresh: true}); pending = null; G.beep("wire"); render();
+  }
+
+  function render() {
+    board.innerHTML = ""; decor(ALL[cur]); refreshLast();
+    const L = ALL[cur], memo = new Map(), val = n => evalNode(n, probe, memo), used = usedGates();
+    // wires
+    wires.forEach(w => {
+      const a = nodes.find(n => n.id === w.from), b = nodes.find(n => n.id === w.to);
+      const [x1, y1] = portPos(a, "out"), [x2, y2] = portPos(b, w.toPort), mx = (x1 + x2) / 2;
+      const p = el("path", {d: `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`, class: "wire" + (val(a) === 1 ? " on" : "")});
+      p.addEventListener("click", () => { wires = wires.filter(x => x !== w); render(); });
+      if (w.fresh) {                       // draw-in animation, once
+        w.fresh = false;
+        if (!REDUCE) {
+          const len = p.getTotalLength(); p.style.strokeDasharray = len; p.style.strokeDashoffset = len;
+          requestAnimationFrame(() => { p.style.transition = "stroke-dashoffset .35s ease"; p.style.strokeDashoffset = 0; });
+        }
+      }
+    });
+    // nodes
+    const firstIn = nodes.find(n => n.kind === "in");
+    nodes.forEach(n => {
+      if (n.kind === "nand") {
+        if (prefs.detail) { const ref = el("text", {class: "ref", x: n.x, y: n.y - 7}, board); ref.textContent = "U" + (nodes.filter(k => k.kind === "nand").indexOf(n) + 1); }
+        const hot = val(n) === 1, g = el("g", {class: "gate" + (used.has(n.id) ? " used" : "") + (hot ? " hot" : ""), transform: `translate(${n.x},${n.y}) scale(${S})`});
+        el("path", {d: "M0,0 H26 A26,25 0 0 1 26,50 H0 Z", class: "body"}, g);       // first child = drag handle
+        el("circle", {cx: 57, cy: 25, r: 5, class: "bub"}, g);
+        el("path", {d: "M62,25 H70", class: "pin"}, g);
+        const t = el("text", {x: 20, y: 29}, g); t.textContent = "NAND";
+        el("rect", {x: 5, y: 5, width: 5, height: 5, class: "gl" + (hot ? " on" : "")}, g);
+        drag(g.firstChild, n);
+        g.firstChild.addEventListener("dblclick", e => { e.preventDefault(); removeGate(n.id); });
+        g.firstChild.addEventListener("contextmenu", e => { e.preventDefault(); removeGate(n.id); });
+        port(n, "in0"); port(n, "in1"); port(n, "out");
+      } else {
+        const g = el("g", {class: "io"});
+        if (n.kind === "in") {
+          const on = probe[n.name] === 1;
+          const tg = el("g", {class: "tog" + (on ? " on" : ""), tabindex: "0", role: "button", "aria-label": `Toggle input ${n.name}`}, g);
+          el("rect", {x: n.x - 48, y: n.y - 13, width: 52, height: 26}, tg);
+          const tt = el("text", {x: n.x - 22, y: n.y + 4}, tg); tt.textContent = `${n.name}=${probe[n.name]}`;
+          const flip = e => { e.stopPropagation(); probe[n.name] ^= 1; tut.flipped = true; pushSample(); render(); };
+          tg.addEventListener("click", flip);
+          tg.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(e); } });
+          port(n, "out", !pending && wires.length === 0 && n === firstIn ? " start" : "");
+        } else {
+          const v = val(n);
+          const t = el("text", {x: n.x - 6, y: n.y + 4, class: "yo" + (v === 1 ? " on" : "")}, g);
+          t.textContent = `${n.name}=${v === undefined ? "?" : v}`;
+          port(n, "in0");
+        }
+      }
+    });
+    const ti = tutInfo();
+    if (ti && ti.target) {
+      const r = el("circle", {cx: ti.target.x, cy: ti.target.y, r: ti.target.r, class: "tutring"});
+      r.setAttribute("pointer-events", "none");
+    }
+    renderTut(ti);
+    updateHud(L, used);
+    drawScope();
+  }
+
+  // ---------- guided tutorial (level 1) ----------
+  // Derived from the actual board state, so it stays right if the learner does things out of order.
+  const T = [
+    "", "Wire A into the first gate input", "Wire A into the second gate input", "Send the gate's output to Y", "Flip A and watch the signal", "Press CHECK"
+  ];
+  function tutInfo() {
+    if (!tut.active) return null;
+    const A = nodes.find(n => n.kind === "in"), g = nodes.find(n => n.kind === "nand"), Y = nodes.find(n => n.kind === "out");
+    if (!A || !g || !Y) return null;
+    const hasA = p => wires.some(w => w.from === A.id && w.to === g.id && w.toPort === p);
+    const missing = ["in0", "in1"].filter(p => !hasA(p));
+    const gOut = wires.some(w => w.from === g.id && w.to === Y.id);
+    const at = (n, p) => { const [x, y] = portPos(n, p); return {x, y, r: 16}; };
+    if (!tut.intro) return {step: 0, text: "A NAND gate outputs 0 only when both of its inputs are 1. Your mission: build NOT, so Y is the opposite of A. You wire everything with clicks.", btn: "Got it"};
+    if (missing.length) {
+      const n = 3 - missing.length;        // 1 or 2
+      const picked = pending && pending.id === A.id;
+      return {step: n, target: picked ? at(g, missing[0]) : at(A, "out"),
+        text: picked ? "Now click the glowing dot on the gate to plug A in." : (n === 1 ? "Click the pulsing dot next to A. That picks the signal to send." : "NAND needs two inputs. Click A's dot again to send it to the second one too.")};
+    }
+    if (!gOut) {
+      const picked = pending && pending.id === g.id;
+      return {step: 3, target: picked ? at(Y, "in0") : at(g, "out"), text: picked ? "Click Y to deliver the result." : "Click the gate's output dot (right side), then Y."};
+    }
+    if (!tut.flipped) return {step: 4, target: {x: A.x - 22, y: A.y, r: 30}, text: "It's wired. Click the A=0 chip to flip A to 1 and watch the green signal travel."};
+    if (!tut.checked) return {step: 5, text: "Press CHECK. Rows turn green when your circuit matches the truth table.", glow: true};
+    return {step: 6, text: "You built a NOT gate from NAND. That is the whole game: wire it, test it, level up. There are 16 levels, stars to earn, and a rank to climb.", btn: "Next level →"};
+  }
+  function renderTut(info) {
+    const card = $("tut"), chk = $("checkBtn");
+    chk.classList.toggle("tutglow", !!(info && info.glow));
+    if (!info) { card.hidden = true; return; }
+    card.hidden = false;
+    $("tutText").textContent = info.text;
+    $("tutStep").textContent = info.step === 0 ? "WELCOME" : info.step === 6 ? "MISSION COMPLETE" : `STEP ${info.step} / 5 · ${T[info.step].toUpperCase()}`;
+    $("tutDots").innerHTML = [1, 2, 3, 4, 5].map(i => `<i class="${info.step > i || info.step === 6 ? "d" : info.step === i ? "c" : ""}"></i>`).join("");
+    const nb = $("tutNext"); nb.hidden = !info.btn; nb.textContent = info.btn || "";
+    $("tutSkip").hidden = info.step === 6;
+  }
+  function endTut() { tut.active = false; jset("ft_tut", 1); }
+  $("tutNext").onclick = () => { const s = tutInfo(); if (!s) return; if (s.step === 0) { tut.intro = true; render(); } else if (s.step === 6) { endTut(); if (cur + 1 < LEVELS.length) load(cur + 1); else render(); } };
+  $("tutSkip").onclick = () => { endTut(); render(); };
+  $("tutBtn").onclick = () => { tut.force = true; load(0); };
+
+  // Live HUD: rows matched, gates used, and a coach line saying what to do next.
+  function updateHud(L, used) {
+    const c = $("coach"), ti = tutInfo();
+    if (L.sandbox) {
+      const outs = nodes.filter(n => n.kind === "out"), t = $("truth"); t.innerHTML = "";
+      const h = t.insertRow(); [...L.inputs, ...L.outputs].forEach(n => { const th = document.createElement("th"); th.textContent = n; h.appendChild(th); });
+      let allDefined = true;
+      for (let v = 0; v < (1 << L.inputs.length); v++) {
+        const iv = {}, ins = L.inputs.map((n, k) => { const b = (v >> (L.inputs.length - 1 - k)) & 1; iv[n] = b; return b; });
+        const memo = new Map(), o = outs.map(n => evalNode(n, iv, memo));
+        if (o.some(x => x === undefined)) allDefined = false;
+        const tr = t.insertRow(); [...ins, ...o.map(x => x === undefined ? "?" : x)].forEach(x => tr.insertCell().textContent = x);
+      }
+      $("stRows").textContent = "—"; $("stRows").className = ""; $("stGates").textContent = String(used.size); $("stGates").className = "";
+      if (allDefined && used.size >= 3) G.sandboxUsed();
+      c.textContent = used.size ? "FREE BUILD → the table shows what your circuit does" : "FREE BUILD → wire A, B, C into gates, then into Y"; c.classList.remove("go");
+      return;
+    }
+    const res = rowResults(), matched = res.filter(Boolean).length, total = res.length;
+    $("stRows").textContent = `${matched}/${total}`; $("stRows").className = matched === total && total ? "full" : "";
+    $("stGates").textContent = `${used.size}${L.maxGates ? "/" + L.maxGates : ""}`;
+    $("stGates").className = L.maxGates && used.size > L.maxGates ? "over" : "";
+    document.querySelectorAll("#truth tr").forEach((tr, i) => { if (i > 0) tr.classList.toggle("match", !!res[i - 1]); });
+    const ci = L.rows.findIndex(([ins]) => ins.every((v, k) => probe[L.inputs[k]] === v));
+    document.querySelectorAll("#truth tr").forEach((tr, i) => { if (i > 0) tr.classList.toggle("cur", i - 1 === ci); });
+    let t;
+    if (pending) t = "NOW → click a glowing input dot to plug the signal in";
+    else if (!wires.length) t = "START HERE → click the pulsing dot next to " + (nodes.find(n => n.kind === "in") || {name: "A"}).name;
+    else if (matched === total && total) t = "ALL ROWS MATCH → press CHECK";
+    else t = `KEEP WIRING → ${matched}/${total} rows match. Flip the inputs to test.`;
+    if (ti) t = ti.step === 0 ? "TUTORIAL" : ti.step === 6 ? "MISSION COMPLETE" : `TUTORIAL → STEP ${ti.step} / 5`;
+    c.textContent = t; c.classList.toggle("go", matched === total && total > 0);
+  }
+
+  function drag(handle, n) {
+    handle.addEventListener("pointerdown", e => {
+      handle.setPointerCapture(e.pointerId);
+      const pt = e2 => { const r = board.getBoundingClientRect(); return [(e2.clientX - r.left) * W / r.width, (e2.clientY - r.top) * H / r.height]; };
+      const [sx, sy] = pt(e), ox = n.x, oy = n.y;
+      const move = e2 => { const [x, y] = pt(e2); n.x = Math.max(90, Math.min(W - gateW - 100, ox + x - sx)); n.y = Math.max(prefs.detail ? 50 : 20, Math.min(H - gateH - (prefs.detail ? 44 : 20), oy + y - sy)); render(); };
+      const up = () => { window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); };
+      window.addEventListener("pointermove", move); window.addEventListener("pointerup", up);
+    });
+  }
+
+  // ---------- level map (worlds, daily challenge, sandbox, badges) ----------
+  const locked = i => i > 0 && !done.includes(LEVELS[i - 1].id);
+  function openMap() {
+    const p = G.load(), m = $("mapBody"); m.innerHTML = "";
+    const dl = G.dailyLevel(), dIdx = LEVELS.findIndex(l => l.id === dl.id), dDone = G.load().daily.done;
+    const daily = document.createElement("div"); daily.className = "daily";
+    daily.innerHTML = `<div><span class="cap">DAILY CHALLENGE · ${G.today()}</span><div class="dtitle"></div><div class="dsub"></div></div>`;
+    daily.querySelector(".dtitle").textContent = `${dl.title} (level ${dl.id})`;
+    daily.querySelector(".dsub").textContent = dDone ? "Done today. Back tomorrow for a new one." : `Solve it at par (≤ ${dl.maxGates} gates) for +50 XP.`;
+    const db = document.createElement("button"); db.className = "btn primary"; db.textContent = locked(dIdx) ? "Locked" : "Play"; db.disabled = locked(dIdx) || dDone;
+    db.onclick = () => { closeMap(); load(dIdx); }; daily.appendChild(db); m.appendChild(daily);
+    WORLDS.forEach(w => {
+      const sec = document.createElement("section"); sec.className = "world";
+      sec.innerHTML = `<h3></h3><p class="sub2"></p><div class="nodes"></div>`;
+      sec.querySelector("h3").textContent = `World ${w.id} · ${w.name}`; sec.querySelector(".sub2").textContent = w.sub;
+      LEVELS.forEach((L, i) => {
+        if (L.world !== w.id) return;
+        const b = p.best[L.id], n = document.createElement("button"); n.className = "node" + (b ? " cleared" : "") + (locked(i) ? " lock" : "");
+        n.disabled = locked(i); n.onclick = () => { closeMap(); load(i); };
+        n.innerHTML = `<b></b><span class="nt"></span><span class="ns"></span>`;
+        n.querySelector("b").textContent = L.id; n.querySelector(".nt").textContent = L.title.replace(/^Bounty /, "");
+        n.querySelector(".ns").textContent = locked(i) ? "LOCKED" : b ? G.starStr(b.stars) : "NEW";
+        sec.querySelector(".nodes").appendChild(n);
+      });
+      m.appendChild(sec);
+    });
+    const sb = document.createElement("section"); sb.className = "world";
+    sb.innerHTML = `<h3>Sandbox</h3><p class="sub2">Free build with no goal. The truth table shows what you made.</p><div class="nodes"></div>`;
+    const sn = document.createElement("button"); sn.className = "node"; sn.id = "sandboxNode"; sn.innerHTML = `<b>∞</b><span class="nt">Free build</span><span class="ns">OPEN</span>`;
+    sn.onclick = () => { closeMap(); load(SB); }; sb.querySelector(".nodes").appendChild(sn); m.appendChild(sb);
+    const bs = document.createElement("section"); bs.className = "world";
+    bs.innerHTML = `<h3>Badges · ${Object.keys(p.ach).length}/${G.ACH.length}</h3><div class="badges"></div>`;
+    G.ACH.forEach(a => { const d = document.createElement("div"); d.className = "badge2" + (p.ach[a.id] ? " got" : ""); d.innerHTML = `<b></b><span></span>`; d.querySelector("b").textContent = a.name; d.querySelector("span").textContent = a.desc; bs.querySelector(".badges").appendChild(d); });
+    m.appendChild(bs);
+    $("map").hidden = false; $("mapClose").focus();
+  }
+  function closeMap() { $("map").hidden = true; }
+  $("mapBtn").onclick = openMap; $("mapClose").onclick = closeMap;
+  $("map").addEventListener("click", e => { if (e.target === $("map")) closeMap(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("map").hidden) closeMap(); });
+  $("soundBtn").onclick = () => { G.toggleSound(); renderHud(); };
+
+  // ---------- controls ----------
+  function removeGate(id) {
+    const n = nodes.find(k => k.id === id); if (!n || n.kind !== "nand") return;
+    nodes = nodes.filter(k => k.id !== id); wires = wires.filter(w => w.from !== id && w.to !== id);
+    if (pending && pending.id === id) pending = null;
+    G.beep("wire"); render();
+  }
+  $("delGate").onclick = () => { const g = nodes.filter(k => k.kind === "nand"); if (g.length) removeGate(g[g.length - 1].id); };
+  $("addGate").onclick = () => {
+    const c = nodes.filter(n => n.kind === "nand").length;
+    nodes.push({id: nextId++, kind: "nand", x: Math.min(W - gateW - 120, 190 + (c % 6) * 80), y: (prefs.detail ? 120 : 80) + (c % 4) * 70});
+    render();
+  };
+  // ---------- paste & optimize ----------
+  function placeGates(gates, nIn, nOut) {
+    const L = ALL[SB], base = 2 + nIn, ins = nodes.filter(n => n.kind === "in"), outs = nodes.filter(n => n.kind === "out");
+    nodes = nodes.filter(n => n.kind !== "nand"); wires = []; pending = null;
+    const depth = gates.map(() => 1);
+    gates.forEach((g, k) => { depth[k] = 1 + Math.max(0, ...[g.a, g.b].map(r => r >= base ? depth[r - base] : 0)); });
+    const D = Math.max(...depth), colCount = {}, colSeen = {};
+    depth.forEach(d => colCount[d] = (colCount[d] || 0) + 1);
+    const top = prefs.detail ? 110 : 50, bot = H - gateH - (prefs.detail ? 50 : 30);
+    const made = gates.map((g, k) => {
+      const d = depth[k], i = colSeen[d] = (colSeen[d] || 0) + 1, cnt = colCount[d];
+      const x = D === 1 ? (W - gateW) / 2 : 140 + (d - 1) * ((W - 280 - gateW) / (D - 1));
+      const y = cnt === 1 ? (top + bot) / 2 : top + (i - 1) * ((bot - top) / (cnt - 1));
+      const n = {id: nextId++, kind: "nand", x, y}; nodes.push(n); return n;
+    });
+    const srcNode = r => r >= base ? made[r - base] : ins[r - 2];
+    gates.forEach((g, k) => { wires.push({from: srcNode(g.a).id, to: made[k].id, toPort: "in0"}, {from: srcNode(g.b).id, to: made[k].id, toPort: "in1"}); });
+    outs.forEach((o, i) => wires.push({from: made[gates.length - nOut + i].id, to: o.id, toPort: "in0"}));
+  }
+  function openImport() { load(SB); $("impPanel").hidden = false; $("impHex").focus(); }
+  function loadGates(gates, nIn, nOut) {
+    SANDBOX.inputs = ["A", "B", "C", "D", "E"].slice(0, nIn); SANDBOX.outputs = ["Y", "Z", "W", "V"].slice(0, nOut);
+    const hex = $("impHex").value; load(SB); placeGates(gates, nIn, nOut); $("impHex").value = hex; render();
+  }
+  $("impBtn").onclick = () => { openImport(); };
+  $("impLoad").onclick = () => {
+    const nIn = +$("impIn").value, nOut = +$("impOut").value, d = decodeNetlist($("impHex").value, nIn, nOut), m = $("impMsg");
+    if (d.error) { m.className = "bad"; m.textContent = d.error; return; }
+    loadGates(d.gates, nIn, nOut); m.className = "ok"; m.textContent = `Loaded ${d.gates.length} gates. Press Optimize to strip redundant ones, or flip the inputs to test it.`;
+  };
+  $("impOpt").onclick = () => {
+    const L = ALL[cur], m = $("impMsg"); if (!L.sandbox) return;
+    const net = encodeNetlist(L, nodes, wires); if (net.error) { m.className = "bad"; m.textContent = net.error; return; }
+    const d = decodeNetlist(net.hex, net.nIn, net.nOut), o = optimizeNetlist(d.gates, net.nIn, net.nOut);
+    $("impHex").value = o.hex; $("impIn").value = String(net.nIn); $("impOut").value = String(net.nOut);
+    loadGates(o.gates, net.nIn, net.nOut);
+    m.className = "ok"; m.innerHTML = o.removed ? `Removed ${o.removed} gate${o.removed === 1 ? "" : "s"}: ${net.gates} → ${o.gates.length}. Same behaviour on every input. <br>${o.steps.map(s => "• " + s).join("<br>")}` : `Nothing to remove: ${net.gates} gate${net.gates === 1 ? " is" : "s are"} already lean by these rules (no dead gates, double inverters or duplicates).`;
+  };
+  $("impCopy").onclick = async () => {
+    const m = $("impMsg"); let hex = $("impHex").value.trim();
+    const L = ALL[cur]; if (L.sandbox) { const net = encodeNetlist(L, nodes, wires); if (!net.error) { hex = net.hex; $("impHex").value = hex; } }
+    if (!hex) { m.className = "bad"; m.textContent = "Nothing to copy yet."; return; }
+    try { await navigator.clipboard.writeText(hex); m.className = "ok"; m.textContent = "Copied. Paste it under Import design on the FabX canvas."; } catch { m.className = "ok"; m.textContent = "Select the box above and copy it manually."; }
+  };
+  $("fabxBtn").onclick = async () => {
+    const L = ALL[cur], msg = $("msg"), net = encodeNetlist(L, nodes, wires);
+    if (net.error) { msg.className = "bad"; msg.textContent = net.error; return; }
+    let copied = false; try { await navigator.clipboard.writeText(net.hex); copied = true; } catch {}
+    window.open("https://fabx.tech/en/canvas", "_blank", "noopener");
+    msg.className = "ok";
+    msg.innerHTML = (copied ? "Netlist copied. " : "Copy this netlist: ") + `On the FabX canvas pick task ${L.fabx}, paste it under "Import design", check it, then tape out there to start mining.` + (copied ? "" : ` <code>${net.hex}</code>`);
+  };
+  $("chainBtn").onclick = async () => {
+    const L = ALL[cur], msg = $("msg"), say = t => { msg.className = ""; msg.textContent = t; };
+    const net = encodeNetlist(L, nodes, wires);
+    if (net.error) { msg.className = "bad"; msg.textContent = net.error; return; }
+    if (!FT_CHAIN.deployed()) { msg.className = ""; msg.textContent = `Demo mode: contracts not deployed yet. Your netlist (${net.gates} gates) is ready: ${net.hex}`; return; }
+    $("chainBtn").disabled = true;
+    try {
+      const account = await FT_CHAIN.connect();
+      const r = await FT_CHAIN.tapeoutAndSubmit(L, net, account, say);
+      const cs = circuitsStore.get(); cs[L.id] = String(r.circuitId); circuitsStore.set(cs);
+      G.chainDone(L); renderHud();
+      msg.className = "ok"; msg.innerHTML = `Level ${L.id} cleared on-chain! Circuit #${r.circuitId}. <a href="${FT_CHAIN.explorerTx(r.submitTx)}" target="_blank" rel="noopener">View transaction</a>.` + (L.graduation ? ` <b>Design proven!</b> To mine, press <b>Copy for FabX</b>, paste the netlist into the <a href="https://fabx.tech/en/canvas" target="_blank" rel="noopener">FabX canvas</a> for task ${L.fabx}, then mint, commit and tape out there. Our circuit #${r.circuitId} cannot be claimed on FabX. Budget about 0.004 OKB on X Layer for FabX's mint and tape-out fee (our NAND comes free from the faucet). Leaner designs earn more $FAB; rewards come from FabX and are not guaranteed.` : "");
+    } catch (e) { msg.className = "bad"; msg.textContent = (e && (e.message || e.reason)) || "Transaction cancelled."; }
+    $("chainBtn").disabled = false;
+  };
+  $("cardBtn").onclick = () => FT_CARD.download(LEVELS, done, circuitsStore.get());
+  $("clearBtn").onclick = () => load(cur);
+  $("checkBtn").onclick = check;
+  $("runBtn").onclick = runAll;
+  $("scopeBox").addEventListener("toggle", () => { if (autoOpen) autoOpen = false; else { prefs.scope = $("scopeBox").open; jset("ft_prefs", prefs); applyPrefs(); } drawScope(); });
+  function applyPrefs() {
+    const g = $("game"); g.classList.toggle("wide", !!prefs.wide); g.classList.toggle("detail", !!prefs.detail);
+    [["prefWide", "Wide layout", prefs.wide], ["prefDetail", "Board details", prefs.detail], ["prefScope", "Waveforms open", prefs.scope]].forEach(([id, label, on]) => { const b = $(id); b.textContent = `${label}: ${on ? "on" : "off"}`; b.setAttribute("aria-pressed", String(!!on)); });
+    if ($("scopeBox").open !== !!prefs.scope && !runT) { autoOpen = false; $("scopeBox").open = !!prefs.scope; }
+  }
+  [["prefWide", "wide"], ["prefDetail", "detail"], ["prefScope", "scope"]].forEach(([id, key]) => $(id).addEventListener("click", () => {
+    prefs[key] = !prefs[key]; jset("ft_prefs", prefs); applyPrefs(); if (key === "detail") render(); else { refit(); drawScope(); }
+  }));
+  // "⋯" menu: profile extras live here so the play screen stays quiet
+  const menu = $("menu"), mbtn = $("menuBtn");
+  const setMenu = open => { menu.hidden = !open; mbtn.setAttribute("aria-expanded", String(open)); };
+  mbtn.addEventListener("click", e => { e.stopPropagation(); setMenu(menu.hidden); });
+  document.addEventListener("click", e => { if (!menu.hidden && !menu.contains(e.target)) setMenu(false); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !menu.hidden) setMenu(false); });
+  menu.addEventListener("click", e => { if (e.target.closest(".mi") && !["soundBtn", "prefWide", "prefDetail", "prefScope"].includes(e.target.id)) setMenu(false); });
+  board.addEventListener("click", () => { if (pending) { pending = null; render(); } });
+  if (window.ResizeObserver) new ResizeObserver(() => { refit(); drawScope(); }).observe($("boardwrap"));
+  window.addEventListener("ft-route", e => {
+    if (e.detail !== "game") return;
+    let want = null; try { want = sessionStorage.getItem("ft_goto"); sessionStorage.removeItem("ft_goto"); } catch {}
+    if (want) { const gi = LEVELS.findIndex(l => l.id === +want); if (gi >= 0 && !locked(gi)) load(gi); }
+    refit(); drawScope();
+  });
+  applyPrefs();
+  const firstOpen = LEVELS.findIndex(l => !done.includes(l.id));
+  load(firstOpen < 0 ? LEVELS.length - 1 : firstOpen);
+})();
+</script>
+<script>
+// Landing page: hash routing (#play = game, anything else = landing), terminal tabs, level table, honest status badges.
+(() => {
+  const $ = id => document.getElementById(id);
+  const landing = $("landing"), game = $("game");
+
+  function route() {
+    const h = location.hash, isCC = h.startsWith("#c=") || h.startsWith("#ch=") || ["#issue", "#verify", "#manage"].includes(h);
+    // #learners = the on-chain learner lookup (old FirstTape verify page); #verify = certificate + passport check
+    const view = h === "#play" ? "game" : h === "#learners" ? "verify" : h === "#judges" ? "judges" : isCC ? "cc" : "landing";
+    ["landing", "game", "verify", "judges", "cc"].forEach(v => { const e = $(v); if (e) e.hidden = v !== view; });
+    if (view !== "landing") window.scrollTo(0, 0);
+    window.dispatchEvent(new CustomEvent("ft-route", {detail: view}));
+  }
+  window.addEventListener("hashchange", route); route();
+
+  // Terminal mockup. Strings are static and trusted; spans carry syntax colour.
+  const TABS = {
+    browser:
+`<span class="p">$</span> firsttape check --level 4
+<span class="k">rows</span>  00 01 10 11
+<span class="k">want</span>   0  1  1  0
+<span class="k">got</span>    0  1  1  0
+<span class="c">level 4 cleared, 4 gates (par 4)</span>`,
+    chain:
+`<span class="p">$</span> cast call $CIRCUITS <span class="v">"eval(uint256,bytes)(bytes)"</span> $ID 0x03
+0x00
+<span class="c"># free read: input 3 (A=1,B=1) gives 0 for XOR</span>
+<span class="p">$</span> cast send $VERIFIER <span class="v">"submit(uint8,uint256)"</span> 4 $ID
+<span class="c">progress recorded only on a pass</span>`,
+    mining:
+`<span class="p">$</span> curl api.fabx.tech/v1/pod/taskbank
+<span class="k">GC-001</span>  single-bit inverter   in 1  out 1
+<span class="k">GC-003</span>  two-input AND         in 2  out 1
+<span class="k">GC-006</span>  two-input XOR         in 2  out 1
+<span class="c"># levels 14-16 hand you to FabX with your circuit ID</span>`
+  };
+  const body = $("termBody");
+  const REDUCE = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function showTab(name) {
+    const lines = TABS[name].split("\n");
+    body.innerHTML = lines.map((l, i) => `<span class="ln" style="animation-delay:${REDUCE ? 0 : i * 140}ms">${l || " "}</span>`).join("") + '<span class="tcur" aria-hidden="true"></span>';
+    document.querySelectorAll("#term .tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === name));
+  }
+  document.querySelectorAll("#term .tabs button").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
+  showTab("browser");
+
+  // Level table, rank ladder and badges: all generated from the same data the game uses, so they cannot drift.
+  const prog = FT_GAME.load();
+  const tb = document.querySelector("#lvlTable tbody");
+  let lastWorld = 0;
+  LEVELS.forEach(L => {
+    if (L.world !== lastWorld) {                                    // world header row
+      lastWorld = L.world; const w = WORLDS[L.world - 1], hr = document.createElement("tr"); hr.className = "whead";
+      const td = document.createElement("td"); td.colSpan = 5; td.textContent = `WORLD ${w.id} · ${w.name}  —  ${w.sub}`; hr.appendChild(td); tb.appendChild(hr);
+    }
+    const tr = document.createElement("tr"), b = prog.best[L.id];
+    const cells = [String(L.id).padStart(2, "0"), L.title + (L.ref ? `  (FabX ref ${L.ref})` : ""), L.onchain ? "X Layer" : "Browser", L.maxGates ? `${L.maxGates} gate${L.maxGates > 1 ? "s" : ""}` : "", b ? FT_GAME.starStr(b.stars) : "—"];
+    cells.forEach((t, i) => {
+      const td = document.createElement("td"); td.textContent = t;
+      if (i === 2) { td.className = "where" + (L.onchain ? " chain" : ""); }
+      if (i === 4) td.className = "starcell" + (b ? " got" : "");
+      tr.appendChild(td);
+    });
+    tb.appendChild(tr);
+  });
+  const rk = FT_GAME.rank(prog.xp), ladder = $("rankLadder");
+  FT_GAME.RANKS.forEach((r, i) => {
+    const d = document.createElement("div"); d.className = "rung" + (i < rk.index ? " past" : i === rk.index ? " now" : "");
+    d.innerHTML = "<b></b><span></span>"; d.querySelector("b").textContent = r.name; d.querySelector("span").textContent = r.xp + " XP";
+    ladder.appendChild(d);
+  });
+  const bg = $("badgeGrid");
+  FT_GAME.ACH.forEach(a => {
+    const d = document.createElement("div"); d.className = "badge2" + (prog.ach[a.id] ? " got" : "");
+    d.innerHTML = "<b></b><span></span>"; d.querySelector("b").textContent = a.name; d.querySelector("span").textContent = a.desc;
+    bg.appendChild(d);
+  });
+
+
+
+  // ---- the card cage: one blade per level; lit = cleared; dots = stars; click to play (if unlocked) ----
+  let scanT = null;
+  function buildCage() {
+    const box = $("cage"); if (!box) return;
+    const prog = FT_GAME.load(); let done = []; try { done = JSON.parse(localStorage.getItem("ft_done") || "[]"); } catch {}
+    box.innerHTML = ""; let idx = 0; const blades = [];
+    WORLDS.forEach(w => {
+      const items = LEVELS.filter(L => L.world === w.id), grp = document.createElement("div"); grp.className = "cgrp"; grp.style.setProperty("--n", items.length);
+      const row = document.createElement("div"); row.className = "cslots";
+      items.forEach(L => {
+        const i = LEVELS.indexOf(L), cleared = done.includes(L.id), locked = i > 0 && !done.includes(LEVELS[i - 1].id), stars = (prog.best[L.id] || {}).stars || 0;
+        const b = document.createElement("button"); b.type = "button"; b.className = "blade" + (cleared ? " on" : "") + (locked ? " lock" : ""); b.dataset.id = L.id; b.style.setProperty("--i", idx++);
+        b.setAttribute("aria-label", `Level ${L.id}, ${L.title}, ${cleared ? "cleared, " + stars + " stars" : locked ? "locked" : "not cleared yet"}`);
+        if (locked) b.setAttribute("aria-disabled", "true");
+        b.innerHTML = '<span class="btip"></span><span class="bled"></span><span class="bst"><i></i><i></i><i></i></span><span class="bname"></span><span class="bnum"></span><span class="bhandle"></span>';
+        b.querySelector(".btip").textContent = `${String(L.id).padStart(2, "0")} · ${L.title.replace(/^Bounty /, "")} · ` + (cleared ? FT_GAME.starStr(stars) : locked ? "locked" : "ready");
+        b.querySelector(".bname").textContent = L.title.replace(/^Bounty /, "").replace(/ · .*/, "");
+        b.querySelector(".bnum").textContent = String(L.id).padStart(2, "0");
+        b.querySelectorAll(".bst i").forEach((d, k) => d.classList.toggle("f", k < stars));
+        b.addEventListener("click", () => { if (locked) return; try { sessionStorage.setItem("ft_goto", String(L.id)); } catch {} location.hash = "#play"; });
+        row.appendChild(b); blades.push(b);
+      });
+      grp.appendChild(row);
+      const gl = document.createElement("div"); gl.className = "cgl"; gl.innerHTML = "<span></span><span></span>"; gl.children[0].textContent = w.name; gl.children[1].textContent = w.id === 1 ? "browser" : w.id === 4 ? "real tasks" : "on-chain";
+      grp.appendChild(gl); box.appendChild(grp);
+    });
+    $("rackNum").textContent = `${done.length}/${LEVELS.length} · ${FT_GAME.rank(prog.xp).name.toUpperCase()}`;
+    // a slow scanning light along the top LEDs
+    if (scanT) clearInterval(scanT);
+    if (!REDUCE) { let i = -1, dir = 1; scanT = setInterval(() => { if (document.hidden) return; blades.forEach(x => x.classList.remove("scan")); i += dir; if (i >= blades.length) { i = blades.length - 1; dir = -1; } if (i < 0) { i = 0; dir = 1; } blades[i].classList.add("scan"); }, 190); }
+  }
+  buildCage();
+  window.addEventListener("ft-route", e => { if (e.detail === "landing") buildCage(); });
+
+  // ---- Scroll reveal (opt-in so content is visible if JS or IntersectionObserver is missing) ----
+  if ("IntersectionObserver" in window && !REDUCE) {
+    document.documentElement.classList.add("js");
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), {threshold: 0.12});
+    document.querySelectorAll(".section, .compare, .lvltable, .stack").forEach(el => { if (el.classList.contains("section")) el.classList.add("reveal"); io.observe(el); });
+    document.querySelectorAll(".lvltable tbody tr").forEach((tr, i) => tr.style.transitionDelay = i * 50 + "ms");
+  }
+
+  // Honest deploy status (recomputed whenever the landing page is shown, so it always reflects the current config).
+  function refreshStatus() {
+    const live = window.FT_CHAIN && FT_CHAIN.deployed(), xl = [196, 1952].includes(Number(FT_CONFIG.chainId));
+    $("verBadge").textContent = live ? (xl ? (FT_CONFIG.network === "testnet" ? "Live · testnet" : "Live") : "Live · not X Layer") : "Not deployed";
+    $("verBadge").classList.toggle("muted", !live);
+    $("demoBadge").textContent = live ? "Levels 1–5 · no wallet" : "Demo mode · contracts not deployed";
+  }
+  refreshStatus();
+  window.addEventListener("ft-route", e => { if (e.detail === "landing") refreshStatus(); });
+
+  // Start button resumes where the learner left off.
+  try {
+    const done = JSON.parse(localStorage.getItem("ft_done") || "[]");
+    if (done.length) $("startBtn").textContent = `Continue (${done.length}/${LEVELS.length})`;
+  } catch {}
+})();
+</script>
+<script>
+// On-chain proof: reads the LessonVerifier directly over JSON-RPC (eth_call). No server, no wallet needed.
+// Used by the Verify page and the For judges page. Runs only when one of those pages is opened or a lookup is requested.
+(() => {
+  const $ = id => document.getElementById(id), C = window.FT_CONFIG;
+  const SEL = {progress: "0xda8589a2", learnerCount: "0x4a8af620", learnerAt: "0xe14f3ee7", totalClears: "0xfdcc2bba", clearsByLevel: "0xe4461903"};
+  const w = n => BigInt(n).toString(16).padStart(64, "0");
+  const a32 = a => a.toLowerCase().replace("0x", "").padStart(64, "0");
+  const isAddr = a => /^0x[0-9a-fA-F]{40}$/.test(a);
+  const deployed = () => !!(window.FT_CHAIN && FT_CHAIN.deployed());
+  const short = a => a.slice(0, 6) + "…" + a.slice(-4);
+  const testnet = () => C.network === "testnet" || C.network === "bsc-testnet", notXLayer = () => deployed() && ![196, 1952].includes(Number(C.chainId));
+  const netName = () => /test/i.test(C.chainName || "") ? C.chainName : (testnet() ? "X Layer testnet" : "X Layer");
+
+  async function call(data) {
+    const r = await fetch(C.rpc, {method: "POST", headers: {"content-type": "application/json"},
+      body: JSON.stringify({jsonrpc: "2.0", id: 1, method: "eth_call", params: [{to: C.verifier, data}, "latest"]})});
+    const j = await r.json(); if (j.error) throw new Error(j.error.message || "RPC error"); return j.result;
+  }
+  const progressOf = async a => BigInt(await call(SEL.progress + a32(a)));
+  const levelsOf = mask => LEVELS.filter(L => (mask >> BigInt(L.id)) & 1n).map(L => L.id);
+  async function stats() {
+    const [c, t] = await Promise.all([call(SEL.learnerCount), call(SEL.totalClears)]);
+    return {learners: Number(BigInt(c)), clears: Number(BigInt(t))};
+  }
+  const clearsOf = async id => Number(BigInt(await call(SEL.clearsByLevel + w(id))));
+  async function recent(n = 20) {
+    const {learners} = await stats(), idx = [];
+    for (let i = learners - 1; i >= Math.max(0, learners - n); i--) idx.push(i);
+    const addrs = await Promise.all(idx.map(async i => "0x" + (await call(SEL.learnerAt + w(i))).slice(-40)));
+    const masks = await Promise.all(addrs.map(progressOf));
+    return addrs.map((addr, k) => ({addr, levels: levelsOf(masks[k]).length})).sort((x, y) => y.levels - x.levels);
+  }
+  window.FT_PROOF = {deployed, stats, recent, progressOf, levelsOf, clearsOf, isAddr};
+
+  // ---------- Verify page ----------
+  const state = $("vState"), msg = $("vMsg");
+  function setMsg(t, cls = "") { msg.textContent = t; msg.className = cls; }
+  function renderResult(addr, mask) {
+    const cleared = levelsOf(mask);
+    $("vResult").hidden = false;
+    $("vCount").textContent = String(cleared.length); $("vOf").textContent = ` / ${LEVELS.length} levels`;
+    const box = $("vTiles"); box.innerHTML = "";
+    WORLDS.forEach(wd => {
+      const row = document.createElement("div"); row.className = "vworld";
+      const lab = document.createElement("span"); lab.className = "cap"; lab.textContent = `W${wd.id} ${wd.name}`; row.appendChild(lab);
+      LEVELS.filter(L => L.world === wd.id).forEach(L => {
+        const t = document.createElement("span"); t.className = "vtile" + (cleared.includes(L.id) ? " on" : ""); t.textContent = L.id; t.title = L.title + (cleared.includes(L.id) ? " (cleared on-chain)" : "");
+        row.appendChild(t);
+      });
+      box.appendChild(row);
+    });
+    const link = $("vLink"); link.href = `${C.explorer}/address/${addr}`;
+  }
+  async function lookup(addr) {
+    setMsg(""); $("vResult").hidden = true;
+    if (!isAddr(addr)) return setMsg("That is not a valid wallet address (0x followed by 40 hex characters).", "bad");
+    if (!deployed()) return setMsg("The contracts are not deployed yet, so there is nothing to read. This page works as soon as the verifier address is set.", "bad");
+    $("vGo").disabled = true; setMsg("Reading the chain…");
+    try {
+      const mask = await progressOf(addr);
+      if (mask === 0n) setMsg("No levels cleared on-chain for this address (or it has never submitted).");
+      else setMsg("");
+      renderResult(addr, mask);
+    } catch (e) { setMsg("Could not read the chain: " + (e.message || "network error") + ". Try again.", "bad"); }
+    $("vGo").disabled = false;
+  }
+  async function loadLevels() {
+    const box = $("vLevels"); box.innerHTML = "";
+    const counts = await Promise.all(LEVELS.map(L => clearsOf(L.id))), max = Math.max(1, ...counts);
+    WORLDS.forEach(wd => {
+      const h = document.createElement("div"); h.className = "vlh cap"; h.textContent = `World ${wd.id} · ${wd.name}`; box.appendChild(h);
+      LEVELS.forEach((L, i) => {
+        if (L.world !== wd.id) return;
+        const row = document.createElement("div"); row.className = "vlrow"; row.dataset.level = L.id;
+        const name = document.createElement("span"); name.className = "vln"; name.textContent = L.graduation ? `${L.id}  FabX ${L.title.replace(/^Bounty /, "")}` : `${L.id}  ${L.title}`; name.title = name.textContent;
+        const bar = document.createElement("span"); bar.className = "vlbar"; const fill = document.createElement("i"); fill.style.width = Math.round(100 * counts[i] / max) + "%"; bar.appendChild(fill);
+        const n = document.createElement("b"); n.className = "vlc"; n.textContent = String(counts[i]);
+        row.append(name, bar, n); box.appendChild(row);
+      });
+    });
+  }
+  async function loadStats() {
+    const live = deployed();
+    $("sVerifier").textContent = live ? short(C.verifier) : "not deployed";
+    $("vBadge").textContent = live ? "Reads " + netName() + " directly" : "Reads the chain directly";
+    if (!live) $("vLevels").innerHTML = "";
+    if (state) { state.hidden = live; state.textContent = live ? "" : "Demo mode: the contracts are not deployed yet. Once they are, this page reads them live. Until then the numbers below stay empty rather than invented."; }
+    if (!live) { $("vBoardNote").textContent = ""; return; }
+    try {
+      const s = await stats();
+      $("sLearners").textContent = s.learners; $("sClears").textContent = s.clears;
+      await loadLevels();
+      const rows = await recent(20), tb = document.querySelector("#vBoard tbody"); tb.innerHTML = "";
+      rows.forEach((r, i) => {
+        const tr = document.createElement("tr"), a = document.createElement("a");
+        a.href = `${C.explorer}/address/${r.addr}`; a.target = "_blank"; a.rel = "noopener"; a.className = "ulink"; a.textContent = short(r.addr);
+        const c0 = document.createElement("td"), c1 = document.createElement("td"), c2 = document.createElement("td");
+        c0.textContent = String(i + 1); c1.appendChild(a); c2.textContent = `${r.levels} / ${LEVELS.length}`;
+        tr.append(c0, c1, c2); tb.appendChild(tr);
+      });
+      $("vBoardNote").textContent = s.learners > 20 ? `Showing the 20 most recent of ${s.learners} learners, ranked by levels cleared.` : (s.learners ? "" : "No learner has submitted a level yet.");
+    } catch (e) { $("vBoardNote").textContent = "Could not read the chain: " + (e.message || "network error"); }
+  }
+  async function loadJudges() {
+    const live = deployed();
+    $("jNetWarn").hidden = !notXLayer();
+    $("jDeploy").textContent = live ? (notXLayer() ? "LIVE · NOT X LAYER" : testnet() ? "LIVE · TESTNET" : "LIVE") : "NOT YET"; $("jDeploy").className = live ? "ok" : "";
+    $("jDeploy2").textContent = live ? (notXLayer() ? "Live, not X Layer" : testnet() ? "Live (testnet)" : "Live") : "Not yet"; $("jDeploy2").className = "st " + (live ? (notXLayer() ? "plan" : "live") : "no");
+    $("jReady").textContent = live ? "Live on " + netName() : "Tested on a fork"; $("jReady").className = "st " + (live ? "live" : "test");
+    if (!live) return;
+    try {
+      const s = await stats();
+      $("jLearners").textContent = s.learners; $("jClears").textContent = s.clears;
+      $("jLearners2").textContent = `${s.learners} on-chain`; $("jLearners2").className = "st " + (s.learners ? "live" : "no");
+    } catch { $("jLearners").textContent = "?"; $("jClears").textContent = "?"; }
+  }
+  $("vForm").addEventListener("submit", e => { e.preventDefault(); lookup($("vAddr").value.trim()); });
+  $("vMine").addEventListener("click", async () => {
+    try { const a = await FT_CHAIN.connect(); $("vAddr").value = a; lookup(a); } catch (e) { setMsg((e && e.message) || "Wallet not available.", "bad"); }
+  });
+  window.addEventListener("ft-route", e => { if (e.detail === "verify") loadStats(); if (e.detail === "judges") loadJudges(); });
+  if (location.hash === "#learners") loadStats(); if (location.hash === "#judges") loadJudges();
+})();
+</script>
 <script>
 // CertCheck core: salted credential leaves, a Merkle tree and portable proofs. No dependencies; uses the built-in SHA-256 (WebCrypto).
 // Format v2 (also documented in docs/FORMAT.md):
@@ -523,118 +2882,6 @@ window.CC_CONFIG = {
 })(typeof window !== "undefined" ? window : globalThis);
 </script>
 <script>
-// Encodes the board's NAND graph into a TapeOut netlist (verified on X Layer fork).
-// board: {inputs:[names], outputs:[names], nodes:[{id,kind:'in'|'out'|'nand'}], wires:[{from,to,toPort}]}
-// Returns {hex, nIn, nOut, gates} or {error}.
-window.encodeNetlist = function (L, nodes, wires) {
-  const nIn = L.inputs.length, nOut = L.outputs.length;
-  const nands = nodes.filter(n => n.kind === "nand");
-  const ref = new Map(); // node id -> ref number
-  nodes.filter(n => n.kind === "in").forEach((n, i) => ref.set(n.id, 2 + i));
-  const src = (id, port) => wires.find(w => w.to === id && w.toPort === port);
-  // topological order (gates only reference earlier refs)
-  const order = [], seen = new Set(), visiting = new Set();
-  const visit = n => {
-    if (seen.has(n.id)) return true; if (visiting.has(n.id)) return false;
-    visiting.add(n.id);
-    for (const p of ["in0", "in1"]) {
-      const w = src(n.id, p); if (!w) return null;
-      const f = nodes.find(x => x.id === w.from);
-      if (f.kind === "nand") { const r = visit(f); if (r !== true) return r; }
-    }
-    visiting.delete(n.id); seen.add(n.id); order.push(n); return true;
-  };
-  // outputs must be the LAST nOut gates, in output order
-  const outs = nodes.filter(n => n.kind === "out"), drivers = [];
-  for (const o of outs) {
-    const w = src(o.id, "in0"); if (!w) return {error: "Output " + o.name + " is not wired."};
-    const d = nodes.find(x => x.id === w.from);
-    if (d.kind !== "nand") return {error: "Output " + o.name + " must come from a gate."};
-    drivers.push(d);
-  }
-  for (const d of drivers) { const r = visit(d); if (r === null) return {error: "A gate input is unwired."}; if (r === false) return {error: "Loop detected."}; }
-  const rest = order.filter(g => !drivers.includes(g)), final = [...rest, ...drivers];
-  if (new Set(drivers).size !== drivers.length) return {error: "Each output needs its own gate."};
-  final.forEach((g, i) => ref.set(g.id, 2 + nIn + i));
-  const b3 = n => n.toString(16).padStart(6, "0");
-  let hex = "0x";
-  for (const g of final) {
-    const a = ref.get(src(g.id, "in0").from), b = ref.get(src(g.id, "in1").from);
-    hex += "00" + b3(a) + b3(b);
-  }
-  return {hex, nIn, nOut, gates: final.length};
-};
-
-// ---- Import / lint / optimize (pure functions; ref numbering as in encodeNetlist: 0/1 constants, 2.. inputs, then gates) ----
-// decodeNetlist("0x00...", nIn, nOut) -> {gates:[{a,b}]} or {error}
-window.decodeNetlist = function (text, nIn, nOut) {
-  let h = String(text || "").trim().replace(/^0x/i, "").replace(/\s+/g, "");
-  if (!h) return {error: "Paste a hex netlist first."};
-  if (!/^[0-9a-f]+$/i.test(h)) return {error: "That is not hex. Paste only the netlist bytes (0x00…)."};
-  if (h.length % 14) return {error: `Netlist length must be a multiple of 7 bytes (one NAND = 7 bytes); got ${h.length / 2} bytes. LATCH circuits are not supported here.`};
-  const gates = [];
-  for (let i = 0; i < h.length; i += 14) {
-    if (h.slice(i, i + 2) !== "00") return {error: `Gate ${i / 14 + 1} is not a plain NAND (opcode ${h.slice(i, i + 2)}). Only NAND netlists load here.`};
-    const a = parseInt(h.slice(i + 2, i + 8), 16), b = parseInt(h.slice(i + 8, i + 14), 16), k = i / 14, lim = 2 + nIn + k;
-    if (a < 2 || b < 2) return {error: `Gate ${k + 1} uses a constant input. The board has no constants; tie it to an input instead.`};
-    if (a >= lim || b >= lim) return {error: `Gate ${k + 1} points at a signal that does not exist yet (inputs: ${nIn}).`};
-    gates.push({a, b});
-  }
-  if (!gates.length) return {error: "Empty netlist."};
-  if (nOut > gates.length) return {error: `${nOut} outputs need at least ${nOut} gates.`};
-  return {gates};
-};
-window.encodeGates = function (gates) {
-  const b3 = n => n.toString(16).padStart(6, "0");
-  return "0x" + gates.map(g => "00" + b3(g.a) + b3(g.b)).join("");
-};
-// optimizeNetlist(gates, nIn, nOut) -> {gates, hex, removed, steps}. Never changes behaviour:
-//  1) drop gates that feed no output, 2) NAND(NAND(y,y),NAND(y,y)) -> y, 3) merge gates with identical inputs.
-window.optimizeNetlist = function (gates0, nIn, nOut) {
-  const base = 2 + nIn, n0 = gates0.length;
-  let G = gates0.map(g => ({a: g.a, b: g.b})), steps = [];
-  const outIdx = new Set(); for (let i = n0 - nOut; i < n0; i++) outIdx.add(i);
-  const alias = new Map(); // ref -> ref
-  const res = r => { while (alias.has(r)) r = alias.get(r); return r; };
-  const gi = r => r - base; // gate index of a ref (>=0 means gate)
-  let changed = true, guard = 0;
-  while (changed && guard++ < 200) {
-    changed = false;
-    for (let i = 0; i < G.length; i++) {
-      if (outIdx.has(i) || alias.has(base + i)) continue;
-      const a = res(G[i].a), b = res(G[i].b);
-      if (a === b && gi(a) >= 0 && !alias.has(a)) {
-        const h = G[gi(a)], ha = res(h.a), hb = res(h.b);
-        if (ha === hb) { alias.set(base + i, ha); steps.push(`Gate ${i + 1} is a double inverter (NOT of NOT): replaced by its source.`); changed = true; continue; }
-      }
-      for (let j = 0; j < i; j++) {
-        if (alias.has(base + j)) continue;
-        const c = res(G[j].a), d = res(G[j].b);
-        if ((a === c && b === d) || (a === d && b === c)) { alias.set(base + i, base + j); steps.push(`Gate ${i + 1} duplicates gate ${j + 1}: merged.`); changed = true; break; }
-      }
-    }
-  }
-  // reachability from outputs after aliasing
-  const live = new Set(), walk = r => { r = res(r); const k = gi(r); if (k < 0 || live.has(k)) return; live.add(k); walk(G[k].a); walk(G[k].b); };
-  outIdx.forEach(i => { live.add(i); walk(G[i].a); walk(G[i].b); });
-  for (let i = 0; i < G.length; i++) if (!live.has(i) && !alias.has(base + i)) steps.push(`Gate ${i + 1} feeds no output: removed.`);
-  const keep = [...live].sort((x, y) => x - y), newIdx = new Map(keep.map((k, n) => [k, n]));
-  const remap = r => { r = res(r); const k = gi(r); return k < 0 ? r : base + newIdx.get(k); };
-  const out = keep.map(k => ({a: remap(G[k].a), b: remap(G[k].b)}));
-  return {gates: out, hex: window.encodeGates(out), removed: n0 - out.length, steps};
-};
-// Evaluate a gate list for all input rows -> array of output-bit arrays (used to prove optimize() keeps behaviour)
-window.evalGates = function (gates, nIn, nOut) {
-  const rows = [];
-  for (let m = 0; m < (1 << nIn); m++) {
-    const v = {0: 0, 1: 1}; for (let k = 0; k < nIn; k++) v[2 + k] = (m >> k) & 1;
-    gates.forEach((g, i) => { v[2 + nIn + i] = 1 - (v[g.a] & v[g.b]); });
-    rows.push(Array.from({length: nOut}, (_, o) => v[2 + nIn + gates.length - nOut + o]));
-  }
-  return rows;
-};
-</script>
-<script>
 // Compact NAND canvas for the student challenge. Click an output dot, then an input dot, to wire. Drag gates. Double-click a wire or gate to remove it.
 // Inputs A,B,C (3) and one output Y. Live-checks against the challenge truth table. Uses encodeNetlist() from netlist.js to export.
 (function (root) {
@@ -800,6 +3047,7 @@ window.evalGates = function (gates, nIn, nOut) {
   const VIEWS = ["verify", "issue", "manage", "challenge"];
   function route() {
     const h = location.hash;
+    if (!(h.startsWith("#c=") || h.startsWith("#ch=") || ["#issue", "#verify", "#manage"].includes(h))) return;   // landing, game and other pages are handled by ft/landing.js
     let v = h.startsWith("#c=") ? "verify" : h.startsWith("#ch=") ? "challenge" : VIEWS.includes(h.slice(1)) ? h.slice(1) : "issue";
     VIEWS.forEach(n => { $(n + "View").hidden = n !== v; });
     document.querySelectorAll(".tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === v));
@@ -823,8 +3071,8 @@ window.evalGates = function (gates, nIn, nOut) {
   }
   const FACT = (dt, dd, mono) => { const d = document.createElement("div"), a = document.createElement("dt"), b = document.createElement("dd"); a.textContent = dt; if (dd instanceof Node) b.appendChild(dd); else b.textContent = dd; if (mono) b.className = "mono"; d.append(a, b); return d; };
   function show(state, title, why, facts, note) {
-    const r = $("vResult"); r.hidden = false; r.dataset.state = state;
-    $("vBadge").textContent = state === "valid" ? "✓" : state === "invalid" || state === "revoked" ? "✕" : "!";
+    const r = $("cvResult"); r.hidden = false; r.dataset.state = state;
+    $("cvBadge").textContent = state === "valid" ? "✓" : state === "invalid" || state === "revoked" ? "✕" : "!";
     $("vTitle").textContent = title; $("vWhy").textContent = why; $("vNote").textContent = note || "";
     const f = $("vFacts"); f.replaceChildren(...facts);
   }
@@ -842,7 +3090,7 @@ window.evalGates = function (gates, nIn, nOut) {
   }
   let vSeq = 0;
   async function runVerify() {
-    const seq = ++vSeq; $("vHint").textContent = ""; $("vResult").hidden = true;
+    const seq = ++vSeq; $("vHint").textContent = ""; $("cvResult").hidden = true;
     let p; try { p = parseInput($("vInput").value); } catch (e) { say($("vHint"), e.message, "bad"); return; }
     const res = await C.verifyCredential(p);
     if (seq !== vSeq) return;

@@ -1,5 +1,5 @@
 // Compares our QR encoder to the `qrencode` reference tool, module for module (byte mode). node tests/qr.test.mjs
-import "../site/qr.js";
+import "../site/cc/qr.js";
 import {execFileSync} from "node:child_process";
 const Q = globalThis.CertQR; let fails = 0, checked = 0;
 const ok = (n, c, x = "") => { console.log(c ? "ok  " : "FAIL", n, c ? "" : x); if (!c) fails++; };

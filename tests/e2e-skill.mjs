@@ -16,7 +16,7 @@ const wallet = () => { const w = JSON.parse(cast("wallet", "new", "--json"))[0].
 const ORG = wallet(), STU = [wallet(), wallet(), wallet()];
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "ccsk-")), sd = path.join(tmp, "site"); fs.cpSync(path.join(ROOT, "site"), sd, {recursive: true});
-fs.writeFileSync(path.join(sd, "config.js"), `window.CC_CONFIG = {registry: "${REG}", chainId: 196, chainName: "X Layer", rpc: "${RPC}", explorer: "http://x.test", currency: {name: "OKB", symbol: "OKB", decimals: 18}, processors: ["${PROC}"], tapeout: {processor: "${PROC}", transistors: "0xd0faafc5b9149cae7bd9af64070fee33c46ed619", faucet: "0xBC58802002307fD80048e93A6475335eC65a4f39", feeWei: "1300000000000000"}};`);
+fs.writeFileSync(path.join(sd, "cc", "config.js"), `window.CC_CONFIG = {registry: "${REG}", chainId: 196, chainName: "X Layer", rpc: "${RPC}", explorer: "http://x.test", currency: {name: "OKB", symbol: "OKB", decimals: 18}, processors: ["${PROC}"], tapeout: {processor: "${PROC}", transistors: "0xd0faafc5b9149cae7bd9af64070fee33c46ed619", faucet: "0xBC58802002307fD80048e93A6475335eC65a4f39", feeWei: "1300000000000000"}};`);
 execFileSync("node", [path.join(ROOT, "scripts/bundle.js")], {env: {...process.env, SITE_DIR: sd, OUT_DIR: path.join(tmp, "o")}, stdio: "ignore"});
 const html = fs.readFileSync(path.join(tmp, "o/index.html"), "utf8"), srv = http.createServer((q, s) => { s.setHeader("content-type", "text/html"); s.end(html); }).listen(WEB);
 const b = await puppeteer.launch({executablePath: "/usr/bin/google-chrome", headless: "new", args: ["--no-sandbox"]}), errs = [];
@@ -32,7 +32,7 @@ async function open(hash, acct) {
 }
 const T = (p, s) => p.$eval(s, e => e.textContent), setv = (p, s, v) => p.$eval(s, (e, v) => { e.value = v; e.dispatchEvent(new Event("input")); }, v);
 const port = async (p, i) => (await p.$$("#chBoard circle.port"))[i].evaluate(e => e.dispatchEvent(new MouseEvent("click", {bubbles: true})));
-const vstate = async (p, link) => { await setv(p, "#vInput", link); await p.click("#vBtn"); await sleep(2500); return p.$eval("#vResult", e => e.hidden ? "hidden" : e.dataset.state); };
+const vstate = async (p, link) => { await setv(p, "#vInput", link); await p.click("#vBtn"); await sleep(2500); return p.$eval("#cvResult", e => e.hidden ? "hidden" : e.dataset.state); };
 
 // ===== organizer: roster + challenges =====
 const org = await open("#issue", ORG);

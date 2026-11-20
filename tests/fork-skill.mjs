@@ -1,7 +1,7 @@
 // REAL TapeOut check on a local fork of X Layer mainnet: tape out circuits on the real processor, then verify them with CertSkill.
 // Needs: anvil, cast (internet for the fork). node tests/fork-skill.mjs
 import {spawn, execFileSync} from "node:child_process";
-import "../site/core.js";
+import "../site/cc/core.js";
 import {tableToGates} from "./helpers/synth.mjs";
 const FORK_URL = process.env.FORK_URL || "https://rpc.xlayer.tech", PORT = 8547, RPC = `http://127.0.0.1:${PORT}`;
 const PROC = "0x9e2849c04a513fe64db07521cbe52d078d905c0e", FAUCET = "0xBC58802002307fD80048e93A6475335eC65a4f39", FEE = "1300000000000000";
@@ -12,7 +12,7 @@ for (let i = 0; i < 100; i++) { try { cast("chain-id", "--rpc-url", RPC); break;
 globalThis.window = globalThis; await import("../site/netlist.js");
 const C = globalThis.CertCore, E = globalThis.encodeGates;
 globalThis.CC_CONFIG = {registry: "0x0000000000000000000000000000000000000000", rpc: RPC, processors: [PROC]};
-await import("../site/chain.js"); await import("../site/skill.js");
+await import("../site/cc/chain.js"); await import("../site/cc/skill.js");
 const S = globalThis.CertSkill;
 
 async function newLearner() {

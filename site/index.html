@@ -4,18 +4,318 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CertCheck — certificates anyone can verify</title>
-<meta name="description" content="Issue certificates that anyone can check forever, with no personal data on-chain and no server to trust. Built on X Layer.">
-<link rel="stylesheet" href="style.css">
+<meta name="description" content="Issue certificates anyone can check forever, with no personal data on-chain. Learn circuits and earn a passport verified by TapeOut. Built on X Layer.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="ft/style.css">
+<link rel="stylesheet" href="cc/style.css">
 </head>
 <body>
+<div id="landing">
+  <header class="bar">
+    <a class="logo" href="#"><svg class="mark" viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><circle cx="7" cy="8" r="2.4" fill="#00d892"/><circle cx="15" cy="8" r="2.4" fill="none" stroke="#5d5e61"/><circle cx="23" cy="8" r="2.4" fill="#00d892"/></svg><span class="wordmark">firsttape</span></a>
+    <nav class="links" aria-label="Sections">
+      <a href="#how">How it works</a>
+      <a href="#levels">Levels</a>
+      <a href="#progress">Ranks</a>
+      <a href="#judges">For judges</a>
+      <a href="#learners">Verify</a>
+      <a href="#stack">Stack</a>
+      <a href="#sponsor">Sponsor</a>
+    </nav>
+    <div class="cta">
+      <a class="btn ghost" href="#under">How it checks</a>
+      <a class="btn primary" href="#play">Open course</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero4">
+    <div class="wrap h4top">
+      <span class="badge" id="demoBadge">Levels 1–5 · no wallet</span>
+      <h1>Learn lean circuits.<br>Then mine on FabX.</h1>
+      <p class="lede">Build every logic gate from one gate. Sixteen levels, four worlds, and a real FabX task at the end: prove your design here, then build it on FabX to mine $FAB. The first five need no wallet.</p>
+      <div class="row">
+        <a class="btn primary big" href="#play" id="startBtn">Start level 1</a>
+        <a class="btn ghost big" href="#how">How it works</a>
+      </div>
+    </div>
+    <div class="wrap cagewrap">
+      <div class="cage" role="group" aria-label="The 16 levels as blades in a card cage. Lit blades are levels you have cleared; dots show your stars.">
+        <i class="screw s1"></i><i class="screw s2"></i><i class="screw s3"></i><i class="screw s4"></i>
+        <div class="chead"><b>FIRSTTAPE · CARD CAGE</b><span id="rackNum">0/16 · NEWCOMER</span></div>
+        <div class="cgroups" id="cage"></div>
+        <div class="cfoot"><span>One blade per level. A lit blade is cleared; the dots are your stars.</span><span>Click a blade to play it</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="under" class="wrap section trygrid">
+    <div>
+      <h2>See what the check does.</h2>
+      <p class="sub">Every level asks one question: does your circuit give the right answer for every input? In the browser that is a truth-table comparison. From level 6 the same table is checked on X Layer: a contract runs your circuit on the processor and compares every row.</p>
+      <ul class="ticks"><li>Levels 1–5: checked in your browser, no wallet</li><li>Levels 6–16: your circuit is taped out and checked on X Layer</li><li>The check itself is a free read; you pay only the tape-out fee</li></ul>
+    </div>
+    <div class="term" id="term" aria-label="Example output">
+          <div class="tabs" role="tablist">
+            <button role="tab" class="on" data-tab="browser">Browser</button>
+            <button role="tab" data-tab="chain">On-chain</button>
+            <button role="tab" data-tab="mining">Mining</button>
+          </div>
+          <pre class="code" id="termBody"></pre>
+          <div class="term-foot">Illustrative. Commands and endpoints are real; values are examples.</div>
+        </div>
+  </section>
+
+    <section id="how" class="wrap section">
+      <h2>Static guides don't check your work.</h2>
+      <p class="sub">Most beginner material for TapeOut is a page you read. FirstTape is a circuit you build, with an answer that is verified.</p>
+      <div class="compare">
+        <div class="panel">
+          <svg viewBox="0 0 420 150" aria-hidden="true">
+            <g fill="none" stroke="#303235" stroke-dasharray="3 4"><rect x="10" y="10" width="400" height="130"/><path d="M10 75H410M140 10V140M280 10V140"/></g>
+            <path d="M20 40H140V110H410" fill="none" stroke="#9f3f53" stroke-width="2"/>
+            <text x="268" y="100" fill="#9f3f53" class="svgtxt">NO FEEDBACK</text>
+          </svg>
+          <div class="cap">READING A GUIDE</div>
+          <ul><li>Diagrams of gates, no way to wire one.</li><li>Nothing tells you if your circuit is right.</li><li>Mining feels like a separate world.</li></ul>
+        </div>
+        <div class="panel">
+          <svg viewBox="0 0 420 150" aria-hidden="true">
+            <g fill="none" stroke="#303235" stroke-dasharray="3 4"><rect x="10" y="10" width="400" height="130"/><path d="M10 75H410M140 10V140M280 10V140"/></g>
+            <path d="M20 40H140V110H410" fill="none" stroke="#00d892" stroke-width="2"/>
+            <text x="268" y="100" fill="#00d892" class="svgtxt">ROWS MATCH</text>
+          </svg>
+          <div class="cap">WIRING A CIRCUIT</div>
+          <ul><li>Wire NAND gates on a live board.</li><li>Every truth-table row turns green or red.</li><li>From level 4, X Layer checks your circuit.</li></ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="levels" class="wrap section">
+      <h2>Sixteen levels. Four worlds.</h2>
+      <p class="sub">Each level unlocks the next. Beat par for three stars, then take on real FabX mining tasks in the last world.</p>
+      <table class="lvltable" id="lvlTable"><thead><tr><th>Level</th><th>Circuit</th><th>Checked</th><th>Par</th><th>Best</th></tr></thead><tbody></tbody></table>
+    </section>
+
+    <section id="progress" class="wrap section">
+      <h2>Earn stars. Climb the ranks.</h2>
+      <p class="sub">Use fewer gates than par for three stars. Every clear earns XP, a daily streak adds up, and badges mark the moments worth showing off. Progress lives in your browser.</p>
+      <div class="ladder" id="rankLadder"></div>
+      <div class="badges" id="badgeGrid"></div>
+    </section>
+
+    <section id="stack" class="wrap section">
+      <h2>What it runs on.</h2>
+      <p class="sub">Only things that exist today are marked live. The rest are marked as planned.</p>
+      <div class="stack">
+        <div><span class="k">X Layer</span><span class="v">Circuits are read with the free eval call</span><span class="badge">Tested on a fork</span></div>
+        <div><span class="k">LessonVerifier</span><span class="v">Records level progress on a pass</span><span class="badge" id="verBadge">Not deployed</span></div>
+        <div><span class="k">FabX</span><span class="v">Levels 14–16 are real FabX tasks (GC-001, GC-003, GC-006)</span><span class="badge">Live API</span></div>
+        <div><span class="k">DeWEB + TapeKit</span><span class="v">Single-file on-chain hosting</span><span class="badge muted">Planned</span></div>
+      </div>
+    </section>
+
+    <section id="sponsor" class="wrap section">
+      <h2>Reach learners at the moment they're ready to mine.</h2>
+      <p class="sub">Ecosystem projects can sponsor a branded level. Learners who finish it arrive warm. This is a plan, not a live product: no sponsor has signed yet.</p>
+    </section>
+  </main>
+
+  <footer class="foot wrap">
+    <div><span class="logo"><svg class="mark" viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><circle cx="7" cy="8" r="2.4" fill="#00d892"/><circle cx="15" cy="8" r="2.4" fill="none" stroke="#5d5e61"/><circle cx="23" cy="8" r="2.4" fill="#00d892"/></svg><span class="wordmark">firsttape</span></span></div>
+    <div class="fine"><a class="ulink" href="#judges">For judges</a> · <a class="ulink" href="#learners">Verify a learner on-chain</a><br>Built for the X Layer Build X hackathon. Circuits, processors and mining by TapeOut and FabX.</div>
+  </footer>
+</div>
+
+<!-- ============ GAME ============ -->
+<div id="game" hidden>
+  <header class="gbar">
+    <a class="logo" href="#"><svg class="mark" viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><circle cx="7" cy="8" r="2.4" fill="#00d892"/><circle cx="15" cy="8" r="2.4" fill="none" stroke="#5d5e61"/><circle cx="23" cy="8" r="2.4" fill="#00d892"/></svg><span class="wordmark">firsttape</span></a>
+    <nav id="levelNav" aria-label="Levels"></nav>
+    <div class="gright">
+      <div class="rankchip" title="Your rank"><span id="hudRank">Newcomer</span><span class="xpbar"><i id="xpFill"></i></span><span id="xpText" class="cap">0 / 250 XP</span></div>
+      <button id="mapBtn" class="btn ghost sm">Map</button>
+      <div class="menuwrap">
+        <button id="menuBtn" class="btn ghost sm" aria-haspopup="true" aria-expanded="false" aria-label="More">⋯</button>
+        <div id="menu" class="menu" hidden>
+          <div class="mstats"><span class="cap">Stars</span><b id="hudStars">0</b><span class="cap">Streak</span><b id="hudStreak">0d</b></div>
+          <button id="tutBtn" class="mi" hidden>Replay tutorial</button>
+          <button id="cardBtn" class="mi" hidden>Share card</button>
+          <button id="impBtn" class="mi">Paste &amp; optimize a netlist</button>
+          <button id="soundBtn" class="mi">Sound off</button>
+          <div class="mgroup"><span class="cap">View</span>
+            <button id="prefWide" class="mi" aria-pressed="false">Wide layout: off</button>
+            <button id="prefDetail" class="mi" aria-pressed="false">Board details: off</button>
+            <button id="prefScope" class="mi" aria-pressed="false">Waveforms open: off</button>
+          </div>
+          <a class="mi" href="#">Back to overview</a>
+          <details class="how"><summary>How to play</summary><p>Click an output dot, then an input dot to wire. Click a wire to remove it. Drag gates to move them. Click an input chip (A, B…) to flip it 0/1 and watch the signal. Press <b>Run all inputs</b> to test every row and see the waveforms below the board.</p></details>
+        </div>
+      </div>
+    </div>
+  </header>
+  <main class="play3">
+    <aside id="brief">
+      <div class="cap" id="lvlCap">MISSION</div>
+      <h2 id="lvlTitle"></h2>
+      <p id="lvlText"></p>
+      <p id="lvlMeta" class="cap meta"></p>
+      <table id="truth"></table>
+    </aside>
+    <section class="stage3">
+      <div class="boardwrap" id="boardwrap">
+        <svg id="board" viewBox="0 0 800 480" preserveAspectRatio="xMidYMid meet" aria-label="circuit board"></svg>
+        <div id="coach" class="coach"></div>
+        <div class="readout"><span>Rows <b id="stRows">0/0</b></span><span>Gates <b id="stGates">0</b></span><span id="stWhere">BROWSER</span></div>
+        <div id="burst" aria-hidden="true"></div>
+        <div id="tut" hidden role="dialog" aria-live="polite" aria-label="Tutorial">
+        <div class="tutdots" id="tutDots" aria-hidden="true"></div>
+        <div class="cap" id="tutStep"></div>
+        <p id="tutText"></p>
+        <div class="tutrow"><button id="tutNext" class="btn primary" hidden></button><button id="tutSkip" class="btn ghost">Skip tutorial</button></div>
+      </div>
+        <div id="cleared" aria-hidden="true"><div class="big" id="clearedBig">LEVEL CLEARED</div><div id="clearedStars" class="starsbig"></div><div id="clearedSub" class="cap"></div></div>
+      </div>
+      <div class="actionbar">
+        <div id="actions">
+          <button id="checkBtn" class="btn primary">Check</button>
+          <button id="runBtn" class="btn ghost">▶ Run</button>
+          <button id="addGate" class="btn ghost">+ Gate</button>
+          <button class="btn ghost" id="delGate" title="Remove the last gate (or double-click / right-click any gate)">− Gate</button>
+          <button id="clearBtn" class="btn ghost">Reset</button>
+          <button id="fabxBtn" class="btn ghost" hidden title="Copies your circuit as a hex netlist and opens the FabX canvas">Copy for FabX</button>
+          <button id="chainBtn" class="btn primary" hidden>Tape out &amp; submit on X Layer</button>
+        </div>
+        <p id="msg" role="status"></p>
+      </div>
+      <section id="impPanel" hidden aria-label="Paste and optimize a netlist">
+        <div class="imphead"><span class="cap">Paste &amp; optimize</span><span class="cap impnote">Paste a hex netlist (for example from fabx.tech), see it as gates, strip redundant ones, copy it back. Nothing is sent anywhere.</span></div>
+        <textarea id="impHex" rows="2" spellcheck="false" placeholder="0x00000002000002…  (7 bytes per NAND)"></textarea>
+        <div class="improw">
+          <label>Inputs <select id="impIn"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option></select></label>
+          <label>Outputs <select id="impOut"><option selected>1</option><option>2</option><option>3</option><option>4</option></select></label>
+          <button id="impLoad" class="btn ghost sm" type="button">Load on board</button>
+          <button id="impOpt" class="btn primary sm" type="button">Optimize board</button>
+          <button id="impCopy" class="btn ghost sm" type="button">Copy hex</button>
+        </div>
+        <p id="impMsg" role="status"></p>
+      </section>
+      <details class="scope" id="scopeBox">
+        <summary><span class="cap">Logic analyzer</span><span class="cap scopehint">Flip an input or press Run. Dashed line = what the output should be; red = mismatch.</span></summary>
+        <svg id="scope" role="img" aria-label="Waveforms of the inputs and outputs"></svg>
+      </details>
+    </section>
+  </main>
+</div>
+
+<!-- ============ VERIFY ============ -->
+<div id="verify" hidden>
+  <header class="bar"><a class="logo" href="#"><svg class="mark" viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><circle cx="7" cy="8" r="2.4" fill="#00d892"/><circle cx="15" cy="8" r="2.4" fill="none" stroke="#5d5e61"/><circle cx="23" cy="8" r="2.4" fill="#00d892"/></svg><span class="wordmark">firsttape</span></a>
+    <div class="cta"><a class="btn ghost" href="#judges">For judges</a><a class="btn primary" href="#play">Open course</a></div></header>
+  <main class="wrap pg">
+    <span class="badge" id="vBadge">Reads the chain directly</span>
+    <h1 class="pgh">Verify a learner on X Layer</h1>
+    <p class="sub">Paste any wallet address. This page calls the LessonVerifier contract itself: no server, nothing to trust but the chain.</p>
+    <div id="vState" class="notice" hidden></div>
+    <form id="vForm" class="vform">
+      <input id="vAddr" placeholder="0x… wallet address" spellcheck="false" autocomplete="off" aria-label="Wallet address">
+      <button class="btn primary" id="vGo" type="submit">Check</button>
+      <button class="btn ghost" id="vMine" type="button">Use my wallet</button>
+    </form>
+    <p id="vMsg" role="status"></p>
+    <section id="vResult" hidden>
+      <div class="cap">CLEARED ON X LAYER</div>
+      <div class="vcount"><b id="vCount">0</b><span id="vOf"></span></div>
+      <div id="vTiles" class="vtiles"></div>
+      <a id="vLink" class="ulink" target="_blank" rel="noopener">View this address on the explorer</a>
+    </section>
+    <h2 class="pgh2">Network stats</h2>
+    <div class="stats statrow"><div><span class="cap">Learners</span><b id="sLearners">—</b></div><div><span class="cap">Levels cleared</span><b id="sClears">—</b></div><div><span class="cap">Verifier</span><b id="sVerifier" class="mono small">—</b></div></div>
+    <h2 class="pgh2">Sponsor dashboard: unique wallets per level</h2>
+    <p class="sub">What a sponsor would buy against: how many different wallets cleared each level, read from the chain. Wallets are not people, since one person can use several wallets.</p>
+    <div id="vLevels" class="vlevels"></div>
+    <h2 class="pgh2">Recent learners</h2>
+    <table class="lvltable" id="vBoard"><thead><tr><th>#</th><th>Wallet</th><th>Levels cleared</th></tr></thead><tbody></tbody></table>
+    <p class="hint" id="vBoardNote"></p>
+  </main>
+</div>
+
+<!-- ============ JUDGES ============ -->
+<div id="judges" hidden>
+  <header class="bar"><a class="logo" href="#"><svg class="mark" viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><circle cx="7" cy="8" r="2.4" fill="#00d892"/><circle cx="15" cy="8" r="2.4" fill="none" stroke="#5d5e61"/><circle cx="23" cy="8" r="2.4" fill="#00d892"/></svg><span class="wordmark">firsttape</span></a>
+    <div class="cta"><a class="btn ghost" href="#learners">Verify on-chain</a><a class="btn primary" href="#play">Open course</a></div></header>
+  <main class="wrap pg">
+    <span class="badge">Checkable claims</span>
+    <h1 class="pgh">For judges</h1>
+    <p class="lede2">FirstTape: learn circuits by building them. From level 6, X Layer checks your circuit. The course ends in real FabX bounties. Everything below can be checked, and where something is not live, it says so.</p>
+
+    <div id="jNetWarn" class="notice warn" hidden>This deployment is <b>not on X Layer</b>. It is a rehearsal environment. The hackathon requires X Layer, so it does not count as the submission unless the organizers say so.</div>
+
+    <div class="stats statrow">
+      <div><span class="cap">Deployed on X Layer</span><b id="jDeploy">NOT YET</b></div>
+      <div><span class="cap">Learners on-chain</span><b id="jLearners">—</b></div>
+      <div><span class="cap">Levels cleared on-chain</span><b id="jClears">—</b></div>
+      <div><span class="cap">Levels</span><b id="jLevels">16</b></div>
+    </div>
+
+    <h2 class="pgh2">The five criteria</h2>
+    <table class="lvltable jt"><thead><tr><th>Criterion</th><th>What we show</th><th>Status</th></tr></thead><tbody>
+      <tr><td>Commercial potential</td><td>Sponsored levels, and a sponsor-funded faucet: one flat-fee mint (0.00066 OKB or 0.01 BEM, depending on the processor) funds thousands of free NAND claims (measured on a fork). No sponsor has signed yet.</td><td><span class="st plan">Plan, no sponsor</span></td></tr>
+      <tr><td>Innovation</td><td>A course where a contract checks your circuit by running it through the processor's free <code>eval</code>. Novelty against other entries has not been checked against the leaderboard, so we do not claim "first".</td><td><span class="st test">Built</span></td></tr>
+      <tr><td>Ecosystem integration</td><td>X Layer processor and circuits (tape-out and eval). FabX's task bank: levels 14–16 target real tasks. DeWEB and TapeKit: single-file build is ready, publishing is not done. TapeCode and TapeSend are not used.</td><td><span class="st plan">Partial</span></td></tr>
+      <tr><td>Product readiness and UX</td><td>16 levels and a sandbox, a guided tutorial, stars, XP and ranks, a mobile layout, all tested in a real browser. Contracts are tested on a fork of live X Layer.</td><td><span class="st" id="jReady">Tested on a fork</span></td></tr>
+      <tr><td>Demo</td><td>A learner goes from a first puzzle to a verified on-chain level and a FabX hand-off.</td><td><span class="st no">Not recorded yet</span></td></tr>
+    </tbody></table>
+
+    <h2 class="pgh2">What is real today</h2>
+    <table class="lvltable jt"><thead><tr><th>Item</th><th>Status</th><th>How to check it</th></tr></thead><tbody>
+      <tr><td>Browser game: 16 levels and a sandbox</td><td><span class="st test">Built</span></td><td><code>node tests/smoke-all-levels.mjs</code> solves all 16 through the real UI</td></tr>
+      <tr><td>Every level is solvable at its par</td><td><span class="st test">Tested</span></td><td><code>node tests/solutions.js</code></td></tr>
+      <tr><td>On-chain checks for levels 6–16</td><td><span class="st test">Tested on a fork</span></td><td><code>forge test --match-test everyLevelPassesOnChain</code> on a fork of live X Layer</td></tr>
+      <tr><td>Wallet flow: faucet, tape-out, submit</td><td><span class="st test">Tested on a fork</span></td><td><code>tests/e2e-fork.mjs</code> (stand-in wallet; a real wallet extension is untested)</td></tr>
+      <tr><td>Deployed contracts on X Layer</td><td><span class="st no" id="jDeploy2">Not yet</span></td><td>The <a class="ulink" href="#learners">Verify page</a> reads them once deployed</td></tr>
+      <tr><td>Hosted on DeWEB with the TapeKit badge</td><td><span class="st no">Not yet</span></td><td><code>dist/index.html</code> is a single file with no external assets</td></tr>
+      <tr><td>FabX mining</td><td><span class="st plan">Hand-off only</span></td><td>We verify a circuit matching the task and link to fabx.tech. Mining needs FabX's own mint, commit and tape-out flow, so a circuit made here cannot be claimed there. We do not send FabX transactions. $FAB rewards come from FabX, depend on the network, and are not guaranteed.</td></tr>
+      <tr><td>Sponsors</td><td><span class="st no">None yet</span></td><td>Outreach is drafted, not sent</td></tr>
+      <tr><td>Real learners</td><td><span class="st no" id="jLearners2">None counted</span></td><td>Counted on-chain once deployed (see the Verify page)</td></tr>
+    </tbody></table>
+
+    <h2 class="pgh2">Questions you will ask</h2>
+    <div class="faq">
+      <details><summary>Who pays?</summary><p>Sponsors would pay per verified graduate of their bounty level, or fund the faucet. A free pilot comes first. No sponsor has agreed yet, so this is a plan. Learners pay only gas and the 0.0013 OKB tape-out fee, and no BEM, because the faucet hands out NAND.</p></details>
+      <details><summary>Why would a learner stay?</summary><p>Each level unlocks the next. You earn stars for beating par, XP and ranks, a daily streak and badges. The last world is real FabX tasks instead of a certificate; on FabX, leaner circuits earn more $FAB (not guaranteed).</p></details>
+      <details><summary>Is the content correct?</summary><p>Every level's answer is a truth table. A solver proves each level is solvable at its par, and from level 6 the contract re-runs your circuit on the processor and compares every row. Levels 1–5 are checked in the browser only.</p></details>
+      <details><summary>What is new here?</summary><p>We have not compared against the leaderboard yet, so we make no claim of being first. What we can show is that the check is on-chain and the course ends in real tasks.</p></details>
+      <details><summary>What can go wrong?</summary><p>The contracts are small and unaudited. The faucet gives one claim per wallet and cannot stop one person using many wallets. Progress in the browser lives in local storage. By default circuits are minted on an existing free processor, not one we own.</p></details>
+    </div>
+
+    <h2 class="pgh2">Sponsor offer (prices are placeholders)</h2>
+    <p class="sub">Nothing here has been tested with a buyer. The numbers are to be set with the first sponsor. The idea is to pay for outcomes: the <a class="ulink" href="#learners">sponsor dashboard</a> shows, straight from the chain, how many different wallets cleared each level.</p>
+    <table class="lvltable jt"><thead><tr><th>Option</th><th>What the sponsor gets</th><th>Price</th></tr></thead><tbody>
+      <tr><td>Pilot (first sponsor)</td><td>A bounty level for your task, built by us, plus the on-chain count of wallets that cleared it</td><td>Free, in exchange for a written yes and permission to publish the numbers</td></tr>
+      <tr><td>Pay per verified graduate</td><td>You pay only when a unique wallet clears your bounty level. The count is public and checkable on the Verify page.</td><td>Placeholder: to be set with the first sponsor</td></tr>
+      <tr><td>Fund the faucet</td><td>Free NAND for new learners, with your name on the faucet</td><td>One flat mint fee covers thousands of claims: 0.00066 OKB on older processors, 0.01 BEM on newer ones (measured on-chain cost, not a price)</td></tr>
+      <tr><td>Level pack</td><td>A set of levels built around your own task bank</td><td>To be agreed</td></tr>
+    </tbody></table>
+
+    <h2 class="pgh2">Check it yourself</h2>
+    <ul class="ticks"><li>Paste any wallet on the <a class="ulink" href="#learners">Verify page</a> to read its progress straight from the contract.</li><li>Run the tests listed above. They need no wallet and spend nothing.</li><li>Read <code>docs/DEPLOY.md</code> for the exact deploy steps and measured costs.</li></ul>
+  </main>
+</div>
+
+<div id="map" class="mapov" hidden role="dialog" aria-modal="true" aria-label="Level map">
+  <div class="mapbox"><div class="maphead"><h2>Mission map</h2><button id="mapClose" class="btn ghost">Close</button></div><div id="mapBody"></div></div>
+</div>
+<div id="toasts" aria-live="polite"></div>
+
+<div id="cc" class="cc" hidden>
 <header class="bar">
-  <a class="logo" href="#issue" aria-label="CertCheck home"><svg viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><path d="M7 8.5l3 3 6-7" fill="none" stroke="#00d892" stroke-width="2"/></svg>certcheck</a>
+  <a class="logo" href="#" aria-label="Home"><svg viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><path d="M7 8.5l3 3 6-7" fill="none" stroke="#00d892" stroke-width="2"/></svg>certcheck</a>
   <nav class="tabs" aria-label="Sections">
-    <a href="#verify" data-tab="verify">Verify</a><a href="#issue" data-tab="issue">Issue</a><a href="#manage" data-tab="manage">Manage</a>
+    <a href="#issue" data-tab="issue">Issue</a><a href="#verify" data-tab="verify">Verify</a><a href="#manage" data-tab="manage">Manage</a><a href="#play" data-tab="learn">Learn circuits</a>
   </nav>
   <span class="chip" id="netChip">…</span>
 </header>
-
 <main>
 <!-- ===== VERIFY ===== -->
 <section id="verifyView" class="view" hidden>
@@ -24,8 +324,8 @@
   <div class="field"><label for="vInput">Certificate link or proof</label>
     <textarea id="vInput" rows="3" spellcheck="false" placeholder="Paste a link ending in #c=… or the proof JSON"></textarea></div>
   <div class="row"><button id="vBtn" class="btn primary" type="button">Verify</button><span class="hint" id="vHint"></span></div>
-  <article id="vResult" class="result" data-state="idle" hidden aria-live="polite">
-    <div class="rhead"><span class="badge" id="vBadge"></span><h2 id="vTitle"></h2></div>
+  <article id="cvResult" class="result" data-state="idle" hidden aria-live="polite">
+    <div class="rhead"><span class="badge" id="cvBadge"></span><h2 id="vTitle"></h2></div>
     <p id="vWhy"></p>
     <dl class="facts" id="vFacts"></dl>
     <p class="note" id="vNote"></p>
@@ -128,19 +428,28 @@
     <div class="row"><button id="qrDownload" class="btn ghost" type="button">Download QR (SVG)</button><button id="qrPrint" class="btn ghost" type="button">Print</button><span class="hint" id="qrMsg"></span></div>
   </div>
 </dialog>
-<div id="printArea" aria-hidden="true"></div>
 <footer class="foot">
   <p>No personal data is stored on-chain: only a batch fingerprint, a count and a label. The format is public (<code>docs/FORMAT.md</code>), so anyone can write their own verifier. Hackathon MVP, contracts unaudited.</p>
 </footer>
+</div>
+<div id="printArea" aria-hidden="true"></div>
 
-<script src="core.js"></script>
-<script src="qr.js"></script>
-<script src="config.js"></script>
-<script src="chain.js"></script>
-<script src="skill.js"></script>
+<script src="ft/levels.js"></script>
+<script src="ft/game.js"></script>
 <script src="netlist.js"></script>
-<script src="board.js"></script>
-<script src="challenge.js"></script>
-<script src="app.js"></script>
+<script src="ft/config.js"></script>
+<script src="ft/chain.js"></script>
+<script src="ft/card.js"></script>
+<script src="ft/app.js"></script>
+<script src="ft/landing.js"></script>
+<script src="ft/proof.js"></script>
+<script src="cc/core.js"></script>
+<script src="cc/qr.js"></script>
+<script src="cc/config.js"></script>
+<script src="cc/chain.js"></script>
+<script src="cc/skill.js"></script>
+<script src="cc/board.js"></script>
+<script src="cc/challenge.js"></script>
+<script src="cc/app.js"></script>
 </body>
 </html>

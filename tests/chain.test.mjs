@@ -1,7 +1,7 @@
 // ABI encoding vs `cast` (cast must be installed). node tests/chain.test.mjs
 import {execFileSync} from "node:child_process";
 globalThis.CC_CONFIG = {registry: "0x0000000000000000000000000000000000000000"};
-await import("../site/chain.js"); const E = globalThis.CertChain.enc; let fails = 0;
+await import("../site/cc/chain.js"); const E = globalThis.CertChain.enc; let fails = 0;
 const ok = (n, c, x = "") => { console.log(c ? "ok  " : "FAIL", n, c ? "" : x); if (!c) fails++; };
 const cast = (...a) => execFileSync("cast", a, {encoding: "utf8"}).trim();
 const R = "0x" + "11".repeat(32), L = "0x" + "22".repeat(32), A = "0x" + "ab".repeat(20);

@@ -23,7 +23,7 @@ const ACCT = sh("cast", ["wallet", "address", "--private-key", DEV_KEY]), OTHER 
 // 2. bundled single-file build with the test config
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "cc-")), siteDir = path.join(tmp, "site"); fs.cpSync(path.join(ROOT, "site"), siteDir, {recursive: true});
 const mkCfg = reg => `window.CC_CONFIG = {registry: "${reg}", chainId: 31337, chainName: "Anvil", rpc: "${RPC}", explorer: "http://x.test", currency: {name: "ETH", symbol: "ETH", decimals: 18}};`;
-const build = (reg, name) => { fs.writeFileSync(path.join(siteDir, "config.js"), mkCfg(reg)); const o = path.join(tmp, name); execFileSync("node", [path.join(ROOT, "scripts/bundle.js")], {env: {...process.env, SITE_DIR: siteDir, OUT_DIR: o}, stdio: "ignore"}); return fs.readFileSync(path.join(o, "index.html"), "utf8"); };
+const build = (reg, name) => { fs.writeFileSync(path.join(siteDir, "cc", "config.js"), mkCfg(reg)); const o = path.join(tmp, name); execFileSync("node", [path.join(ROOT, "scripts/bundle.js")], {env: {...process.env, SITE_DIR: siteDir, OUT_DIR: o}, stdio: "ignore"}); return fs.readFileSync(path.join(o, "index.html"), "utf8"); };
 const pages = {live: build(REG, "live"), demo: build("0x0000000000000000000000000000000000000000", "demo")};
 ok("bundle is one self-contained file (no external refs)", !/(src|href)="(?!data:|#)[^"]+"/.test(pages.live.replace(/<a [^>]*>/g, "")), "");
 const srv = http.createServer((q, s) => { s.setHeader("content-type", "text/html"); s.end(q.url.startsWith("/demo") ? pages.demo : pages.live); }).listen(WEB_PORT);
@@ -45,11 +45,11 @@ async function open(url = "/", w = 1280, h = 900, withWallet = true) {
 }
 const T = (p, sel) => p.$eval(sel, e => e.textContent), V = (p, sel) => p.$eval(sel, e => e.value);
 const setv = (p, sel, v) => p.$eval(sel, (e, v) => { e.value = v; e.dispatchEvent(new Event("input")); }, v);
-const state = p => p.$eval("#vResult", e => e.hidden ? "hidden" : e.dataset.state);
+const state = p => p.$eval("#cvResult", e => e.hidden ? "hidden" : e.dataset.state);
 const verify = async (p, link) => { await setv(p, "#vInput", link); await p.click("#vBtn"); await sleep(600); return state(p); };
 
 // ===== issue + publish =====
-let p = await open("/");
+let p = await open("/#issue");
 ok("lands on the Issue page", await p.$eval("#issueView", e => !e.hidden) && await p.$eval("#verifyView", e => e.hidden));
 ok("network chip shows the connected network as live", (await T(p, "#netChip")) === "Anvil" && await p.$eval("#netChip", e => e.classList.contains("live")));
 await p.click("#genBtn"); ok("generating without an issuer address is refused", /issuer address/.test(await T(p, "#genHint")));
@@ -156,11 +156,11 @@ for (const [w, h, tag] of [[390, 844, "phone"], [1280, 800, "desktop"]]) {
   for (const hash of ["#issue", "#verify", "#manage"]) { const q = await open("/" + hash, w, h); ok(`${tag} ${hash}: no horizontal scroll`, await q.evaluate(() => document.documentElement.scrollWidth <= innerWidth), await q.evaluate(() => document.documentElement.scrollWidth + ">" + innerWidth)); await q.close(); }
 }
 // a name so long that the link cannot fit in a QR code
-p = await open("/"); await setv(p, "#issuerAddr", ACCT); await setv(p, "#course", "C"); await setv(p, "#csvText", "name\n" + "N".repeat(3200)); await p.click("#genBtn"); await sleep(500);
+p = await open("/#issue"); await setv(p, "#issuerAddr", ACCT); await setv(p, "#course", "C"); await setv(p, "#csvText", "name\n" + "N".repeat(3200)); await p.click("#genBtn"); await sleep(500);
 await p.$eval("#rows tbody tr:nth-child(1) td:nth-child(2) button:nth-of-type(2)", b => b.click()); await sleep(200);
 ok("a link too long for a QR code says so and disables the download", /too long for a QR/.test(await T(p, "#qrSvg")) && await p.$eval("#qrDownload", b => b.disabled)); await p.close();
 // big batch performance
-p = await open("/"); await setv(p, "#issuerAddr", ACCT); await setv(p, "#course", "Mass");
+p = await open("/#issue"); await setv(p, "#issuerAddr", ACCT); await setv(p, "#course", "Mass");
 const t0 = Date.now(); await setv(p, "#csvText", "name\n" + Array.from({length: 2000}, (_, i) => "Person " + i).join("\n")); await p.click("#genBtn"); await p.waitForFunction(() => !document.getElementById("results").hidden, {timeout: 30000});
 ok("2000 certificates generate in under 15s", Date.now() - t0 < 15000, (Date.now() - t0) + " ms"); ok("table shows only 50 rows but says how many exist", (await p.$$eval("#rows tbody tr", r => r.length)) === 50 && /50 of 2000/.test(await T(p, "#moreRows")));
 await p.close();

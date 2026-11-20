@@ -1,5 +1,5 @@
 // Core tests (plain node, no dependencies): node tests/core.test.mjs
-import "../site/core.js";
+import "../site/cc/core.js";
 const C = globalThis.CertCore; let fails = 0;
 const ok = (n, c, x = "") => { console.log(c ? "ok  " : "FAIL", n, x); if (!c) fails++; };
 const ISS = "0x" + "ab".repeat(20), mk = n => Array.from({length: n}, (_, i) => ({issuer: ISS, name: "Student " + i, course: "Intro", date: "2026-11-20"}));

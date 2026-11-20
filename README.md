@@ -122,7 +122,32 @@ All on X Layer mainnet (chain 196).
 - **`withdraw()`:** anyone can call it; only earned fees go to the treasury, never escrow or refunds.
 - **Owner caps:** price at most 0.01 OKB, free allowance at most 1,000, verification fee at most 10 OKB. Two-step ownership.
 
-**The prices are hypotheses, not market-tested.** Secondary revenue ideas: sponsored course levels and a sponsor-funded NAND faucet (see the `#circuits` sponsor section). No fees have been collected and no sponsor has signed.
+### Revenue, plainly
+**Collected so far: nothing.** No organizer has used the registry and no sponsor has signed. Every price below is a guess.
+
+| Stream | State | Unit price |
+|---|---|---|
+| Per-certificate fee (after the free allowance) | Live on the contract, tested | 0.00024 OKB, about $0.02 at $83/OKB |
+| Prepaid credits (a sponsor can pay for others) | Live, tested | same rate |
+| Verified-issuer badge (escrowed, refundable if rejected) | Live; the owner approves each request by hand with `cast` (`docs/OWNER.md`) | 0.12 OKB, about $10 |
+| Sponsored course levels, sponsor-funded faucet | A pitch plus live on-chain numbers on `#circuits`; no payment mechanism | none |
+| Public revenue totals | Live: `stats()` on-chain, shown on `#pricing` and `#judges` | none |
+
+**What the numbers mean.** A 200-certificate batch costs an organizer 175 paid certificates x 0.00024 = 0.042 OKB, about $3.50. Fifty organizers doing that twice a year, plus ten verified badges, is roughly $450 a year. That shows the model works at small scale. It is not income, and it is not a business yet.
+
+**Costs and who gets what.**
+- The registry's gas is paid by the issuer.
+- The tape-out fee (0.0013 OKB per circuit) goes to TapeOut, not to us.
+- The NAND faucet is a real cost that grows with learners: 40 NAND per wallet, about 98 learners left at last read.
+- Only earned fees can be withdrawn. Escrow and refunds are never touched.
+
+**What would change this.**
+1. Test the price with real organizers before changing any code: "Would you pay $X for 200 certificates?" Ask five.
+2. Add an organizer plan (a flat monthly price, branding on certificates, bulk import). That is where recurring revenue would come from, and it is not built.
+3. Treat sponsors as upside until one says yes.
+
+**Open decisions for the owner:** the price, who controls the treasury wallet, tax and legal questions, and whether verified-issuer approval stays manual. The prices are hypotheses, not market-tested.
+
 
 ## Architecture
 - **No backend.** The site is one self-contained `dist/index.html` with no external assets (system fonts only). It reads the chain over plain JSON-RPC `eth_call`, and a wallet is only needed to publish, tape out or buy.

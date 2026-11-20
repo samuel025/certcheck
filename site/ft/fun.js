@@ -198,6 +198,7 @@
       const s = document.createElement("span"); s.className = "race"; s.textContent = used < puzzle.par ? `Beat your friend: ${used} vs ${puzzle.par} gates.` : used === puzzle.par ? `Tied your friend at ${used} gates.` : `Solved in ${used}. Your friend needed only ${puzzle.par}.`; row.appendChild(s);
     }
     msg.appendChild(row);
+    barKey = ""; drawBar(L);   // refresh the 0/4 counters and ticks right away
   }
 
   // ---------- map extras + sandbox "Share puzzle" ----------

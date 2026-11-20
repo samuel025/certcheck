@@ -44,7 +44,7 @@
   const machineLevel = (M, i) => ({machine: M.mid, title: M.title, cap: `WORKSHOP · MACHINE ${i + 1} / ${MACHINES.length}`, text: M.text, inputs: M.inputs, outputs: M.outputs, rows: rowsOf(M.inputs.length, M.fn), maxGates: M.ref});
 
   const mHost = document.createElement("div"); mHost.id = "funMachine"; mHost.className = "funmachine"; mHost.hidden = true;
-  $("boardwrap").insertAdjacentElement("afterend", mHost);
+  $("brief").prepend(mHost);
   let mBuilt = "";
   const SEGP = {a: "M16 8H64L58 16H22Z", b: "M68 12V64L62 58V20Z", c: "M68 76V128L62 120V82Z", d: "M16 132H64L58 124H22Z", e: "M12 76V128L18 120V82Z", f: "M12 12V64L18 58V20Z", g: "M18 70L24 64H56L62 70L56 76H24Z"};
   function buildMachine(id) {
@@ -236,10 +236,36 @@
     note("ok", ok ? `Puzzle link copied (par ${par} gate${par === 1 ? "" : "s"}). Send it to a friend.` : `Copy this puzzle link: ${link}`);
   };
 
+  // ---------- mode bar: makes every kind of play one click away ----------
+  const bar = document.createElement("nav"); bar.id = "funBar"; bar.className = "funbar"; bar.setAttribute("aria-label", "Ways to play");
+  $("game").querySelector(".play3").insertAdjacentElement("beforebegin", bar);
+  let barKey = "";
+  const modeOf = L => L.machine ? "workshop" : L.rid ? "repair" : L.kind === "puzzle" ? "puzzle" : L.sandbox ? "make" : "course";
+  const chip = (label, cls, fn, title) => { const b = document.createElement("button"); b.className = "fchip" + (cls ? " " + cls : ""); b.textContent = label; if (title) b.title = title; b.onclick = fn; return b; };
+  const firstOpen = () => { let d = []; try { d = JSON.parse(localStorage.getItem("ft_done") || "[]"); } catch {} const L = (window.LEVELS || []).find(l => !d.includes(l.id)) || window.LEVELS[window.LEVELS.length - 1]; return L.id; };
+  const reset = () => { race = null; puzzle = null; };
+  function drawBar(L) {
+    const mode = modeOf(L), fun = G.load().fun || {}, mach = fun.machines || {}, rep = fun.repairs || {};
+    const key = mode + (L.machine || L.rid || "") + Object.keys(mach) + Object.keys(rep); if (key === barKey) return; barKey = key;
+    bar.innerHTML = "";
+    const main = document.createElement("div"); main.className = "fmain"; bar.appendChild(main);
+    const go = (m, label, fn, title) => main.appendChild(chip(label, mode === m || (m === "puzzle" && mode === "make") ? "on" : "", fn, title));
+    go("course", "Course", () => { if (location.hash !== "#play") location.hash = "#play"; reset(); APP().loadLevelId(firstOpen()); }, "The 16 levels, from NAND to adders");
+    go("workshop", `Workshop ${Object.keys(mach).length}/${MACHINES.length}`, () => { reset(); APP().loadCustom(machineLevel(MACHINES[0], 0)); }, "Build machines that move: a lock, a lift, a jury, a display");
+    go("repair", `Repair shop ${Object.keys(rep).length}/${REPAIRS.length}`, () => { reset(); APP().loadCustom(repairLevel(REPAIRS[0], 0), faulty(REPAIRS[0])); note("", "This circuit is broken. Flip the inputs, compare with the truth table, then rewire the wrong input."); }, "Find the wrong wire in a broken circuit");
+    go("daily", "Daily", () => { if (location.hash === "#daily") route(); else location.hash = "#daily"; }, "Today's puzzle, with a result you can share");
+    go("puzzle", "Make a puzzle", () => { reset(); APP().openSandbox(); note("", "Build any circuit with 2 to 4 inputs, then press Share puzzle to send it to a friend."); }, "Build a circuit and turn it into a puzzle link");
+    if (mode === "workshop" || mode === "repair") {
+      const sub = document.createElement("div"); sub.className = "fsub"; bar.appendChild(sub);
+      if (mode === "workshop") MACHINES.forEach((M, i) => sub.appendChild(chip((mach[M.mid] ? "✓ " : "") + M.title, L.machine === M.mid ? "on" : "", () => { reset(); APP().loadCustom(machineLevel(M, i)); })));
+      else REPAIRS.forEach((R, i) => sub.appendChild(chip((rep[R.rid] ? "✓ " : "") + R.title, L.rid === R.rid ? "on" : "", () => { reset(); APP().loadCustom(repairLevel(R, i), faulty(R)); note("", "This circuit is broken. Flip the inputs, compare with the truth table, then rewire the wrong input."); })));
+    }
+  }
+
   window.FT_FUN = {
     MACHINES, REPAIRS, machineLevel, repairLevel, faulty, golfName, encodePuzzle, decodePuzzle, dailyText, chipCard, afterClear, onCustomSolved, mapExtras, route,
     onRender(L, outs, probe) {
-      shareBtn.hidden = !L.sandbox;
+      shareBtn.hidden = !L.sandbox; drawBar(L);
       if (L.machine) { mHost.hidden = false; renderMachine(L, outs, probe); } else { mHost.hidden = true; mBuilt = ""; }
     }
   };

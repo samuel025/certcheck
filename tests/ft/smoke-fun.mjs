@@ -100,6 +100,22 @@ const chip = await p.evaluate(() => { const s = FT_APP.snapshot(), L = FT_APP.sn
 ok("chip card renders 640x640, is deterministic and has artwork", chip.w === 640 && chip.same && chip.lit > 300, JSON.stringify(chip));
 await p.close();
 
+// ---- mode bar: every way to play is one click away ----
+p = await fresh();
+ok("mode bar offers Course, Workshop, Repair shop, Daily, Make a puzzle", (await p.$$eval("#funBar .fmain .fchip", c => c.map(x => x.textContent.split(" ")[0]))).join() === "Course,Workshop,Repair,Daily,Make");
+ok("Course is the active mode on a normal level", await p.$eval("#funBar .fchip.on", e => e.textContent === "Course"));
+await p.click("#funBar .fmain .fchip:nth-child(2)");
+ok("Workshop opens a machine and lists the four machines", await p.$$eval("#funBar .fsub .fchip", c => c.length === 4) && await p.$eval("#funMachine", e => !e.hidden) && await p.$eval("#brief #funMachine", e => !!e));
+await p.click("#funBar .fsub .fchip:nth-child(3)");
+ok("picking the jury loads it", await p.$eval("#lvlTitle", e => e.textContent === "Jury of three"));
+await p.click("#funBar .fmain .fchip:nth-child(3)");
+ok("Repair shop loads a broken circuit with its four repairs listed", await p.$eval("#lvlCap", e => e.textContent.startsWith("REPAIR")) && await p.$$eval("#funBar .fsub .fchip", c => c.length === 4));
+await p.click("#funBar .fmain .fchip:nth-child(5)");
+ok("Make a puzzle opens the sandbox with Share puzzle", await p.$eval("#lvlCap", e => e.textContent === "SANDBOX") && await p.$eval("#sharePuzzle", e => !e.hidden));
+await p.click("#funBar .fmain .fchip:nth-child(1)");
+ok("Course returns to the levels", await p.$eval("#lvlCap", e => e.textContent.includes("LEVEL")) && await p.$eval("#funMachine", e => e.hidden));
+await p.close();
+
 // ---- pure helpers ----
 p = await fresh();
 ok("golf names", await p.evaluate(() => [[1, 3, "Hole in one"], [2, 4, "Eagle"], [3, 4, "Birdie"], [4, 4, "Par"], [5, 4, "Bogey"], [8, 4, "Double bogey+"]].every(([u, par, n]) => FT_FUN.golfName(u, par) === n)));

@@ -771,10 +771,10 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 
 /* ===== course hero: the live schematic ===== */
 .h4top{position:relative}
-.hv{display:none;margin:0}
+.hvf{display:none;margin:0}
 @media (min-width:1320px){
-  .hv{display:block;position:absolute;right:0;top:34px;width:clamp(430px,31vw,560px);border:1px solid #262c33;background:linear-gradient(180deg,#12161b,#0a0d11);padding:12px 14px 12px;box-shadow:0 40px 90px rgba(0,0,0,.55),0 0 90px rgba(0,216,146,.08);animation:rise .9s .25s both}
-  .hv::before,.hv::after{content:"";position:absolute;width:7px;height:7px;border-radius:50%;background:#252c34;top:8px}.hv::before{left:8px}.hv::after{right:8px}
+  .hvf{display:block;position:absolute;right:0;top:34px;width:clamp(430px,31vw,560px);border:1px solid #262c33;background:linear-gradient(180deg,#12161b,#0a0d11);padding:12px 14px 12px;box-shadow:0 40px 90px rgba(0,0,0,.55),0 0 90px rgba(0,216,146,.08);animation:rise .9s .25s both}
+  .hvf::before,.hvf::after{content:"";position:absolute;width:7px;height:7px;border-radius:50%;background:#252c34;top:8px}.hvf::before{left:8px}.hvf::after{right:8px}
   .hvhead{display:flex;justify-content:space-between;align-items:center;padding:0 14px 8px;font:600 10.5px var(--mono);letter-spacing:.14em;color:var(--silver);border-bottom:1px solid #1d2329;margin-bottom:6px}
   .hvled{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);margin-right:9px;animation:hvpulse 1.6s ease-in-out infinite}
   .hvr{color:var(--green)}
@@ -1233,7 +1233,7 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
   <main>
     <section class="hero4">
     <div class="wrap h4top">
-      <figure class="hv" id="hv" aria-label="A live XOR circuit built from four NAND gates, cycling through all four inputs">
+      <figure class="hvf" id="hv" aria-label="A live XOR circuit built from four NAND gates, cycling through all four inputs">
         <div class="hvhead"><span class="hvt"><i class="hvled"></i>LIVE · LEVEL 05 · XOR FROM 4 NAND</span><span class="hvr" id="hvRow">A=0 B=0</span></div>
         <svg id="hvSvg" viewBox="0 70 600 280" role="img" aria-hidden="true"></svg>
         <div class="hvtab" id="hvTab"></div>

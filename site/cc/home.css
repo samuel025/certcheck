@@ -243,3 +243,19 @@
 .cc .home .blade{padding:8px 0 6px;gap:5px}.cc .home .blade .nm{font-size:9px;letter-spacing:.12em}.cc .home .blade .hx{font-size:8px}
 @media (max-width:640px){.cc .home .blades{height:130px}}
 @media (prefers-reduced-motion:reduce){.cc .home .mkstamp.go,.cc .home .mke.chain.lit{animation:none!important}.cc .home .mkstamp.go{opacity:1}}
+
+/* ===== trust ladder ===== */
+.cc .home .tladder{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:end;margin-top:30px}
+.cc .home .tstep{position:relative;display:flex;flex-direction:column;gap:10px;padding:22px 22px 20px;background:linear-gradient(180deg,#12171c,#0b0e12);border:1px solid #232a32;transition:border-color .25s,transform .25s}
+.cc .home .tstep.t1{min-height:300px}.cc .home .tstep.t2{min-height:365px}.cc .home .tstep.t3{min-height:430px}.cc .home .tstep.t3{border-color:#1f6b52;box-shadow:0 0 70px rgba(0,216,146,.1)}
+.cc .home .tstep:hover{border-color:var(--green);transform:translateY(-4px)}
+.cc .home .tstep .tsn{font:600 10.5px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--green)}
+.cc .home .tstep h3{font:400 24px/1.15 var(--serif);margin:0;color:var(--bone)}
+.cc .home .tstep p{margin:0;color:var(--silver);font-size:14.5px;line-height:1.5}
+.cc .home .tstep .tswho{font:12px var(--mono);color:var(--fog);margin-top:auto;padding-top:8px}.cc .home .tstep .tswho b{color:var(--bone);font-weight:600}
+.cc .home .tsbar{display:flex;gap:5px;margin-top:6px}.cc .home .tsbar i{flex:1;height:5px;background:#1b2128}
+.cc .home .tsbar[data-lv="1"] i:nth-child(1),.cc .home .tsbar[data-lv="2"] i:nth-child(-n+2),.cc .home .tsbar[data-lv="3"] i{background:var(--green);box-shadow:0 0 8px rgba(0,216,146,.5)}
+.cc .home .tsbar[data-lv="1"] i:nth-child(1){background:var(--amber);box-shadow:0 0 8px rgba(232,182,74,.4)}
+.cc .home .tstep .btn{align-self:flex-start;margin-top:6px}
+.cc .home .tsnote{max-width:760px;margin:26px 0 0;color:var(--silver);font-size:16px;line-height:1.5}
+@media (max-width:900px){.cc .home .tladder{grid-template-columns:1fr}}

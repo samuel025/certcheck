@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CertCheck — certificates anyone can verify</title>
-<meta name="description" content="Issue certificates anyone can check forever, with no personal data on-chain. Learn circuits and earn a passport verified by TapeOut. Built on X Layer.">
+<meta name="description" content="Certificates for what people attended, passports for what people can prove. Tamper-proof certificates anyone can issue, and skill passports an X Layer processor checks. No personal data on-chain.">
 <link rel="icon" href="data:,">
 <style>
 /* FirstTape — dark, terminal-grade. Flat surfaces, 1px hairlines, one green LED.
@@ -1208,12 +1208,28 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 .cc .home .blade{padding:8px 0 6px;gap:5px}.cc .home .blade .nm{font-size:9px;letter-spacing:.12em}.cc .home .blade .hx{font-size:8px}
 @media (max-width:640px){.cc .home .blades{height:130px}}
 @media (prefers-reduced-motion:reduce){.cc .home .mkstamp.go,.cc .home .mke.chain.lit{animation:none!important}.cc .home .mkstamp.go{opacity:1}}
+
+/* ===== trust ladder ===== */
+.cc .home .tladder{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:end;margin-top:30px}
+.cc .home .tstep{position:relative;display:flex;flex-direction:column;gap:10px;padding:22px 22px 20px;background:linear-gradient(180deg,#12171c,#0b0e12);border:1px solid #232a32;transition:border-color .25s,transform .25s}
+.cc .home .tstep.t1{min-height:300px}.cc .home .tstep.t2{min-height:365px}.cc .home .tstep.t3{min-height:430px}.cc .home .tstep.t3{border-color:#1f6b52;box-shadow:0 0 70px rgba(0,216,146,.1)}
+.cc .home .tstep:hover{border-color:var(--green);transform:translateY(-4px)}
+.cc .home .tstep .tsn{font:600 10.5px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--green)}
+.cc .home .tstep h3{font:400 24px/1.15 var(--serif);margin:0;color:var(--bone)}
+.cc .home .tstep p{margin:0;color:var(--silver);font-size:14.5px;line-height:1.5}
+.cc .home .tstep .tswho{font:12px var(--mono);color:var(--fog);margin-top:auto;padding-top:8px}.cc .home .tstep .tswho b{color:var(--bone);font-weight:600}
+.cc .home .tsbar{display:flex;gap:5px;margin-top:6px}.cc .home .tsbar i{flex:1;height:5px;background:#1b2128}
+.cc .home .tsbar[data-lv="1"] i:nth-child(1),.cc .home .tsbar[data-lv="2"] i:nth-child(-n+2),.cc .home .tsbar[data-lv="3"] i{background:var(--green);box-shadow:0 0 8px rgba(0,216,146,.5)}
+.cc .home .tsbar[data-lv="1"] i:nth-child(1){background:var(--amber);box-shadow:0 0 8px rgba(232,182,74,.4)}
+.cc .home .tstep .btn{align-self:flex-start;margin-top:6px}
+.cc .home .tsnote{max-width:760px;margin:26px 0 0;color:var(--silver);font-size:16px;line-height:1.5}
+@media (max-width:900px){.cc .home .tladder{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div id="landing">
   <header class="bar">
-    <a class="logo" href="#" aria-label="CertCheck home"><svg class="mark" viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><circle cx="7" cy="8" r="2.4" fill="#00d892"/><circle cx="15" cy="8" r="2.4" fill="none" stroke="#5d5e61"/><circle cx="23" cy="8" r="2.4" fill="#00d892"/></svg><span class="wordmark">certcheck</span><span class="ftag">Learn circuits</span></a>
+    <a class="logo" href="#" aria-label="CertCheck home"><svg class="mark" viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><circle cx="7" cy="8" r="2.4" fill="#00d892"/><circle cx="15" cy="8" r="2.4" fill="none" stroke="#5d5e61"/><circle cx="23" cy="8" r="2.4" fill="#00d892"/></svg><span class="wordmark">certcheck</span><span class="ftag">Passport track</span></a>
     <nav class="links" aria-label="Sections">
       <a href="#" id="toCerts">Certificates</a>
       <a href="#how">How it works</a>
@@ -1349,7 +1365,7 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 <!-- ============ GAME ============ -->
 <div id="game" hidden>
   <header class="gbar">
-    <a class="logo" href="#" aria-label="CertCheck home"><svg class="mark" viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><circle cx="7" cy="8" r="2.4" fill="#00d892"/><circle cx="15" cy="8" r="2.4" fill="none" stroke="#5d5e61"/><circle cx="23" cy="8" r="2.4" fill="#00d892"/></svg><span class="wordmark">certcheck</span><span class="ftag">Learn circuits</span></a>
+    <a class="logo" href="#" aria-label="CertCheck home"><svg class="mark" viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><circle cx="7" cy="8" r="2.4" fill="#00d892"/><circle cx="15" cy="8" r="2.4" fill="none" stroke="#5d5e61"/><circle cx="23" cy="8" r="2.4" fill="#00d892"/></svg><span class="wordmark">certcheck</span><span class="ftag">Passport track</span></a>
     <nav id="levelNav" aria-label="Levels"></nav>
     <div class="gright">
       <div class="rankchip" title="Your rank"><span id="hudRank">Newcomer</span><span class="xpbar"><i id="xpFill"></i></span><span id="xpText" class="cap">0 / 250 XP</span></div>
@@ -1429,7 +1445,7 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 
 <!-- ============ VERIFY ============ -->
 <div id="verify" hidden>
-  <header class="bar"><a class="logo" href="#"><svg class="mark" viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><circle cx="7" cy="8" r="2.4" fill="#00d892"/><circle cx="15" cy="8" r="2.4" fill="none" stroke="#5d5e61"/><circle cx="23" cy="8" r="2.4" fill="#00d892"/></svg><span class="wordmark">certcheck</span><span class="ftag">Learn circuits</span></a>
+  <header class="bar"><a class="logo" href="#"><svg class="mark" viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><circle cx="7" cy="8" r="2.4" fill="#00d892"/><circle cx="15" cy="8" r="2.4" fill="none" stroke="#5d5e61"/><circle cx="23" cy="8" r="2.4" fill="#00d892"/></svg><span class="wordmark">certcheck</span><span class="ftag">Passport track</span></a>
     <div class="cta"><a class="btn ghost" href="#judges">For judges</a><a class="btn primary" href="#play">Open course</a></div></header>
   <main class="wrap pg">
     <span class="badge" id="vBadge">Reads the chain directly</span>
@@ -1461,7 +1477,7 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 
 <!-- ============ JUDGES ============ -->
 <div id="judges" hidden>
-  <header class="bar"><a class="logo" href="#"><svg class="mark" viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><circle cx="7" cy="8" r="2.4" fill="#00d892"/><circle cx="15" cy="8" r="2.4" fill="none" stroke="#5d5e61"/><circle cx="23" cy="8" r="2.4" fill="#00d892"/></svg><span class="wordmark">certcheck</span><span class="ftag">Learn circuits</span></a>
+  <header class="bar"><a class="logo" href="#"><svg class="mark" viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><circle cx="7" cy="8" r="2.4" fill="#00d892"/><circle cx="15" cy="8" r="2.4" fill="none" stroke="#5d5e61"/><circle cx="23" cy="8" r="2.4" fill="#00d892"/></svg><span class="wordmark">certcheck</span><span class="ftag">Passport track</span></a>
     <div class="cta"><a class="btn ghost" href="#learners">Verify on-chain</a><a class="btn primary" href="#play">Open course</a></div></header>
   <main class="wrap pg">
     <span class="badge">Checkable claims</span>
@@ -1539,7 +1555,7 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 <header class="bar">
   <a class="logo" href="#" aria-label="Home"><svg viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><path d="M7 8.5l3 3 6-7" fill="none" stroke="#00d892" stroke-width="2"/></svg>certcheck</a>
   <nav class="tabs" aria-label="Sections">
-    <a href="#issue" data-tab="issue">Issue</a><a href="#verify" data-tab="verify">Verify</a><a href="#manage" data-tab="manage">Manage</a><a href="#pricing" data-tab="pricing">Pricing</a><a href="#play" data-tab="learn">Learn circuits</a><a href="#exam" data-tab="exam">Final exam</a>
+    <a href="#issue" data-tab="issue">Issue</a><a href="#verify" data-tab="verify">Verify</a><a href="#manage" data-tab="manage">Manage</a><a href="#pricing" data-tab="pricing">Pricing</a><a href="#play" data-tab="learn">Earn a passport</a><a href="#exam" data-tab="exam">Final exam</a>
   </nav>
   <span class="chip" id="netChip">…</span>
 </header>
@@ -1552,7 +1568,7 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
       <div class="hl">
         <p class="live"><i class="pulse"></i>Live on X Layer · registry <a class="ulink" href="https://www.oklink.com/xlayer/address/0xF965f9Fd3A6F36E000abE1288aE1363B9F920670" target="_blank" rel="noopener">0xF965…0670</a></p>
         <h1>Credentials that <em>prove themselves.</em></h1>
-        <p class="lede">Issue certificates anyone can verify in seconds, with no personal data on-chain. Or learn circuits, take an exam only your wallet can pass, and earn a passport that <b>TapeOut</b> checks for you.</p>
+        <p class="lede"><b>Certificates for what people attended. Passports for what people can prove.</b> Issue tamper-proof certificates in minutes, with no personal data on-chain. Or earn a skill passport that an X Layer processor checks, with no issuer to trust.</p>
         <div class="row ctas"><a class="btn primary" href="#issue">Issue certificates</a><a class="btn ghost" href="#verify">Check a certificate</a></div>
 
         <div class="hterm" id="fTerm">
@@ -1614,6 +1630,38 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
   <!-- ============ STATEMENT ============ -->
   <div class="hwrap statement hreveal">
     <p class="hbig"><strong>A PDF can be faked in a minute. A database can vanish in a day.</strong> <span>A fingerprint on a public chain can be checked by anyone, for as long as the chain lives.</span></p>
+  </div>
+
+  <!-- ============ TRUST LADDER ============ -->
+  <div class="hwrap hreveal" id="hLadder">
+    <h2 class="sect">One question decides how much a credential is worth: who do you have to trust?</h2>
+    <div class="tladder">
+      <article class="tstep t1">
+        <span class="tsn">Rung 1 · Attended</span>
+        <h3>Attendance certificate</h3>
+        <p>A bootcamp, a meetup or a workshop hands out names. You paste a list, we fingerprint it, and the batch goes on-chain.</p>
+        <div class="tsbar" data-lv="1"><i></i><i></i><i></i></div>
+        <p class="tswho">Trust needed: <b>the organizer</b></p>
+        <a class="btn ghost" href="#issue">Issue certificates</a>
+      </article>
+      <article class="tstep t2">
+        <span class="tsn">Rung 2 · Completed</span>
+        <h3>Certificate that carries a skill</h3>
+        <p>The same certificate, with a skill claim inside: a circuit and an exam seed that anyone can re-run against the chain.</p>
+        <div class="tsbar" data-lv="2"><i></i><i></i><i></i></div>
+        <p class="tswho">Trust needed: <b>the organizer, plus the chain</b></p>
+        <a class="btn ghost" href="#verify">Check one</a>
+      </article>
+      <article class="tstep t3">
+        <span class="tsn">Rung 3 · Proven</span>
+        <h3>Skill passport</h3>
+        <p>You build circuits in the course, then take an exam only your wallet can pass. A TapeOut processor runs it. Nobody signs anything.</p>
+        <div class="tsbar" data-lv="3"><i></i><i></i><i></i></div>
+        <p class="tswho">Trust needed: <b>only the chain</b></p>
+        <a class="btn primary" href="#play">Earn a passport</a>
+      </article>
+    </div>
+    <p class="tsnote">Most credentials stop at rung 1. CertCheck covers the whole ladder, so an organizer can start at the top rung they can offer and a learner can climb without leaving.</p>
   </div>
 
   <!-- ============ COMPARE ============ -->

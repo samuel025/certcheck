@@ -212,3 +212,34 @@
 @media (hover:hover){.cc .home .blade:not([data-state=idle]):hover{transform:translateY(-12px);border-color:var(--green)}}
 @media (max-width:640px){.cc .home .blades{height:210px;gap:4px}.cc .home .blade .hx{display:none}.cc .home .blade .nm{font-size:9px}}
 @media (prefers-reduced-motion:reduce){.cc .home .blades::after,.cc .home .blade{animation:none!important}}
+
+/* ===== hero v6: the Merkle scene (a real SHA-256 tree, animated) ===== */
+.cc .home .mkscene{position:relative;margin:0 0 10px;padding:0 0 8px;border-bottom:1px solid #1d2329}
+.cc .home .mkhead{display:flex;justify-content:space-between;align-items:center;font:600 10.5px var(--mono);letter-spacing:.14em;color:var(--silver);padding:2px 2px 4px}
+.cc .home .mkres{font-weight:700;color:var(--fog)}.cc .home .mkres.ok{color:var(--green)}.cc .home .mkres.bad{color:var(--coral)}
+.cc .home #mkSvg{display:block;width:100%;height:auto}
+.cc .home .mkgrid{stroke:rgba(255,255,255,.03);stroke-width:1}
+.cc .home .mke{stroke:#252d35;stroke-width:2;fill:none;transition:stroke .3s}
+.cc .home .mke.lit{stroke:#1f7a5c}.cc .home .mke.path{stroke:var(--green);stroke-width:3;filter:drop-shadow(0 0 5px rgba(0,216,146,.8))}.cc .home .mke.bad{stroke:var(--coral);stroke-width:3;filter:drop-shadow(0 0 5px rgba(255,107,107,.8))}
+.cc .home .mke.chain{stroke-dasharray:5 5}.cc .home .mke.chain.lit{stroke:var(--green);animation:mkflow .8s linear infinite}
+@keyframes mkflow{to{stroke-dashoffset:-20}}
+.cc .home .mkn rect{fill:#11161b;stroke:#2f3841;stroke-width:1.6;transition:all .25s}.cc .home .mkn text{font:600 11px var(--mono);fill:#5f6972;letter-spacing:.04em}
+.cc .home .mkn.l3 text{font-size:13px}
+.cc .home .mkn.lit rect{stroke:#1f7a5c;fill:#0c211b}.cc .home .mkn.lit text{fill:#7fe3c1}
+.cc .home .mkn.path rect{stroke:var(--green);fill:#0d2d24;filter:drop-shadow(0 0 7px rgba(0,216,146,.6))}.cc .home .mkn.path text{fill:#b8ffe6}
+.cc .home .mkn.sib rect{stroke:var(--amber);fill:#241d0d}.cc .home .mkn.sib text{fill:var(--amber)}
+.cc .home .mkn.bad rect{stroke:var(--coral);fill:#2a1316;filter:drop-shadow(0 0 7px rgba(255,107,107,.6))}.cc .home .mkn.bad text{fill:#ffb0b0}
+.cc .home .mkname{font:9.5px var(--mono);fill:#5a636c;letter-spacing:.04em}
+.cc .home .mkdot{fill:#fff;filter:drop-shadow(0 0 8px var(--green))}
+.cc .home .mkchain rect{fill:#0e1317;stroke:#2f3841;stroke-width:1.6;transition:all .3s}.cc .home .mkchain text{font:700 9.5px var(--mono);fill:#6b747d;letter-spacing:.1em;transition:fill .3s}
+.cc .home .mkchain.on rect{stroke:var(--green);fill:#0d2d24;filter:drop-shadow(0 0 8px rgba(0,216,146,.55))}.cc .home .mkchain.on text{fill:var(--green)}
+.cc .home .mkforged{font:600 10.5px var(--mono);fill:var(--coral);letter-spacing:.04em}
+.cc .home .mkstamp{position:absolute;z-index:6;right:14px;top:206px;border:3px solid var(--green);color:var(--green);padding:5px 14px;font:800 20px var(--mono);letter-spacing:.16em;display:flex;flex-direction:column;align-items:center;background:rgba(5,22,17,.88);transform:rotate(-8deg) scale(1.8);opacity:0;pointer-events:none;box-shadow:0 0 30px rgba(0,216,146,.35)}
+.cc .home .mkstamp span{font-size:9px;letter-spacing:.18em;font-weight:600}.cc .home .mkstamp.bad{border-color:var(--coral);color:var(--coral);background:rgba(34,10,12,.9);box-shadow:0 0 30px rgba(255,107,107,.35)}
+.cc .home .mkstamp.go{animation:mkstamp 2.2s cubic-bezier(.2,.8,.2,1) both}
+@keyframes mkstamp{0%{opacity:0;transform:rotate(-8deg) scale(1.9)}12%{opacity:1;transform:rotate(-8deg) scale(1)}80%{opacity:1}100%{opacity:0;transform:rotate(-8deg) scale(1)}}
+/* the cage below becomes the compact tray for the live demo */
+.cc .home .blades{height:178px;padding-top:4px}
+.cc .home .blade{padding:8px 0 6px;gap:5px}.cc .home .blade .nm{font-size:9px;letter-spacing:.12em}.cc .home .blade .hx{font-size:8px}
+@media (max-width:640px){.cc .home .blades{height:130px}}
+@media (prefers-reduced-motion:reduce){.cc .home .mkstamp.go,.cc .home .mke.chain.lit{animation:none!important}.cc .home .mkstamp.go{opacity:1}}

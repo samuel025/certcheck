@@ -369,10 +369,15 @@
       </div>
 
       <figure class="hr" id="fRackFig">
-        <figcaption class="figcap"><b>Fig. 1</b> The certificate cage</figcaption>
+        <figcaption class="figcap"><b>Fig. 1</b> A batch, proven in motion</figcaption>
         <svg class="conn" id="fConn" viewBox="0 0 160 300" preserveAspectRatio="none" aria-hidden="true"><path id="fConnPath" d="M0 250 H70 L100 190 H160"/><circle r="3.5" id="fConnDot" cx="0" cy="250"/></svg>
         <div class="chassis" id="fRack" data-state="idle">
-          <div class="rackhead"><span class="plate">CC&nbsp;·&nbsp;CARD&nbsp;CAGE</span><span class="rstat" id="rStat">AWAITING BATCH</span></div>
+          <div class="rackhead"><span class="plate">CC&nbsp;·&nbsp;VERIFICATION&nbsp;RACK</span><span class="rstat" id="rStat">AWAITING BATCH</span></div>
+          <div class="mkscene" id="mkScene">
+            <div class="mkhead"><span id="mkStep">1 · HASH THE CERTIFICATES</span><span id="mkRes" class="mkres"></span></div>
+            <svg id="mkSvg" viewBox="0 0 560 252" role="img" aria-label="A Merkle tree: eight certificates hash up to one root, the root is anchored on X Layer, one certificate is proven, then a forged one is rejected"></svg>
+            <div class="mkstamp" id="mkStamp" aria-hidden="true"><b></b><span></span></div>
+          </div>
           <div class="blades" id="fBlades"></div>
           <div class="rackfoot"><span>ROOT</span><code id="rRoot">0x————————————</code></div>
         </div>
@@ -724,6 +729,7 @@
 <script src="cc/challenge.js"></script>
 <script src="cc/app.js"></script>
 <script src="cc/pricing.js"></script>
+<script src="cc/mk.js"></script>
 <script src="cc/home.js"></script>
 </body>
 </html>

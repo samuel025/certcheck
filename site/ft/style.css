@@ -733,3 +733,5 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 .lamp.on i{background:var(--green);border-color:var(--green);box-shadow:0 0 14px var(--green)}
 .juror.on i{background:var(--coral);border-color:var(--coral);box-shadow:0 0 12px var(--coral)}
 .mseg{width:62px;height:108px}.mseg path{fill:#20252b;transition:fill .15s,filter .15s}.mseg path.on{fill:var(--green);filter:drop-shadow(0 0 5px var(--green))}
+.logo .ftag{margin-left:10px;padding:2px 8px;border:1px solid var(--steel);font:600 10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--green);align-self:center}
+@media (max-width:560px){.logo .ftag{display:none}}

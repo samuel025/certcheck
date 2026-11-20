@@ -1,35 +1,198 @@
 # CertCheck
 
-**Certificates for what people attended. Passports for what people can prove.** Tamper-proof certificates anyone can issue and anyone can verify, with no personal data on-chain and nothing that depends on us staying online, plus a **skill passport** earned in the bundled Circuits course and checked by the **TapeOut** processor. Built on X Layer for the TapeOut Accelerate hackathon.
+**Certificates for what people attended. Passports for what people can prove.**
 
-> **Hackathon MVP. Unaudited contracts. Do not rely on them for high-stakes credentials yet.**
+CertCheck is one product with three rungs of trust. Anyone can issue tamper-proof certificates in minutes, anyone can verify them forever, and learners can earn a **skill passport** that a TapeOut processor on X Layer checks, with no issuer to trust. Nothing personal goes on-chain, and nothing depends on us staying online.
 
-## One product, three rungs of trust
-The question that decides what a credential is worth is *who you have to trust*. Rung 1, **attended**: an attendance certificate, trust the organizer. Rung 2, **completed**: the same certificate carrying a skill claim anyone can re-run, trust the organizer plus the chain. Rung 3, **proven**: a skill passport, trust only the chain. Two ways in:
-1. **Certificates for anyone** (`#issue`, `#verify`, `#manage`). An organizer uploads a list; each person gets a link and QR code; anyone can check it against a fingerprint published on X Layer. Optional: require a TapeOut skill challenge (each student gets a different 3-input logic function, builds it, tapes it out; the certificate carries the circuit id and verifiers re-run it with TapeOut's `eval`).
-2. **Learn circuits, earn a passport** (`#play`, `#exam`). The Circuits course (16 levels, plus a game fun pack: workshop machines, a repair shop, friend challenges, a daily result to share, a puzzle maker and chip cards, all in `site/ft/fun.js` and free of XP/progress side effects; levels 6-16 are checked on-chain). The final exam is derived from the learner's own wallet. The passport link proves, from chain state alone: the wallet cleared enough on-chain course levels (LessonVerifier), its exam circuit computes its own function (TapeOut `eval`), and the wallet still owns that circuit.
+Built on X Layer for the TapeOut Accelerate hackathon.
 
-One verify page (`#verify`) accepts certificate links (`#c=`) and passport links (`#p=`).
+> **Hackathon MVP. The contracts are unaudited. Do not rely on them for high-stakes credentials yet.** See [Status](#status-read-this-first) for what is and is not proven.
 
-## How the certificates work
-Each credential gets a random salt and is hashed into a Merkle tree in the browser (`site/cc/core.js`, format in `docs/FORMAT.md`). Only the root, a count and a label go on-chain (`CertRegistry`, keyed by issuer + root so nobody can squat a root). Each person holds their own proof; names and emails never leave the organizer's browser.
+---
 
-## What a result means
-- **Certificate valid:** this issuer address recorded this certificate. It does not prove the issuer is who they claim; compare the address with the organization's own site.
-- **Passport verified:** this wallet cleared the course levels and holds a correct exam circuit. It cannot prove who built the circuit (a friend can build it and transfer it in).
-- Only the configured TapeOut processor is trusted for skill proofs.
+## Contents
+1. [Why this exists](#why-this-exists)
+2. [The three rungs of trust](#the-three-rungs-of-trust)
+3. [Tour of the site](#tour-of-the-site)
+4. [How a certificate works](#how-a-certificate-works)
+5. [Skill proofs and the passport](#skill-proofs-and-the-passport)
+6. [The Circuits course and game](#the-circuits-course-and-game)
+7. [Contracts and the revenue model](#contracts-and-the-revenue-model)
+8. [Architecture](#architecture)
+9. [Repository layout](#repository-layout)
+10. [Run, build, test, deploy](#run-build-test-deploy)
+11. [What a result means (and does not)](#what-a-result-means-and-does-not)
+12. [Status: read this first](#status-read-this-first)
+13. [Docs](#docs)
 
-## Status (be honest)
-- Registry (original, free) on X Layer mainnet: `0xF965f9Fd3A6F36E000abE1288aE1363B9F920670`. Paid registry v2 (fee per certificate with a free allowance, credits, verified-issuer listing, public revenue totals): `0x00ed052771048b0895C1f22Ac6E9654805E414a5`, byte-identical to the tested code; nothing collected yet. FirstTape contracts also on mainnet (see `site/ft/config.js`).
-- Tested: core (55), encoding (12), QR vs the `qrencode` reference, contracts (36: the free registry and the paid registry v2, including a fuzzed fee check and a money-conservation property), the whole certificate flow on a local chain (62), skill and passport flows on a fork of live X Layer with the real processor and LessonVerifier (`tests/e2e-skill.mjs`, `tests/e2e-passport.mjs`), and 13 browser suites for the course and routing (`tests/ft/`).
-- Not done: a real-wallet run of the certificate and passport flows on mainnet, a public hosting address (certificate links embed the page's own URL), real users, an issuer directory.
-- Publishing a batch needs a wallet with a few cents of OKB (see `#wallet`).
+---
 
-## Layout
-- `site/ft/` the Circuits course and game (levels, on-chain flow, fun pack, hero, sponsor and judges pages). `site/cc/` certificates, skill challenge, passport, QR. `site/netlist.js` shared. One bundle: `node scripts/bundle.js` writes `dist/index.html` (single file, no external assets).
-- `contracts/` Foundry: `CertRegistry.sol` (free, v1) and `CertRegistryV2.sol` (paid: fee after a free allowance, prepaid credits, escrowed verified-issuer reviews, public `stats()`) + tests (`forge test`; run `forge install foundry-rs/forge-std` first). FirstTape's `LessonVerifier` and `NandFaucet` live in the FirstTape repo and are already deployed.
-- `tests/` node and browser tests (need `puppeteer-core`, Chrome, `anvil`, `cast`). `scripts/deploy.sh` deployed v1; `scripts/deploy-v2.sh preflight|deploy` deploys v2 (keystore only). `scripts/build-demo.sh` builds the demo bundle used by the FirstTape-side tests.
-- `docs/FORMAT.md` the credential and skill-proof format. `docs/OWNER.md` running the paid registry (prices, approving reviews, withdrawing). `docs/DEPLOY.md` hosting and hackathon eligibility notes. `docs/submission.md` the hackathon submission draft.
+## Why this exists
+A PDF certificate can be faked in a minute. A credential platform's database can vanish in a day, and it knows your name. A fingerprint on a public chain can be checked by anyone for as long as the chain lives, and it need not contain a single personal detail.
 
-## Run
-`cd dist && python3 -m http.server 8082`, then open http://localhost:8082. Secrets: keep keys in a Foundry keystore, never in the repo.
+CertCheck publishes only a fingerprint of a whole batch (a Merkle root). Each person holds their own proof. Change one letter of a name and the check fails.
+
+The second idea is the passport. A certificate asks you to trust whoever issued it. A circuit that a processor has run needs no such trust, so the course makes a credential that proves itself.
+
+## The three rungs of trust
+The question that decides what a credential is worth is *who you have to trust*.
+
+| Rung | What it is | Trust needed | Where |
+|---|---|---|---|
+| 1. **Attended** | Attendance or completion certificate for a workshop, bootcamp or meetup | The organizer | `#issue`, `#verify` |
+| 2. **Completed** | The same certificate, carrying a skill claim anyone can re-run against the chain | The organizer, plus the chain | `#issue` (skill challenge), `#verify` |
+| 3. **Proven** | A skill passport: course levels cleared on-chain plus an exam circuit run by TapeOut | Only the chain | `#play`, `#exam`, `#verify` |
+
+Most credentials stop at rung 1. The product covers the whole ladder, so an organizer can start at the top rung they can offer and a learner can climb without leaving.
+
+## Tour of the site
+One single-page site, hash-routed. Open it and use the top menu, or go straight to a route.
+
+| Route | What it does |
+|---|---|
+| `#` | Home: live demo (issue a certificate, then try to forge it), an animated Merkle-tree hero, the trust ladder, a pricing teaser, the passport card |
+| `#issue` | Paste or upload a list (name, course, date). Get one link and one QR per person, plus a printable sheet. Shows a fee quote before you publish |
+| `#verify` | Paste a certificate link (`#c=`) or passport link (`#p=`) and get a plain verdict |
+| `#manage` | Your batches, revocation of a batch or a single certificate |
+| `#pricing` | Plans, a calculator, prepaid credits, verified-issuer request, live registry totals |
+| `#wallet` | A short guide to getting a wallet and a few cents of OKB |
+| `#exam` | The final exam: a circuit derived from your own wallet |
+| `#play` | The Circuits game (16 levels plus the fun pack) |
+| `#circuits` | Course overview, ranks, and the sponsor section (live on-chain numbers) |
+| `#learners` | Look up any wallet's on-chain course progress |
+| `#judges` | Every claim, its honest status, and how to check it |
+
+Game routes: `#daily` (today's puzzle), `#race=<level>.<gates>` (a friend's challenge), `#puzzle=<table>` (a friend's puzzle).
+
+## How a certificate works
+1. **Fingerprint.** For each person the browser builds a leaf: `SHA-256(0x00 || canon(issuer, name, course, date, salt, skill))`, with a random 16-byte salt so names cannot be guessed against the root.
+2. **Batch.** Leaves fold into a Merkle tree (`node = SHA-256(0x01 || left || right)`). The 0x00/0x01 prefixes separate leaves from nodes.
+3. **Publish.** One transaction stores `(issuer, root, count, label)` in the registry. No names, no emails, no dates.
+4. **Hand out.** Each person gets a link (`#c=` plus the proof) and a QR code. The proof is just the credential fields and the sibling hashes up to the root.
+5. **Verify.** Anyone recomputes the leaf, walks the proof, and checks that the root was recorded by that issuer and has not been revoked. No CertCheck server is involved. The page only reads the chain.
+
+```
+names + salts --> leaves --> tree --> ROOT --on-chain--> registry (issuer, root, count, label)
+                                         ^
+person holds:  their fields + sibling hashes -----> recompute root -----> compare
+```
+
+The registry keys each batch by `(issuer, root)`, so nobody can claim someone else's root. The format is public and small (`docs/FORMAT.md`), with known-answer test vectors, so anyone can write their own verifier.
+
+## Skill proofs and the passport
+**Skill challenge (rung 2).** An organizer can require a TapeOut skill. Each student gets a *different* 3-input logic function, derived from a seed, builds it as a circuit, and tapes it out. The certificate carries the circuit id, and verifiers re-run it with TapeOut's free `eval(circuitId, input)` and compare it with the expected truth table. This stops copying between students. It cannot stop someone building the circuit for them.
+
+**Passport (rung 3).** `#p=<wallet>.<circuitId>` proves, from chain state alone:
+1. the wallet cleared at least 3 on-chain course levels (the `LessonVerifier` contract);
+2. its exam circuit, derived from the wallet itself, computes its own function (TapeOut `eval`);
+3. the wallet still owns that circuit.
+
+A verifier only trusts the configured TapeOut processor. A credential naming any other contract shows as "not checked".
+
+## The Circuits course and game
+A 16-level course in four worlds, from NAND to adders, ending in real FabX mining tasks (GC-001, GC-003, GC-006).
+
+- **Levels 1 to 5** run in the browser with no wallet. **Levels 6 to 16** are checked on-chain: the learner tapes out a circuit on TapeOut and submits it, and `LessonVerifier` evaluates it.
+- **Progression:** XP, ranks, stars against par, streaks, a daily challenge, 20 badges, optional sound, a share card.
+- **Paste and optimize:** paste a hex netlist, see it as gates, strip redundant ones.
+- **Fun pack** (`site/ft/fun.js`; it never touches XP or the 16-level progression):
+  - *Workshop:* four machines that react to your circuit: a combination lock, a lift controller, a jury of three, a seven-segment digit.
+  - *Repair shop:* four broken circuits with one wrong wire each; fix them in as few edits as you can.
+  - *Friend challenges and the daily result:* shareable links, and a Wordle-style emoji result.
+  - *Puzzle maker:* turn a sandbox circuit's truth table into a link a friend can solve.
+  - *Gate golf:* clears are named birdie, par and so on; a golf score across levels.
+  - *Chip cards:* a downloadable PNG of your circuit drawn as a microchip.
+
+## Contracts and the revenue model
+All on X Layer mainnet (chain 196).
+
+| Contract | Address | Role |
+|---|---|---|
+| `CertRegistryV2` | `0x00ed052771048b0895C1f22Ac6E9654805E414a5` | **Paid registry** (current) |
+| `CertRegistry` (v1) | `0xF965f9Fd3A6F36E000abE1288aE1363B9F920670` | Free registry; the verifier reads v2 first, then v1 |
+| `LessonVerifier` | `0x7F6f07f40e14E9A8D2E2b77170Fe748Bd9C4d6d9` | Records which course levels each wallet cleared (from the FirstTape repo) |
+| TapeOut processor | `0x9e2849c04a513fe64db07521cbe52d078d905c0e` | Runs circuits; trusted for skill proofs |
+| NAND faucet | `0xBC58802002307fD80048e93A6475335eC65a4f39` | 40 free NAND per wallet, for tape-out costs |
+
+**`CertRegistryV2`:**
+- **Fee per certificate:** 0.00024 OKB after a free allowance of 25 per issuer per 30 days. `publish` keeps the same selector as v1.
+- **Prepaid credits:** `buyCredits(forIssuer, n)`, so a sponsor can pay for someone else's batch.
+- **Verified-issuer review:** escrowed, 0.12 OKB; the owner approves (`approveVerification`) or rejects, and a rejected request is refundable.
+- **Public totals:** `stats()` returns fees, batches, certificates, issuers, verified, withdrawn, balance.
+- **`withdraw()`:** anyone can call it; only earned fees go to the treasury, never escrow or refunds.
+- **Owner caps:** price at most 0.01 OKB, free allowance at most 1,000, verification fee at most 10 OKB. Two-step ownership.
+
+**The prices are hypotheses, not market-tested.** Secondary revenue ideas: sponsored course levels and a sponsor-funded NAND faucet (see the `#circuits` sponsor section). No fees have been collected and no sponsor has signed.
+
+## Architecture
+- **No backend.** The site is one self-contained `dist/index.html` with no external assets (system fonts only). It reads the chain over plain JSON-RPC `eth_call`, and a wallet is only needed to publish, tape out or buy.
+- **Hash routing,** so it works from any static host.
+- **Browser crypto:** SHA-256 via SubtleCrypto, Merkle tree, QR encoder (verified against `qrencode`), NAND netlist encoder and optimizer (`site/netlist.js`).
+- **Scoped CSS:** certificate styles live under `.cc`, the home page under `.cc .home`, the game in `site/ft/style.css`. Class names are global across these files, so check for collisions before adding one.
+- **Bundle:** `node scripts/bundle.js` inlines the scripts and styles into `dist/index.html`.
+
+## Repository layout
+```
+site/
+  index.html          the whole page: home, certificates, course, game, judges
+  netlist.js          NAND netlist encode / decode / optimize / evaluate (shared)
+  cc/                 CertCheck: core.js (crypto, tree), chain.js (RPC, both registries),
+                      app.js (issue, verify, manage), pricing.js, skill.js, passport.js,
+                      challenge.js, board.js, qr.js, config.js, home.js, mk.js, home.css, style.css
+  ft/                 Circuits course: levels.js, app.js (board), game.js (XP, badges), fun.js (fun pack),
+                      hero.js, landing.js, proof.js (on-chain reads), chain.js, card.js, config.js, style.css
+contracts/
+  src/                CertRegistry.sol, CertRegistryV2.sol
+  test/               CertRegistry.t.sol, CertRegistryV2.t.sol
+scripts/              bundle.js, build-demo.sh, deploy.sh (v1), deploy-v2.sh (v2)
+tests/                core, chain, qr, e2e (certificate flow), e2e-skill, e2e-passport, e2e-pay,
+                      fork-skill, ft/ (browser suites), manual/ (live read-only check, QR scan)
+docs/                 FORMAT.md, OWNER.md, DEPLOY.md, submission.md
+```
+The original FirstTape repo (`../firsttape`) still holds the `LessonVerifier` and `NandFaucet` sources. They are already deployed and are not redeployed here.
+
+## Run, build, test, deploy
+**Run locally**
+```
+node scripts/bundle.js                     # writes dist/index.html
+cd dist && python3 -m http.server 8082     # open http://localhost:8082
+```
+**Contract tests** (Foundry; run `forge install foundry-rs/forge-std` once):
+```
+cd contracts && forge test                 # 36 tests, includes a fuzzed fee check and a money-conservation property
+```
+**Node and browser tests** (need Chrome, `puppeteer-core`, `anvil`, `cast`, `forge`):
+```
+node tests/core.test.mjs   node tests/chain.test.mjs   node tests/qr.test.mjs
+node tests/e2e.mjs         # whole certificate flow on a local chain
+node tests/e2e-skill.mjs   node tests/e2e-passport.mjs   node tests/e2e-pay.mjs
+```
+`bash scripts/build-demo.sh` builds a demo bundle with zero-address course contracts for the browser suites in `tests/ft/` (serve `dist-demo` and pass `BASE=http://localhost:8083`). `tests/manual/live-v2.mjs` is a read-only check of the live registry.
+
+**Deploy** (you run the spending step yourself; keys stay in a Foundry keystore, never in the repo):
+```
+scripts/deploy-v2.sh preflight             # read-only: balance, gas estimate, settings
+scripts/deploy-v2.sh deploy                # sends one transaction, writes the address into site/cc/config.js
+```
+Running the paid registry (prices, approving reviews, withdrawing) is in `docs/OWNER.md`. Hosting notes are in `docs/DEPLOY.md`.
+
+## What a result means (and does not)
+- **Certificate valid:** this issuer address recorded this certificate. It does **not** prove the issuer is who they claim; compare the address with the organization's own site. A "Verified" badge means the owner reviewed that issuer.
+- **Passport verified:** this wallet cleared the course levels and holds a correct exam circuit. It cannot prove who built the circuit; a friend can build it and transfer it in.
+- Privacy: only `(issuer, root, count, label)` is on-chain. Names, courses and dates live in the proof the holder keeps.
+
+## Status: read this first
+**Proven by tests:** the credential format with known-answer vectors; the certificate flow end to end on a local chain; the skill and passport flows on a fork of live X Layer with the real processor and `LessonVerifier`; the paid registry money path; 15 browser suites for the site and game; the live pages read the real registry correctly (read-only).
+
+**Not done, and you should not assume otherwise:**
+- A real-wallet run of the certificate and passport flows on mainnet.
+- A public hosting address. Certificate links embed the page's own URL, so real certificates must be issued from the final address.
+- Real users, real payments, or a signed sponsor. Prices are hypotheses.
+- The faucet top-up (sending NAND to the faucet) is untested.
+- An audit. An issuer directory.
+
+## Docs
+- [`docs/FORMAT.md`](docs/FORMAT.md): credential and skill-proof format, with test vectors.
+- [`docs/OWNER.md`](docs/OWNER.md): running the paid registry.
+- [`docs/DEPLOY.md`](docs/DEPLOY.md): hosting and hackathon eligibility.
+- [`docs/submission.md`](docs/submission.md): the hackathon submission draft.

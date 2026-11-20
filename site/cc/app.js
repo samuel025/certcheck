@@ -8,7 +8,7 @@
   const mkLink = a => { const x = document.createElement("a"); x.href = a.href; x.textContent = a.text; x.target = "_blank"; x.rel = "noopener"; return x; };
 
   // ---------- routing ----------
-  const VIEWS = ["home", "verify", "issue", "manage", "challenge", "wallet"];
+  const VIEWS = ["home", "verify", "issue", "manage", "challenge", "wallet", "pricing"];
   function route() {
     const h = location.hash;
     { const t = h.length > 1 ? document.getElementById(h.slice(1)) : null; if (["#play", "#learners", "#judges", "#circuits"].includes(h) || (t && document.getElementById("landing").contains(t))) return; }   // those pages belong to site/ft
@@ -72,15 +72,17 @@
     if (seq !== vSeq) return;
     if (!res.ok) { show("invalid", "Not valid", res.error ? "This is not a valid CertCheck proof." : "The details or the proof were changed, or this certificate was not issued as shown. Do not trust it.", [], ""); return; }
     const facts = [FACT("Name", p.name), FACT("Course", p.course || "—"), FACT("Date", p.date || "—"), FACT("Issuer", mkLink({href: X.explorerAddr(p.issuer), text: p.issuer}), true)];
-    const issuerNote = "A valid check proves this issuer address recorded this certificate. Make sure that address really belongs to the organization you expect, for example by comparing it with the address on their website.";
+    let issuerNote = "A valid check proves this issuer address recorded this certificate. Make sure that address really belongs to the organization you expect, for example by comparing it with the address on their website.";
     const sk = p.skill ? await CertSkill.check(p.skill) : null; if (seq !== vSeq) return;
     const skillFacts = sk ? skillFactsOf(sk) : [];
     if (!X.configured()) { show("demo", "Proof is correct (registry not checked)", "The mathematics checks out, but the on-chain registry isn't deployed in this build, so registration and revocation were not checked.", facts.concat(skillFacts), issuerNote); return; }
     let b, leafRev;
-    try { b = await X.readBatch(p.issuer, p.root); leafRev = b.found ? await X.readLeafRevoked(p.issuer, p.root, res.leaf) : false; }
+    try { b = await X.readBatch(p.issuer, p.root); leafRev = b.found ? await X.readLeafRevoked(p.issuer, p.root, res.leaf, b.reg) : false; }
     catch (e) { if (seq !== vSeq) return; show("offline", "Proof is correct, but the network is unreachable", "The proof itself checks out, but we couldn't reach X Layer to confirm the issuer registered it. Try again in a moment.", facts, ""); return; }
     if (seq !== vSeq) return;
     if (!b.found) { show("unregistered", "Not registered", "The proof is mathematically correct, but this issuer has not registered the batch on-chain. Until they do, it can't be trusted.", facts, issuerNote); return; }
+    let vi = null; try { vi = await X.issuerInfo(p.issuer); } catch {} if (seq !== vSeq) return;
+    if (vi && vi.verified) { const wrap = document.createElement("span"); wrap.append(document.createTextNode(vi.name + " · "), Object.assign(document.createElement("b"), {textContent: "verified issuer"})); if (vi.url) { wrap.append(document.createTextNode(" · ")); wrap.appendChild(mkLink({href: /^https?:\/\//i.test(vi.url) ? vi.url : "https://" + vi.url, text: vi.url})); } facts.splice(4, 0, FACT("Verified", wrap)); issuerNote = `CertCheck checked this organization (valid until ${new Date(vi.verifiedUntil * 1000).toISOString().slice(0, 10)}). A verified listing means we confirmed who controls this address.`; }
     facts.push(FACT("Registered", fmtDate(b.publishedAt)), FACT("Batch", `${b.label || "(no label)"} · ${b.count} certificate${b.count === 1 ? "" : "s"}`), FACT("Fingerprint", short(p.root), true));
     if (b.revoked || leafRev) { show("revoked", "Revoked", b.revoked ? "The issuer revoked this whole batch." : "The issuer revoked this certificate.", facts, ""); return; }
     facts.push(...skillFacts);
@@ -128,7 +130,7 @@
       k.append(cp, " ", qb, " ", mkLink({href: l.link, text: "Open"}));
     });
     $("moreRows").textContent = links.length > MAXROWS ? `Showing ${MAXROWS} of ${links.length}. Download the file for everyone.` : "";
-    $("results").hidden = false; say(h, "Done. Nothing has been sent anywhere yet.", "ok"); say($("pubMsg"), "", "");
+    $("results").hidden = false; say(h, "Done. Nothing has been sent anywhere yet.", "ok"); say($("pubMsg"), "", ""); refreshQuote();
   });
   // ---------- skill challenge (organizer) ----------
   let roster = [], passed = new Map();
@@ -198,6 +200,10 @@
   $("printAll").addEventListener("click", () => { if (!batch) return; if (batch.count > 200 && !confirm(`Print ${batch.count} certificates?`)) return; fillPrint(batch.credentials.map((_, i) => i)); window.print(); });
   $("dlLinks").addEventListener("click", () => download("certcheck-links.csv", "name,link\r\n" + links.map(l => csvEsc(l.name) + "," + csvEsc(l.link)).join("\r\n") + "\r\n", "text/csv"));
   $("dlProofs").addEventListener("click", () => download("certcheck-proofs.json", JSON.stringify(batch.credentials.map(c => C.toProof(batch, c)), null, 1), "application/json"));
+  async function refreshQuote() {
+    const el = $("pubQuote"); if (!batch) { el.textContent = ""; return; }
+    try { el.textContent = await CertPricing.quoteText(batch.credentials[0].issuer.toLowerCase(), batch.count); } catch { el.textContent = "Could not read the price right now. You will see the exact cost in your wallet."; }
+  }
   $("publishBtn").addEventListener("click", async () => {
     const m = $("pubMsg"); if (!batch) return;
     $("publishBtn").disabled = true;
@@ -207,10 +213,15 @@
       if (acct.toLowerCase() !== issuer) throw new Error(`Connect the issuer wallet (${issuer}). The connected wallet is ${acct}.`);
       if (!$("label").value.trim() && !confirm("Publish without a batch label?")) throw new Error("Cancelled.");
       if ((await X.readBatch(issuer, batch.root)).found) throw new Error("This batch is already published.");
-      say(m, "Confirm the transaction in your wallet…");
-      const tx = await X.send(acct, X.enc.publish(batch.root, batch.count, $("label").value.trim().slice(0, 80)));
-      m.className = "hint ok"; m.textContent = "Published. "; m.appendChild(mkLink({href: X.explorerTx(tx), text: "View transaction"}));
-    } catch (e) { say(m, e.message || String(e), "bad"); }
+      const q = await CertPricing.quoteText(issuer, batch.count); $("pubQuote").textContent = q; say(m, "Confirm the transaction in your wallet…");
+      const out = await X.publishTx(acct, batch.root, batch.count, $("label").value.trim().slice(0, 80));
+      m.className = "hint ok"; m.textContent = out.fee > 0n ? `Published. You paid ${CertPricing.fmtOKB(out.fee)} OKB. ` : "Published. "; m.appendChild(mkLink({href: X.explorerTx(out.hash), text: "View transaction"})); refreshQuote();
+    } catch (e) {
+      let msg = e.message || String(e);
+      if (/InsufficientFee|4c4e635c/i.test(msg)) msg = "The price changed while you were confirming. Nothing was charged. Refresh the quote and try again.";
+      else if (/Transaction failed/i.test(msg)) { msg = "The transaction did not go through, so nothing was published and no fee was charged (only the small network fee). The price may have changed while you were confirming."; try { msg += " " + await CertPricing.quoteText(batch.credentials[0].issuer.toLowerCase(), batch.count); } catch {} }
+      say(m, msg, "bad"); refreshQuote();
+    }
     $("publishBtn").disabled = false;
   });
 
@@ -221,9 +232,9 @@
     try {
       const p = parseInput($("mLink").value), r = await C.verifyCredential(p); if (!r.ok) throw new Error("That certificate is not valid, so there is nothing to revoke.");
       if (!X.configured()) throw new Error("Demo mode: the registry contract isn't deployed in this build.");
-      const acct = await asIssuer(p.issuer); if (!(await X.readBatch(p.issuer, p.root)).found) throw new Error("This batch was never published, so there is nothing to revoke.");
+      const acct = await asIssuer(p.issuer), held = await X.readBatch(p.issuer, p.root); if (!held.found) throw new Error("This batch was never published, so there is nothing to revoke.");
       if (!confirm(`Revoke the certificate for ${p.name}? This is permanent.`)) throw new Error("Cancelled.");
-      say(m, "Confirm in your wallet…"); const tx = await X.send(acct, X.enc.revokeLeaf(p.root, r.leaf));
+      say(m, "Confirm in your wallet…"); const tx = await X.revokeTx(acct, X.enc.revokeLeaf(p.root, r.leaf), held.reg);
       m.className = "hint ok"; m.textContent = "Revoked. "; m.appendChild(mkLink({href: X.explorerTx(tx), text: "View transaction"}));
     } catch (e) { say(m, e.message || String(e), "bad"); }
   });
@@ -232,9 +243,9 @@
     try {
       const root = $("mRoot").value.trim(); if (!/^0x[0-9a-fA-F]{64}$/.test(root)) throw new Error("Enter the 0x… batch fingerprint (66 characters).");
       if (!X.configured()) throw new Error("Demo mode: the registry contract isn't deployed in this build.");
-      const acct = await X.connect(); if (!(await X.readBatch(acct, root)).found) throw new Error("The connected wallet has not published this batch.");
+      const acct = await X.connect(), held = await X.readBatch(acct, root); if (!held.found) throw new Error("The connected wallet has not published this batch.");
       if (!confirm("Revoke the whole batch? Every certificate in it will show as revoked, permanently.")) throw new Error("Cancelled.");
-      say(m, "Confirm in your wallet…"); const tx = await X.send(acct, X.enc.revokeBatch(root));
+      say(m, "Confirm in your wallet…"); const tx = await X.revokeTx(acct, X.enc.revokeBatch(root), held.reg);
       m.className = "hint ok"; m.textContent = "Batch revoked. "; m.appendChild(mkLink({href: X.explorerTx(tx), text: "View transaction"}));
     } catch (e) { say(m, e.message || String(e), "bad"); }
   });

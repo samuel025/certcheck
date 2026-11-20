@@ -21,6 +21,21 @@ ok("decodeBytes reads an ABI-encoded bytes return", globalThis.CertChain.decodeB
 ok("tapeout(bytes,uint32,uint32) encoding (21 bytes)", E.tapeout("0x" + "00".repeat(21), 3, 1) === cast("calldata", "tapeout(bytes,uint32,uint32)", "0x" + "00".repeat(21), "3", "1"));
 ok("tapeout encoding for a 140-byte netlist (5 words)", E.tapeout("0x" + "ab".repeat(140), 3, 1) === cast("calldata", "tapeout(bytes,uint32,uint32)", "0x" + "ab".repeat(140), "3", "1"));
 ok("faucet and transistor balance encodings", E.claimed(A) === cast("calldata", "claimed(address)", A) && E.balanceOf(A, 0) === cast("calldata", "balanceOf(address,uint256)", A, "0"));
+// ---- v2 (pricing, credits, verified issuers, totals) ----
+const A2 = "0x" + "cd".repeat(20);
+ok("quote(address,uint32)", E.quote(A, 30) === cast("calldata", "quote(address,uint32)", A, "30"));
+ok("buyCredits(address,uint256)", E.buyCredits(A2, 1234) === cast("calldata", "buyCredits(address,uint256)", A2, "1234"));
+for (const [n, u] of [["Acme Bootcamp", "https://acme.example"], ["", ""], ["x".repeat(80), "y".repeat(120)], ["Cohorte été", "https://exemple.fr/é"], ["n".repeat(31), "u".repeat(33)]])
+  ok(`requestVerification("${n.slice(0, 12)}…", url ${u.length} chars)`, E.requestVerification(n, u) === cast("calldata", "requestVerification(string,string)", n, u));
+ok("no-argument and address-argument v2 calls", E.cancelVerification() === cast("calldata", "cancelVerification()") && E.claimRefund() === cast("calldata", "claimRefund()") && E.stats() === cast("calldata", "stats()") && E.pricePerCert() === cast("calldata", "pricePerCert()") && E.freeCerts() === cast("calldata", "freeCerts()") && E.verificationFee() === cast("calldata", "verificationFee()")
+  && E.issuerInfo(A) === cast("calldata", "issuerInfo(address)", A) && E.pendingReview(A) === cast("calldata", "pendingReview(address)", A) && E.credits(A) === cast("calldata", "credits(address)", A) && E.refundable(A) === cast("calldata", "refundable(address)", A));
+const CC = globalThis.CertChain;
+const dq = CC.decodeQuote(cast("abi-encode", "f(uint256,uint32,uint256)", "7500000000000000", "25", "40")); ok("decodeQuote", dq.fee === 7500000000000000n && dq.freeNow === 25 && dq.creditsNow === 40n, JSON.stringify(dq, (k, v) => typeof v === "bigint" ? v.toString() : v));
+const ds = CC.decodeStats(cast("abi-encode", "f(uint256,uint256,uint256,uint256,uint256,uint256,uint256)", "1", "2", "3", "4", "5", "6", "7")); ok("decodeStats reads all 7 values in order", [ds.fees, ds.batches, ds.certificates, ds.issuers, ds.verified, ds.withdrawn, ds.balance].join() === "1,2,3,4,5,6,7");
+const di = CC.decodeIssuerInfo(cast("abi-encode", "f(string,string,uint64,bool)", "Acme Bootcamp", "https://acme.example", "1800000000", "true")); ok("decodeIssuerInfo (strings, date, flag)", di.name === "Acme Bootcamp" && di.url === "https://acme.example" && di.verifiedUntil === 1800000000 && di.verified === true, JSON.stringify(di));
+const di2 = CC.decodeIssuerInfo(cast("abi-encode", "f(string,string,uint64,bool)", "", "", "0", "false")); ok("decodeIssuerInfo for an unknown issuer", di2.name === "" && di2.verified === false && di2.verifiedUntil === 0);
+const dp = CC.decodePending(cast("abi-encode", "f(uint256,string,string)", "120000000000000000", "Org", "https://o.example")); ok("decodePending", dp.paid === 120000000000000000n && dp.name === "Org" && dp.url === "https://o.example");
+ok("with no v2 address configured the app behaves as before (v2 off, v1 off in this test config)", CC.v2On() === false);
 // decoding: use cast to produce a real return blob for a known tuple
 const blob = cast("abi-encode", "f(address,uint64,uint32,bool,string)", A, "1700000000", "25", "false", "Cohort 7");
 const d = globalThis.CertChain.decodeBatch(blob);

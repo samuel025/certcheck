@@ -11,6 +11,22 @@
     batch: (issuer, r) => SEL.batch + addr(issuer) + b32(r),
     isLeafRevoked: (issuer, r, l) => SEL.isLeafRevoked + addr(issuer) + b32(r) + b32(l)
   };
+  // ---- CertRegistryV2: pricing, credits, verified issuers, public totals ----
+  const V2 = {quote: "0xea48dc6c", buyCredits: "0xc5efaae8", requestVerification: "0x4de2bfbf", cancelVerification: "0x05061b81", claimRefund: "0xb5545a3c", issuerInfo: "0x90c2b17d", pendingReview: "0x2e17de2a", stats: "0xd80528ae", pricePerCert: "0x7ec3e72e", freeCerts: "0xf4f1e9cf", verificationFee: "0xa8c278a2", credits: "0xfe5ff468", refundable: "0x68ec0d99"};
+  const padHex = d => d.padEnd(Math.ceil(d.length / 64) * 64, "0");
+  enc.quote = (issuer, count) => V2.quote + addr(issuer) + w(count);
+  enc.buyCredits = (forIssuer, amount) => V2.buyCredits + addr(forIssuer) + w(amount);
+  enc.requestVerification = (name, url) => { const a = strBytes(name), b = strBytes(url), la = a.length / 2, lb = b.length / 2, off2 = 64 + 32 + Math.ceil(la / 32) * 32; return V2.requestVerification + w(64) + w(off2) + w(la) + padHex(a) + w(lb) + padHex(b); };
+  enc.cancelVerification = () => V2.cancelVerification; enc.claimRefund = () => V2.claimRefund;
+  enc.issuerInfo = a => V2.issuerInfo + addr(a); enc.pendingReview = a => V2.pendingReview + addr(a); enc.credits = a => V2.credits + addr(a); enc.refundable = a => V2.refundable + addr(a);
+  enc.stats = () => V2.stats; enc.pricePerCert = () => V2.pricePerCert; enc.freeCerts = () => V2.freeCerts; enc.verificationFee = () => V2.verificationFee;
+  const wordsOf = hex => { const h = hex.replace("0x", ""), o = []; for (let i = 0; i < h.length; i += 64) o.push(BigInt("0x" + h.slice(i, i + 64))); return o; };
+  function strAt(hex, byteOffset) { const h = hex.replace("0x", ""), o = byteOffset * 2, len = Number(BigInt("0x" + h.slice(o, o + 64))); const d = h.slice(o + 64, o + 64 + len * 2); return new TextDecoder().decode(Uint8Array.from(d.match(/../g) || [], x => parseInt(x, 16))); }
+  const decodeQuote = hex => { const [fee, freeNow, creditsNow] = wordsOf(hex); return {fee, freeNow: Number(freeNow), creditsNow}; };
+  const decodeStats = hex => { const [fees, batches, certificates, issuers, verified, withdrawn, balance] = wordsOf(hex); return {fees, batches, certificates, issuers, verified, withdrawn, balance}; };
+  function decodeIssuerInfo(hex) { const w4 = wordsOf(hex); return {name: strAt(hex, Number(w4[0])), url: strAt(hex, Number(w4[1])), verifiedUntil: Number(w4[2]), verified: w4[3] === 1n}; }
+  function decodePending(hex) { const w3 = wordsOf(hex); return {paid: w3[0], name: strAt(hex, Number(w3[1])), url: strAt(hex, Number(w3[2]))}; }
+
   // ---- TapeOut processor (read-only) ----
   const TSEL = {eval: "0x934d06ea", ownerOf: "0x6352211e", circuitInfo: "0x084d60f1"};
   enc.eval = (id, byteHex) => { const d = byteHex.replace("0x", ""), len = d.length / 2; return TSEL.eval + w(id) + w(64) + w(len) + d.padEnd(Math.ceil(len / 32) * 64, "0"); };
@@ -38,7 +54,10 @@
     return {circuitId: BigInt(log.topics[3]).toString(), tx: r.transactionHash};
   }
   const readProgress = async (verifier, wallet) => BigInt(await callAt(verifier, "0xda8589a2" + addr(wallet)));   // LessonVerifier.progress(address): bit N = level N cleared
-  const configured = () => !ZERO.test(C().registry);
+  const v2On = () => !!C().registryV2 && !ZERO.test(C().registryV2);
+  const v1On = () => !!C().registry && !ZERO.test(C().registry);
+  const configured = () => v2On() || v1On();
+  const target = reg => reg === "v2" ? C().registryV2 : C().registry;
   async function rpc(method, params) {
     const res = await fetch(C().rpc, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({jsonrpc: "2.0", id: 1, method, params})});
     if (!res.ok) throw new Error("RPC " + res.status);
@@ -54,8 +73,21 @@
     const label = new TextDecoder().decode(Uint8Array.from(data.match(/../g) || [], x => parseInt(x, 16)));
     return {found: true, issuer, publishedAt: Number(BigInt("0x" + word(1))), count: Number(BigInt("0x" + word(2))), revoked: BigInt("0x" + word(3)) === 1n, label};
   }
-  const readBatch = async (issuer, r) => decodeBatch(await call(enc.batch(issuer, r)));
-  const readLeafRevoked = async (issuer, r, l) => BigInt(await call(enc.isLeafRevoked(issuer, r, l))) === 1n;
+  // A batch may live in the new registry (v2) or the original one (v1): look in v2 first, then v1. The result says which one holds it.
+  async function readBatch(issuer, r) {
+    if (v2On()) { const b = decodeBatch(await callAt(C().registryV2, enc.batch(issuer, r))); if (b.found) return {...b, reg: "v2"}; }
+    if (v1On()) { const b = decodeBatch(await callAt(C().registry, enc.batch(issuer, r))); if (b.found) return {...b, reg: "v1"}; }
+    return {found: false};
+  }
+  const readLeafRevoked = async (issuer, r, l, reg) => BigInt(await callAt(target(reg || (v2On() ? "v2" : "v1")), enc.isLeafRevoked(issuer, r, l))) === 1n;
+  // ----- pricing and revenue reads (v2 only; with v2 off, publishing is free and these return the free defaults) -----
+  const quote = async (issuer, count) => v2On() ? decodeQuote(await callAt(C().registryV2, enc.quote(issuer, count))) : {fee: 0n, freeNow: count, creditsNow: 0n};
+  const pricing = async () => { if (!v2On()) return null; const [p, f, v] = await Promise.all([callAt(C().registryV2, enc.pricePerCert()), callAt(C().registryV2, enc.freeCerts()), callAt(C().registryV2, enc.verificationFee())]); return {pricePerCert: BigInt(p), freeCerts: Number(BigInt(f)), verificationFee: BigInt(v)}; };
+  const creditsOf = async a => v2On() ? BigInt(await callAt(C().registryV2, enc.credits(a))) : 0n;
+  const refundableOf = async a => v2On() ? BigInt(await callAt(C().registryV2, enc.refundable(a))) : 0n;
+  const statsV2 = async () => v2On() ? decodeStats(await callAt(C().registryV2, enc.stats())) : null;
+  const issuerInfo = async a => v2On() ? decodeIssuerInfo(await callAt(C().registryV2, enc.issuerInfo(a))) : null;
+  const pendingReview = async a => v2On() ? decodePending(await callAt(C().registryV2, enc.pendingReview(a))) : null;
 
   const eth = () => root.ethereum;
   async function ensureChain() {
@@ -73,10 +105,18 @@
     throw new Error("Timed out waiting for " + hash);
   }
   async function sendTo(to, from, data, value) { const hash = await eth().request({method: "eth_sendTransaction", params: [{from, to, data, value: value ? "0x" + BigInt(value).toString(16) : "0x0"}]}); return waitReceipt(hash); }
+  async function publishTx(from, root_, count, label) {
+    if (v2On()) { const q = await quote(from, count), value = q.fee + q.fee / 100n;   // the contract refunds anything above the real price
+      return {hash: (await sendTo(C().registryV2, from, enc.publish(root_, count, label), value)).transactionHash, fee: q.fee, reg: "v2"}; }
+    if (!v1On()) throw new Error("The registry contract is not deployed yet (demo mode).");
+    return {hash: (await sendTo(C().registry, from, enc.publish(root_, count, label))).transactionHash, fee: 0n, reg: "v1"};
+  }
+  const revokeTx = async (from, data, reg) => (await sendTo(target(reg), from, data)).transactionHash;
+  const paidTx = async (from, data, value) => { if (!v2On()) throw new Error("Pricing is not live yet: the new registry is not deployed."); return (await sendTo(C().registryV2, from, data, value)).transactionHash; };
   async function send(from, data) {
     if (!configured()) throw new Error("The registry contract is not deployed yet (demo mode).");
     return (await sendTo(C().registry, from, data)).transactionHash;
   }
   const explorerTx = h => C().explorer + "/tx/" + h, explorerAddr = a => C().explorer + "/address/" + a;
-  root.CertChain = {readProgress, tapeoutCircuit, evalCircuit, circuitOwner, circuitInfo, decodeBytes, callAt, enc, decodeBatch, configured, readBatch, readLeafRevoked, connect, send, explorerTx, explorerAddr};
+  root.CertChain = {v2On, v1On, quote, pricing, creditsOf, refundableOf, statsV2, issuerInfo, pendingReview, publishTx, revokeTx, paidTx, decodeQuote, decodeStats, decodeIssuerInfo, decodePending, readProgress, tapeoutCircuit, evalCircuit, circuitOwner, circuitInfo, decodeBytes, callAt, enc, decodeBatch, configured, readBatch, readLeafRevoked, connect, send, explorerTx, explorerAddr};
 })(typeof window !== "undefined" ? window : globalThis);

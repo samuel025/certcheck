@@ -143,3 +143,12 @@
   .cc .tabs{flex-wrap:wrap;margin:0;width:100%;order:3;justify-content:flex-start}
   .cc .tabs a{padding:6px 10px}
 }
+
+/* pricing page */
+.cc .pricegrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:6px 0 34px}
+.cc .pcard{border:1px solid var(--slate);padding:18px;background:linear-gradient(180deg,#12151a,#0d1014)}.cc .pcard.hot{border-color:#0b4a38}
+.cc .pcard b{display:block;font:400 26px var(--serif);color:var(--bone);margin:8px 0 6px}.cc .pcard p{margin:0;color:var(--steel);font-size:13.5px}
+.cc .pnote{border:1px solid #4d3d17;background:rgba(232,182,74,.07);color:#e8c77a;padding:12px 14px;font-size:14px;margin:0 0 24px}
+.cc .calcout{border:1px solid var(--slate);background:#0a0d11;padding:10px 12px;min-height:44px;color:var(--bone);font:13px/1.5 var(--mono)}
+.cc .quote{margin:0 0 12px;color:var(--silver);font-size:14px}
+@media (max-width:900px){.cc .pricegrid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (max-width:520px){.cc .pricegrid{grid-template-columns:minmax(0,1fr)}}

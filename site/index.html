@@ -260,9 +260,12 @@
       <div><span class="cap">Levels</span><b id="jLevels">16</b></div>
     </div>
 
+    <h2 class="pgh2">Usage and revenue, read from the chain</h2>
+    <div id="jRevenue"></div>
+
     <h2 class="pgh2">The five criteria</h2>
     <table class="lvltable jt"><thead><tr><th>Criterion</th><th>What we show</th><th>Status</th></tr></thead><tbody>
-      <tr><td>Commercial potential</td><td>Sponsored levels, and a sponsor-funded faucet: one flat-fee mint (0.00066 OKB or 0.01 BEM, depending on the processor) funds thousands of free NAND claims (measured on a fork). No sponsor has signed yet.</td><td><span class="st plan">Plan, no sponsor</span></td></tr>
+      <tr><td>Commercial potential</td><td>A paid registry is built and tested (a fee per certificate with a monthly free allowance, prepaid and sponsor-funded credits, a paid verified-issuer listing, and public on-chain revenue totals; see the Pricing page). It is not deployed yet, so nothing has been collected. Also planned: sponsored levels, and a sponsor-funded faucet: one flat-fee mint (0.00066 OKB or 0.01 BEM, depending on the processor) funds thousands of free NAND claims (measured on a fork). No sponsor has signed yet.</td><td><span class="st plan">Plan, no sponsor</span></td></tr>
       <tr><td>Innovation</td><td>A course where a contract checks your circuit by running it through the processor's free <code>eval</code>. Novelty against other entries has not been checked against the leaderboard, so we do not claim "first".</td><td><span class="st test">Built</span></td></tr>
       <tr><td>Ecosystem integration</td><td>X Layer processor and circuits (tape-out and eval): the course levels and every passport exam are circuits that the processor re-runs on-chain. FabX's task bank: levels 14–16 target real tasks. DeWEB and TapeKit: single-file build is ready, publishing is not done. TapeCode and TapeSend are not used.</td><td><span class="st plan">Partial</span></td></tr>
       <tr><td>Product readiness and UX</td><td>16 levels and a sandbox, a guided tutorial, stars, XP and ranks, a mobile layout, all tested in a real browser. Contracts are tested on a fork of live X Layer.</td><td><span class="st" id="jReady">Tested on a fork</span></td></tr>
@@ -318,7 +321,7 @@
 <header class="bar">
   <a class="logo" href="#" aria-label="Home"><svg viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><path d="M7 8.5l3 3 6-7" fill="none" stroke="#00d892" stroke-width="2"/></svg>certcheck</a>
   <nav class="tabs" aria-label="Sections">
-    <a href="#issue" data-tab="issue">Issue</a><a href="#verify" data-tab="verify">Verify</a><a href="#manage" data-tab="manage">Manage</a><a href="#play" data-tab="learn">Learn circuits</a><a href="#exam" data-tab="exam">Final exam</a>
+    <a href="#issue" data-tab="issue">Issue</a><a href="#verify" data-tab="verify">Verify</a><a href="#manage" data-tab="manage">Manage</a><a href="#pricing" data-tab="pricing">Pricing</a><a href="#play" data-tab="learn">Learn circuits</a><a href="#exam" data-tab="exam">Final exam</a>
   </nav>
   <span class="chip" id="netChip">…</span>
 </header>
@@ -511,8 +514,41 @@
   <div class="hwrap hcta hreveal">
     <h2 class="big2">Issue your first batch <span>in five minutes.</span></h2>
     <div class="row"><a class="btn primary" href="#issue">Issue certificates</a><a class="btn ghost" href="#verify">Check a certificate</a><a class="btn ghost" href="#play">Start the course</a></div>
-    <p class="note center">Publishing needs a wallet with a few cents of OKB. <a href="#wallet">Setting one up takes about two minutes.</a> Checking a certificate needs nothing. <a href="#circuits">About the course</a> · <a href="#judges">For judges</a></p>
+    <p class="note center">Publishing needs a wallet with a few cents of OKB. <a href="#wallet">Setting one up takes about two minutes.</a> Checking a certificate needs nothing. <a href="#pricing">Pricing</a> · <a href="#circuits">About the course</a> · <a href="#judges">For judges</a></p>
   </div>
+</section>
+
+<section id="pricingView" class="view" hidden>
+  <h1>Pricing</h1>
+  <p class="lede">Checking a certificate is always free. Issuing is free for small batches, then a few cents per certificate. You always see the exact cost before you sign.</p>
+  <p class="pnote" id="prNotice" hidden></p>
+  <div class="pricegrid" id="prGrid">
+    <div class="pcard"><span class="cap">Check</span><b>Free</b><p>Anyone, any time, no account. This will never be paid.</p></div>
+    <div class="pcard"><span class="cap">Issue</span><b id="prIssue">…</b><p id="prIssueSub">…</p></div>
+    <div class="pcard"><span class="cap">Credits</span><b id="prCredit">…</b><p>Prepay certificates, or let a sponsor pay for another organization's batches.</p></div>
+    <div class="pcard hot"><span class="cap">Verified issuer</span><b id="prVerify">…</b><p>We check the organization once. Every certificate it issues then shows a verified badge.</p></div>
+  </div>
+
+  <div class="step"><span class="num">1</span><div class="body"><h2>What would a batch cost?</h2>
+    <p class="sub">Type how many certificates you plan to issue. The free allowance renews every 30 days for each issuing wallet.</p>
+    <div class="grid3"><div class="field"><label for="calcN">Certificates</label><input id="calcN" type="text" inputmode="numeric" value="300"></div>
+      <div class="field"><label for="calcUsd">Assumed price of 1 OKB, in dollars</label><input id="calcUsd" type="text" inputmode="decimal" value="83"></div>
+      <div class="field"><label>Cost</label><div class="calcout" id="calcOut" role="status">…</div></div></div>
+    <p class="note">Dollar figures use the price you type here. The real charge is always in OKB, and the exact amount is shown before you confirm.</p></div></div>
+
+  <div class="step"><span class="num">2</span><div class="body"><h2>Buy credits</h2>
+    <p class="sub">Credits are used before you are charged. You can buy them for another organization's wallet: a sponsor, a school or a funder paying for others.</p>
+    <div class="row"><input id="crFor" type="text" spellcheck="false" placeholder="Wallet that receives the credits (default: yours)"><input id="crN" type="text" inputmode="numeric" value="100" aria-label="Number of credits" style="max-width:110px"></div>
+    <div class="row"><button id="crBuy" class="btn ghost" type="button">Buy credits</button><span class="hint" id="crMsg" role="status"></span></div></div></div>
+
+  <div class="step"><span class="num">3</span><div class="body"><h2>Become a verified issuer</h2>
+    <p class="sub">Tell us who you are. We check it, and if it holds up your wallet is listed as verified. The fee is held until we decide, and returned in full if we say no.</p>
+    <div class="grid3" style="grid-template-columns:1fr 1fr"><div class="field"><label for="vrName">Organization name</label><input id="vrName" type="text" maxlength="80" placeholder="Acme Bootcamp"></div><div class="field"><label for="vrUrl">Website</label><input id="vrUrl" type="text" maxlength="120" placeholder="https://acme.example"></div></div>
+    <div class="row"><button id="vrGo" class="btn ghost" type="button">Request a review</button><button id="vrCancel" class="btn ghost" type="button" hidden>Cancel my request</button><button id="vrClaim" class="btn ghost" type="button" hidden>Claim my refund</button><span class="hint" id="vrMsg" role="status"></span></div>
+    <p class="note" id="vrStatus"></p></div></div>
+
+  <div class="step"><span class="num">4</span><div class="body"><h2>Usage and revenue, read from the chain</h2>
+    <p class="sub">Nothing here is self-reported. These totals come straight from the registry contract.</p><div id="prStats"></div></div></div>
 </section>
 
 <section id="walletView" class="view" hidden>
@@ -586,6 +622,7 @@
       <p class="hint" id="moreRows"></p>
       <div class="publish"><h2>4 · Publish the fingerprint</h2>
         <p class="sub">One transaction records the fingerprint, the count and your label on X Layer. Until you do this, verifiers will show “not registered”.</p>
+        <p class="quote" id="pubQuote" role="status"></p>
         <div class="row"><button id="publishBtn" class="btn primary" type="button">Publish on X Layer</button><span class="hint" id="pubMsg" role="status"></span></div></div>
     </div>
   </div></div>
@@ -665,6 +702,7 @@
 <script src="cc/board.js"></script>
 <script src="cc/challenge.js"></script>
 <script src="cc/app.js"></script>
+<script src="cc/pricing.js"></script>
 <script src="cc/home.js"></script>
 </body>
 </html>

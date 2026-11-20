@@ -869,6 +869,15 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
   .cc .tabs{flex-wrap:wrap;margin:0;width:100%;order:3;justify-content:flex-start}
   .cc .tabs a{padding:6px 10px}
 }
+
+/* pricing page */
+.cc .pricegrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:6px 0 34px}
+.cc .pcard{border:1px solid var(--slate);padding:18px;background:linear-gradient(180deg,#12151a,#0d1014)}.cc .pcard.hot{border-color:#0b4a38}
+.cc .pcard b{display:block;font:400 26px var(--serif);color:var(--bone);margin:8px 0 6px}.cc .pcard p{margin:0;color:var(--steel);font-size:13.5px}
+.cc .pnote{border:1px solid #4d3d17;background:rgba(232,182,74,.07);color:#e8c77a;padding:12px 14px;font-size:14px;margin:0 0 24px}
+.cc .calcout{border:1px solid var(--slate);background:#0a0d11;padding:10px 12px;min-height:44px;color:var(--bone);font:13px/1.5 var(--mono)}
+.cc .quote{margin:0 0 12px;color:var(--silver);font-size:14px}
+@media (max-width:900px){.cc .pricegrid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (max-width:520px){.cc .pricegrid{grid-template-columns:minmax(0,1fr)}}
 </style>
 <style>
 /* ===== home v2: verification rack, live terminal, figures, serif headlines ===== */
@@ -1313,9 +1322,12 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
       <div><span class="cap">Levels</span><b id="jLevels">16</b></div>
     </div>
 
+    <h2 class="pgh2">Usage and revenue, read from the chain</h2>
+    <div id="jRevenue"></div>
+
     <h2 class="pgh2">The five criteria</h2>
     <table class="lvltable jt"><thead><tr><th>Criterion</th><th>What we show</th><th>Status</th></tr></thead><tbody>
-      <tr><td>Commercial potential</td><td>Sponsored levels, and a sponsor-funded faucet: one flat-fee mint (0.00066 OKB or 0.01 BEM, depending on the processor) funds thousands of free NAND claims (measured on a fork). No sponsor has signed yet.</td><td><span class="st plan">Plan, no sponsor</span></td></tr>
+      <tr><td>Commercial potential</td><td>A paid registry is built and tested (a fee per certificate with a monthly free allowance, prepaid and sponsor-funded credits, a paid verified-issuer listing, and public on-chain revenue totals; see the Pricing page). It is not deployed yet, so nothing has been collected. Also planned: sponsored levels, and a sponsor-funded faucet: one flat-fee mint (0.00066 OKB or 0.01 BEM, depending on the processor) funds thousands of free NAND claims (measured on a fork). No sponsor has signed yet.</td><td><span class="st plan">Plan, no sponsor</span></td></tr>
       <tr><td>Innovation</td><td>A course where a contract checks your circuit by running it through the processor's free <code>eval</code>. Novelty against other entries has not been checked against the leaderboard, so we do not claim "first".</td><td><span class="st test">Built</span></td></tr>
       <tr><td>Ecosystem integration</td><td>X Layer processor and circuits (tape-out and eval): the course levels and every passport exam are circuits that the processor re-runs on-chain. FabX's task bank: levels 14–16 target real tasks. DeWEB and TapeKit: single-file build is ready, publishing is not done. TapeCode and TapeSend are not used.</td><td><span class="st plan">Partial</span></td></tr>
       <tr><td>Product readiness and UX</td><td>16 levels and a sandbox, a guided tutorial, stars, XP and ranks, a mobile layout, all tested in a real browser. Contracts are tested on a fork of live X Layer.</td><td><span class="st" id="jReady">Tested on a fork</span></td></tr>
@@ -1371,7 +1383,7 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 <header class="bar">
   <a class="logo" href="#" aria-label="Home"><svg viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><path d="M7 8.5l3 3 6-7" fill="none" stroke="#00d892" stroke-width="2"/></svg>certcheck</a>
   <nav class="tabs" aria-label="Sections">
-    <a href="#issue" data-tab="issue">Issue</a><a href="#verify" data-tab="verify">Verify</a><a href="#manage" data-tab="manage">Manage</a><a href="#play" data-tab="learn">Learn circuits</a><a href="#exam" data-tab="exam">Final exam</a>
+    <a href="#issue" data-tab="issue">Issue</a><a href="#verify" data-tab="verify">Verify</a><a href="#manage" data-tab="manage">Manage</a><a href="#pricing" data-tab="pricing">Pricing</a><a href="#play" data-tab="learn">Learn circuits</a><a href="#exam" data-tab="exam">Final exam</a>
   </nav>
   <span class="chip" id="netChip">…</span>
 </header>
@@ -1564,8 +1576,41 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
   <div class="hwrap hcta hreveal">
     <h2 class="big2">Issue your first batch <span>in five minutes.</span></h2>
     <div class="row"><a class="btn primary" href="#issue">Issue certificates</a><a class="btn ghost" href="#verify">Check a certificate</a><a class="btn ghost" href="#play">Start the course</a></div>
-    <p class="note center">Publishing needs a wallet with a few cents of OKB. <a href="#wallet">Setting one up takes about two minutes.</a> Checking a certificate needs nothing. <a href="#circuits">About the course</a> · <a href="#judges">For judges</a></p>
+    <p class="note center">Publishing needs a wallet with a few cents of OKB. <a href="#wallet">Setting one up takes about two minutes.</a> Checking a certificate needs nothing. <a href="#pricing">Pricing</a> · <a href="#circuits">About the course</a> · <a href="#judges">For judges</a></p>
   </div>
+</section>
+
+<section id="pricingView" class="view" hidden>
+  <h1>Pricing</h1>
+  <p class="lede">Checking a certificate is always free. Issuing is free for small batches, then a few cents per certificate. You always see the exact cost before you sign.</p>
+  <p class="pnote" id="prNotice" hidden></p>
+  <div class="pricegrid" id="prGrid">
+    <div class="pcard"><span class="cap">Check</span><b>Free</b><p>Anyone, any time, no account. This will never be paid.</p></div>
+    <div class="pcard"><span class="cap">Issue</span><b id="prIssue">…</b><p id="prIssueSub">…</p></div>
+    <div class="pcard"><span class="cap">Credits</span><b id="prCredit">…</b><p>Prepay certificates, or let a sponsor pay for another organization's batches.</p></div>
+    <div class="pcard hot"><span class="cap">Verified issuer</span><b id="prVerify">…</b><p>We check the organization once. Every certificate it issues then shows a verified badge.</p></div>
+  </div>
+
+  <div class="step"><span class="num">1</span><div class="body"><h2>What would a batch cost?</h2>
+    <p class="sub">Type how many certificates you plan to issue. The free allowance renews every 30 days for each issuing wallet.</p>
+    <div class="grid3"><div class="field"><label for="calcN">Certificates</label><input id="calcN" type="text" inputmode="numeric" value="300"></div>
+      <div class="field"><label for="calcUsd">Assumed price of 1 OKB, in dollars</label><input id="calcUsd" type="text" inputmode="decimal" value="83"></div>
+      <div class="field"><label>Cost</label><div class="calcout" id="calcOut" role="status">…</div></div></div>
+    <p class="note">Dollar figures use the price you type here. The real charge is always in OKB, and the exact amount is shown before you confirm.</p></div></div>
+
+  <div class="step"><span class="num">2</span><div class="body"><h2>Buy credits</h2>
+    <p class="sub">Credits are used before you are charged. You can buy them for another organization's wallet: a sponsor, a school or a funder paying for others.</p>
+    <div class="row"><input id="crFor" type="text" spellcheck="false" placeholder="Wallet that receives the credits (default: yours)"><input id="crN" type="text" inputmode="numeric" value="100" aria-label="Number of credits" style="max-width:110px"></div>
+    <div class="row"><button id="crBuy" class="btn ghost" type="button">Buy credits</button><span class="hint" id="crMsg" role="status"></span></div></div></div>
+
+  <div class="step"><span class="num">3</span><div class="body"><h2>Become a verified issuer</h2>
+    <p class="sub">Tell us who you are. We check it, and if it holds up your wallet is listed as verified. The fee is held until we decide, and returned in full if we say no.</p>
+    <div class="grid3" style="grid-template-columns:1fr 1fr"><div class="field"><label for="vrName">Organization name</label><input id="vrName" type="text" maxlength="80" placeholder="Acme Bootcamp"></div><div class="field"><label for="vrUrl">Website</label><input id="vrUrl" type="text" maxlength="120" placeholder="https://acme.example"></div></div>
+    <div class="row"><button id="vrGo" class="btn ghost" type="button">Request a review</button><button id="vrCancel" class="btn ghost" type="button" hidden>Cancel my request</button><button id="vrClaim" class="btn ghost" type="button" hidden>Claim my refund</button><span class="hint" id="vrMsg" role="status"></span></div>
+    <p class="note" id="vrStatus"></p></div></div>
+
+  <div class="step"><span class="num">4</span><div class="body"><h2>Usage and revenue, read from the chain</h2>
+    <p class="sub">Nothing here is self-reported. These totals come straight from the registry contract.</p><div id="prStats"></div></div></div>
 </section>
 
 <section id="walletView" class="view" hidden>
@@ -1639,6 +1684,7 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
       <p class="hint" id="moreRows"></p>
       <div class="publish"><h2>4 · Publish the fingerprint</h2>
         <p class="sub">One transaction records the fingerprint, the count and your label on X Layer. Until you do this, verifiers will show “not registered”.</p>
+        <p class="quote" id="pubQuote" role="status"></p>
         <div class="row"><button id="publishBtn" class="btn primary" type="button">Publish on X Layer</button><span class="hint" id="pubMsg" role="status"></span></div></div>
     </div>
   </div></div>
@@ -3208,6 +3254,11 @@ window.CC_CONFIG = {
   chainId: 196, chainName: "X Layer", rpc: "https://rpc.xlayer.tech", explorer: "https://www.oklink.com/xlayer",
   currency: {name: "OKB", symbol: "OKB", decimals: 18},
   // TapeOut processor (the circuits ERC-721 + eval). Skill proofs are checked ONLY against processors listed here.
+  // The paid registry (v2). All zeros until it is deployed: then publishing stays free (v1) and the pricing page says pricing is not live yet.
+  registryV2: "0x0000000000000000000000000000000000000000",
+  // Proposed starting prices, shown only while v2 is not deployed. HYPOTHESES to test with real organizers, not a quote. After deployment the page reads the real prices from the contract.
+  proposed: {pricePerCertWei: "240000000000000", freeCerts: 25, verificationFeeWei: "120000000000000000"},
+  okbUsdAssumption: 83,   // only used to translate OKB into dollars on the pricing calculator; the user can change it there
   // FirstTape's LessonVerifier: the on-chain record of which course levels (6-16) each wallet cleared. A passport needs at least minLevels of them.
   passport: {verifier: "0x7F6f07f40e14E9A8D2E2b77170Fe748Bd9C4d6d9", minLevels: 3},
   processors: ["0x9e2849c04a513fe64db07521cbe52d078d905c0e"],
@@ -3228,6 +3279,22 @@ window.CC_CONFIG = {
     batch: (issuer, r) => SEL.batch + addr(issuer) + b32(r),
     isLeafRevoked: (issuer, r, l) => SEL.isLeafRevoked + addr(issuer) + b32(r) + b32(l)
   };
+  // ---- CertRegistryV2: pricing, credits, verified issuers, public totals ----
+  const V2 = {quote: "0xea48dc6c", buyCredits: "0xc5efaae8", requestVerification: "0x4de2bfbf", cancelVerification: "0x05061b81", claimRefund: "0xb5545a3c", issuerInfo: "0x90c2b17d", pendingReview: "0x2e17de2a", stats: "0xd80528ae", pricePerCert: "0x7ec3e72e", freeCerts: "0xf4f1e9cf", verificationFee: "0xa8c278a2", credits: "0xfe5ff468", refundable: "0x68ec0d99"};
+  const padHex = d => d.padEnd(Math.ceil(d.length / 64) * 64, "0");
+  enc.quote = (issuer, count) => V2.quote + addr(issuer) + w(count);
+  enc.buyCredits = (forIssuer, amount) => V2.buyCredits + addr(forIssuer) + w(amount);
+  enc.requestVerification = (name, url) => { const a = strBytes(name), b = strBytes(url), la = a.length / 2, lb = b.length / 2, off2 = 64 + 32 + Math.ceil(la / 32) * 32; return V2.requestVerification + w(64) + w(off2) + w(la) + padHex(a) + w(lb) + padHex(b); };
+  enc.cancelVerification = () => V2.cancelVerification; enc.claimRefund = () => V2.claimRefund;
+  enc.issuerInfo = a => V2.issuerInfo + addr(a); enc.pendingReview = a => V2.pendingReview + addr(a); enc.credits = a => V2.credits + addr(a); enc.refundable = a => V2.refundable + addr(a);
+  enc.stats = () => V2.stats; enc.pricePerCert = () => V2.pricePerCert; enc.freeCerts = () => V2.freeCerts; enc.verificationFee = () => V2.verificationFee;
+  const wordsOf = hex => { const h = hex.replace("0x", ""), o = []; for (let i = 0; i < h.length; i += 64) o.push(BigInt("0x" + h.slice(i, i + 64))); return o; };
+  function strAt(hex, byteOffset) { const h = hex.replace("0x", ""), o = byteOffset * 2, len = Number(BigInt("0x" + h.slice(o, o + 64))); const d = h.slice(o + 64, o + 64 + len * 2); return new TextDecoder().decode(Uint8Array.from(d.match(/../g) || [], x => parseInt(x, 16))); }
+  const decodeQuote = hex => { const [fee, freeNow, creditsNow] = wordsOf(hex); return {fee, freeNow: Number(freeNow), creditsNow}; };
+  const decodeStats = hex => { const [fees, batches, certificates, issuers, verified, withdrawn, balance] = wordsOf(hex); return {fees, batches, certificates, issuers, verified, withdrawn, balance}; };
+  function decodeIssuerInfo(hex) { const w4 = wordsOf(hex); return {name: strAt(hex, Number(w4[0])), url: strAt(hex, Number(w4[1])), verifiedUntil: Number(w4[2]), verified: w4[3] === 1n}; }
+  function decodePending(hex) { const w3 = wordsOf(hex); return {paid: w3[0], name: strAt(hex, Number(w3[1])), url: strAt(hex, Number(w3[2]))}; }
+
   // ---- TapeOut processor (read-only) ----
   const TSEL = {eval: "0x934d06ea", ownerOf: "0x6352211e", circuitInfo: "0x084d60f1"};
   enc.eval = (id, byteHex) => { const d = byteHex.replace("0x", ""), len = d.length / 2; return TSEL.eval + w(id) + w(64) + w(len) + d.padEnd(Math.ceil(len / 32) * 64, "0"); };
@@ -3255,7 +3322,10 @@ window.CC_CONFIG = {
     return {circuitId: BigInt(log.topics[3]).toString(), tx: r.transactionHash};
   }
   const readProgress = async (verifier, wallet) => BigInt(await callAt(verifier, "0xda8589a2" + addr(wallet)));   // LessonVerifier.progress(address): bit N = level N cleared
-  const configured = () => !ZERO.test(C().registry);
+  const v2On = () => !!C().registryV2 && !ZERO.test(C().registryV2);
+  const v1On = () => !!C().registry && !ZERO.test(C().registry);
+  const configured = () => v2On() || v1On();
+  const target = reg => reg === "v2" ? C().registryV2 : C().registry;
   async function rpc(method, params) {
     const res = await fetch(C().rpc, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({jsonrpc: "2.0", id: 1, method, params})});
     if (!res.ok) throw new Error("RPC " + res.status);
@@ -3271,8 +3341,21 @@ window.CC_CONFIG = {
     const label = new TextDecoder().decode(Uint8Array.from(data.match(/../g) || [], x => parseInt(x, 16)));
     return {found: true, issuer, publishedAt: Number(BigInt("0x" + word(1))), count: Number(BigInt("0x" + word(2))), revoked: BigInt("0x" + word(3)) === 1n, label};
   }
-  const readBatch = async (issuer, r) => decodeBatch(await call(enc.batch(issuer, r)));
-  const readLeafRevoked = async (issuer, r, l) => BigInt(await call(enc.isLeafRevoked(issuer, r, l))) === 1n;
+  // A batch may live in the new registry (v2) or the original one (v1): look in v2 first, then v1. The result says which one holds it.
+  async function readBatch(issuer, r) {
+    if (v2On()) { const b = decodeBatch(await callAt(C().registryV2, enc.batch(issuer, r))); if (b.found) return {...b, reg: "v2"}; }
+    if (v1On()) { const b = decodeBatch(await callAt(C().registry, enc.batch(issuer, r))); if (b.found) return {...b, reg: "v1"}; }
+    return {found: false};
+  }
+  const readLeafRevoked = async (issuer, r, l, reg) => BigInt(await callAt(target(reg || (v2On() ? "v2" : "v1")), enc.isLeafRevoked(issuer, r, l))) === 1n;
+  // ----- pricing and revenue reads (v2 only; with v2 off, publishing is free and these return the free defaults) -----
+  const quote = async (issuer, count) => v2On() ? decodeQuote(await callAt(C().registryV2, enc.quote(issuer, count))) : {fee: 0n, freeNow: count, creditsNow: 0n};
+  const pricing = async () => { if (!v2On()) return null; const [p, f, v] = await Promise.all([callAt(C().registryV2, enc.pricePerCert()), callAt(C().registryV2, enc.freeCerts()), callAt(C().registryV2, enc.verificationFee())]); return {pricePerCert: BigInt(p), freeCerts: Number(BigInt(f)), verificationFee: BigInt(v)}; };
+  const creditsOf = async a => v2On() ? BigInt(await callAt(C().registryV2, enc.credits(a))) : 0n;
+  const refundableOf = async a => v2On() ? BigInt(await callAt(C().registryV2, enc.refundable(a))) : 0n;
+  const statsV2 = async () => v2On() ? decodeStats(await callAt(C().registryV2, enc.stats())) : null;
+  const issuerInfo = async a => v2On() ? decodeIssuerInfo(await callAt(C().registryV2, enc.issuerInfo(a))) : null;
+  const pendingReview = async a => v2On() ? decodePending(await callAt(C().registryV2, enc.pendingReview(a))) : null;
 
   const eth = () => root.ethereum;
   async function ensureChain() {
@@ -3290,12 +3373,20 @@ window.CC_CONFIG = {
     throw new Error("Timed out waiting for " + hash);
   }
   async function sendTo(to, from, data, value) { const hash = await eth().request({method: "eth_sendTransaction", params: [{from, to, data, value: value ? "0x" + BigInt(value).toString(16) : "0x0"}]}); return waitReceipt(hash); }
+  async function publishTx(from, root_, count, label) {
+    if (v2On()) { const q = await quote(from, count), value = q.fee + q.fee / 100n;   // the contract refunds anything above the real price
+      return {hash: (await sendTo(C().registryV2, from, enc.publish(root_, count, label), value)).transactionHash, fee: q.fee, reg: "v2"}; }
+    if (!v1On()) throw new Error("The registry contract is not deployed yet (demo mode).");
+    return {hash: (await sendTo(C().registry, from, enc.publish(root_, count, label))).transactionHash, fee: 0n, reg: "v1"};
+  }
+  const revokeTx = async (from, data, reg) => (await sendTo(target(reg), from, data)).transactionHash;
+  const paidTx = async (from, data, value) => { if (!v2On()) throw new Error("Pricing is not live yet: the new registry is not deployed."); return (await sendTo(C().registryV2, from, data, value)).transactionHash; };
   async function send(from, data) {
     if (!configured()) throw new Error("The registry contract is not deployed yet (demo mode).");
     return (await sendTo(C().registry, from, data)).transactionHash;
   }
   const explorerTx = h => C().explorer + "/tx/" + h, explorerAddr = a => C().explorer + "/address/" + a;
-  root.CertChain = {readProgress, tapeoutCircuit, evalCircuit, circuitOwner, circuitInfo, decodeBytes, callAt, enc, decodeBatch, configured, readBatch, readLeafRevoked, connect, send, explorerTx, explorerAddr};
+  root.CertChain = {v2On, v1On, quote, pricing, creditsOf, refundableOf, statsV2, issuerInfo, pendingReview, publishTx, revokeTx, paidTx, decodeQuote, decodeStats, decodeIssuerInfo, decodePending, readProgress, tapeoutCircuit, evalCircuit, circuitOwner, circuitInfo, decodeBytes, callAt, enc, decodeBatch, configured, readBatch, readLeafRevoked, connect, send, explorerTx, explorerAddr};
 })(typeof window !== "undefined" ? window : globalThis);
 </script>
 <script>
@@ -3554,7 +3645,7 @@ window.CC_CONFIG = {
   const mkLink = a => { const x = document.createElement("a"); x.href = a.href; x.textContent = a.text; x.target = "_blank"; x.rel = "noopener"; return x; };
 
   // ---------- routing ----------
-  const VIEWS = ["home", "verify", "issue", "manage", "challenge", "wallet"];
+  const VIEWS = ["home", "verify", "issue", "manage", "challenge", "wallet", "pricing"];
   function route() {
     const h = location.hash;
     { const t = h.length > 1 ? document.getElementById(h.slice(1)) : null; if (["#play", "#learners", "#judges", "#circuits"].includes(h) || (t && document.getElementById("landing").contains(t))) return; }   // those pages belong to site/ft
@@ -3618,15 +3709,17 @@ window.CC_CONFIG = {
     if (seq !== vSeq) return;
     if (!res.ok) { show("invalid", "Not valid", res.error ? "This is not a valid CertCheck proof." : "The details or the proof were changed, or this certificate was not issued as shown. Do not trust it.", [], ""); return; }
     const facts = [FACT("Name", p.name), FACT("Course", p.course || "—"), FACT("Date", p.date || "—"), FACT("Issuer", mkLink({href: X.explorerAddr(p.issuer), text: p.issuer}), true)];
-    const issuerNote = "A valid check proves this issuer address recorded this certificate. Make sure that address really belongs to the organization you expect, for example by comparing it with the address on their website.";
+    let issuerNote = "A valid check proves this issuer address recorded this certificate. Make sure that address really belongs to the organization you expect, for example by comparing it with the address on their website.";
     const sk = p.skill ? await CertSkill.check(p.skill) : null; if (seq !== vSeq) return;
     const skillFacts = sk ? skillFactsOf(sk) : [];
     if (!X.configured()) { show("demo", "Proof is correct (registry not checked)", "The mathematics checks out, but the on-chain registry isn't deployed in this build, so registration and revocation were not checked.", facts.concat(skillFacts), issuerNote); return; }
     let b, leafRev;
-    try { b = await X.readBatch(p.issuer, p.root); leafRev = b.found ? await X.readLeafRevoked(p.issuer, p.root, res.leaf) : false; }
+    try { b = await X.readBatch(p.issuer, p.root); leafRev = b.found ? await X.readLeafRevoked(p.issuer, p.root, res.leaf, b.reg) : false; }
     catch (e) { if (seq !== vSeq) return; show("offline", "Proof is correct, but the network is unreachable", "The proof itself checks out, but we couldn't reach X Layer to confirm the issuer registered it. Try again in a moment.", facts, ""); return; }
     if (seq !== vSeq) return;
     if (!b.found) { show("unregistered", "Not registered", "The proof is mathematically correct, but this issuer has not registered the batch on-chain. Until they do, it can't be trusted.", facts, issuerNote); return; }
+    let vi = null; try { vi = await X.issuerInfo(p.issuer); } catch {} if (seq !== vSeq) return;
+    if (vi && vi.verified) { const wrap = document.createElement("span"); wrap.append(document.createTextNode(vi.name + " · "), Object.assign(document.createElement("b"), {textContent: "verified issuer"})); if (vi.url) { wrap.append(document.createTextNode(" · ")); wrap.appendChild(mkLink({href: /^https?:\/\//i.test(vi.url) ? vi.url : "https://" + vi.url, text: vi.url})); } facts.splice(4, 0, FACT("Verified", wrap)); issuerNote = `CertCheck checked this organization (valid until ${new Date(vi.verifiedUntil * 1000).toISOString().slice(0, 10)}). A verified listing means we confirmed who controls this address.`; }
     facts.push(FACT("Registered", fmtDate(b.publishedAt)), FACT("Batch", `${b.label || "(no label)"} · ${b.count} certificate${b.count === 1 ? "" : "s"}`), FACT("Fingerprint", short(p.root), true));
     if (b.revoked || leafRev) { show("revoked", "Revoked", b.revoked ? "The issuer revoked this whole batch." : "The issuer revoked this certificate.", facts, ""); return; }
     facts.push(...skillFacts);
@@ -3674,7 +3767,7 @@ window.CC_CONFIG = {
       k.append(cp, " ", qb, " ", mkLink({href: l.link, text: "Open"}));
     });
     $("moreRows").textContent = links.length > MAXROWS ? `Showing ${MAXROWS} of ${links.length}. Download the file for everyone.` : "";
-    $("results").hidden = false; say(h, "Done. Nothing has been sent anywhere yet.", "ok"); say($("pubMsg"), "", "");
+    $("results").hidden = false; say(h, "Done. Nothing has been sent anywhere yet.", "ok"); say($("pubMsg"), "", ""); refreshQuote();
   });
   // ---------- skill challenge (organizer) ----------
   let roster = [], passed = new Map();
@@ -3744,6 +3837,10 @@ window.CC_CONFIG = {
   $("printAll").addEventListener("click", () => { if (!batch) return; if (batch.count > 200 && !confirm(`Print ${batch.count} certificates?`)) return; fillPrint(batch.credentials.map((_, i) => i)); window.print(); });
   $("dlLinks").addEventListener("click", () => download("certcheck-links.csv", "name,link\r\n" + links.map(l => csvEsc(l.name) + "," + csvEsc(l.link)).join("\r\n") + "\r\n", "text/csv"));
   $("dlProofs").addEventListener("click", () => download("certcheck-proofs.json", JSON.stringify(batch.credentials.map(c => C.toProof(batch, c)), null, 1), "application/json"));
+  async function refreshQuote() {
+    const el = $("pubQuote"); if (!batch) { el.textContent = ""; return; }
+    try { el.textContent = await CertPricing.quoteText(batch.credentials[0].issuer.toLowerCase(), batch.count); } catch { el.textContent = "Could not read the price right now. You will see the exact cost in your wallet."; }
+  }
   $("publishBtn").addEventListener("click", async () => {
     const m = $("pubMsg"); if (!batch) return;
     $("publishBtn").disabled = true;
@@ -3753,10 +3850,15 @@ window.CC_CONFIG = {
       if (acct.toLowerCase() !== issuer) throw new Error(`Connect the issuer wallet (${issuer}). The connected wallet is ${acct}.`);
       if (!$("label").value.trim() && !confirm("Publish without a batch label?")) throw new Error("Cancelled.");
       if ((await X.readBatch(issuer, batch.root)).found) throw new Error("This batch is already published.");
-      say(m, "Confirm the transaction in your wallet…");
-      const tx = await X.send(acct, X.enc.publish(batch.root, batch.count, $("label").value.trim().slice(0, 80)));
-      m.className = "hint ok"; m.textContent = "Published. "; m.appendChild(mkLink({href: X.explorerTx(tx), text: "View transaction"}));
-    } catch (e) { say(m, e.message || String(e), "bad"); }
+      const q = await CertPricing.quoteText(issuer, batch.count); $("pubQuote").textContent = q; say(m, "Confirm the transaction in your wallet…");
+      const out = await X.publishTx(acct, batch.root, batch.count, $("label").value.trim().slice(0, 80));
+      m.className = "hint ok"; m.textContent = out.fee > 0n ? `Published. You paid ${CertPricing.fmtOKB(out.fee)} OKB. ` : "Published. "; m.appendChild(mkLink({href: X.explorerTx(out.hash), text: "View transaction"})); refreshQuote();
+    } catch (e) {
+      let msg = e.message || String(e);
+      if (/InsufficientFee|4c4e635c/i.test(msg)) msg = "The price changed while you were confirming. Nothing was charged. Refresh the quote and try again.";
+      else if (/Transaction failed/i.test(msg)) { msg = "The transaction did not go through, so nothing was published and no fee was charged (only the small network fee). The price may have changed while you were confirming."; try { msg += " " + await CertPricing.quoteText(batch.credentials[0].issuer.toLowerCase(), batch.count); } catch {} }
+      say(m, msg, "bad"); refreshQuote();
+    }
     $("publishBtn").disabled = false;
   });
 
@@ -3767,9 +3869,9 @@ window.CC_CONFIG = {
     try {
       const p = parseInput($("mLink").value), r = await C.verifyCredential(p); if (!r.ok) throw new Error("That certificate is not valid, so there is nothing to revoke.");
       if (!X.configured()) throw new Error("Demo mode: the registry contract isn't deployed in this build.");
-      const acct = await asIssuer(p.issuer); if (!(await X.readBatch(p.issuer, p.root)).found) throw new Error("This batch was never published, so there is nothing to revoke.");
+      const acct = await asIssuer(p.issuer), held = await X.readBatch(p.issuer, p.root); if (!held.found) throw new Error("This batch was never published, so there is nothing to revoke.");
       if (!confirm(`Revoke the certificate for ${p.name}? This is permanent.`)) throw new Error("Cancelled.");
-      say(m, "Confirm in your wallet…"); const tx = await X.send(acct, X.enc.revokeLeaf(p.root, r.leaf));
+      say(m, "Confirm in your wallet…"); const tx = await X.revokeTx(acct, X.enc.revokeLeaf(p.root, r.leaf), held.reg);
       m.className = "hint ok"; m.textContent = "Revoked. "; m.appendChild(mkLink({href: X.explorerTx(tx), text: "View transaction"}));
     } catch (e) { say(m, e.message || String(e), "bad"); }
   });
@@ -3778,15 +3880,112 @@ window.CC_CONFIG = {
     try {
       const root = $("mRoot").value.trim(); if (!/^0x[0-9a-fA-F]{64}$/.test(root)) throw new Error("Enter the 0x… batch fingerprint (66 characters).");
       if (!X.configured()) throw new Error("Demo mode: the registry contract isn't deployed in this build.");
-      const acct = await X.connect(); if (!(await X.readBatch(acct, root)).found) throw new Error("The connected wallet has not published this batch.");
+      const acct = await X.connect(), held = await X.readBatch(acct, root); if (!held.found) throw new Error("The connected wallet has not published this batch.");
       if (!confirm("Revoke the whole batch? Every certificate in it will show as revoked, permanently.")) throw new Error("Cancelled.");
-      say(m, "Confirm in your wallet…"); const tx = await X.send(acct, X.enc.revokeBatch(root));
+      say(m, "Confirm in your wallet…"); const tx = await X.revokeTx(acct, X.enc.revokeBatch(root), held.reg);
       m.className = "hint ok"; m.textContent = "Batch revoked. "; m.appendChild(mkLink({href: X.explorerTx(tx), text: "View transaction"}));
     } catch (e) { say(m, e.message || String(e), "bad"); }
   });
 
   route();
 })();
+</script>
+<script>
+// Pricing page, price quotes and the on-chain usage/revenue panel. Every number about money is read from the registry contract
+// (or shown as clearly-labelled proposed values while the paid registry is not deployed). Nothing is self-reported.
+(function (root) {
+  const $ = id => document.getElementById(id), X = root.CertChain, cfg = () => root.CC_CONFIG, ADDR = /^0x[0-9a-fA-F]{40}$/;
+  const E18 = 10n ** 18n;
+  const fmtOKB = wei => { wei = BigInt(wei); if (wei === 0n) return "0"; const whole = wei / E18, frac = (wei % E18).toString().padStart(18, "0").replace(/0+$/, ""); return frac ? whole + "." + frac.slice(0, 8) : String(whole); };
+  const usd = (wei, rate) => Number(wei) / 1e18 * rate;
+  const fmtUsd = v => v === 0 ? "$0" : v < 0.01 ? "$" + v.toFixed(4) : "$" + v.toFixed(2);
+  const parseUint = t => { const s = String(t).replace(/[\s,_]/g, ""); return /^\d{1,9}$/.test(s) ? Number(s) : null; };
+  // pure mirror of CertRegistryV2.quote (checked against the contract in the e2e test)
+  function priceFor(count, freeLeft, creditsHave, price) {
+    const free = Math.min(count, freeLeft), remB = BigInt(count - free), haveB = BigInt(creditsHave), cr = remB < haveB ? remB : haveB, paid = remB - cr;   // BigInt: Math.min cannot take BigInts
+    return {free, credits: Number(cr), paid: Number(paid), feeWei: paid * BigInt(price)};
+  }
+  const live = () => X.v2On();
+  // Missing settings must never break the page: an older config.js (without `proposed` or the dollar assumption) falls back to these defaults.
+  const DEFAULTS = {pricePerCertWei: "240000000000000", freeCerts: 25, verificationFeeWei: "120000000000000000"}, DEFAULT_USD = 83;
+  const proposed = () => { const p = Object.assign({}, DEFAULTS, cfg().proposed || {}); return {pricePerCert: BigInt(p.pricePerCertWei), freeCerts: Number(p.freeCerts), verificationFee: BigInt(p.verificationFeeWei)}; };
+  const usdAssumption = () => Number(cfg().okbUsdAssumption) > 0 ? Number(cfg().okbUsdAssumption) : DEFAULT_USD;
+  let prices = proposed();
+  async function loadPrices() { if (live()) { try { prices = await X.pricing(); } catch { prices = proposed(); } } else prices = proposed(); return prices; }
+  const rate = () => { const r = parseFloat(String($("calcUsd").value).replace(",", ".")); return r > 0 && r < 1e7 ? r : usdAssumption(); };
+
+  function paintCards() {
+    const n = $("prNotice"); n.hidden = live(); n.textContent = live() ? "" : "Pricing is not live yet: the paid registry has not been deployed, so publishing is free right now. The numbers below are the proposed starting prices and may change.";
+    $("prIssue").textContent = prices.freeCerts + " free"; $("prIssueSub").textContent = `Every 30 days per issuing wallet. After that ${fmtOKB(prices.pricePerCert)} OKB (about ${fmtUsd(usd(prices.pricePerCert, rate()))}) per certificate.`;
+    $("prCredit").textContent = fmtOKB(prices.pricePerCert) + " OKB each"; $("prVerify").textContent = fmtOKB(prices.verificationFee) + " OKB";
+  }
+  function paintCalc() {
+    const n = parseUint($("calcN").value), out = $("calcOut"); if (n === null || n === 0) { out.textContent = "Enter a number of certificates."; return; }
+    const q = priceFor(n, prices.freeCerts, 0, prices.pricePerCert), r = rate();
+    out.textContent = q.paid === 0 ? `${n} certificates: free.` : `${q.free} free + ${q.paid} paid = ${fmtOKB(q.feeWei)} OKB (about ${fmtUsd(usd(q.feeWei, r))}), ${fmtUsd(usd(q.feeWei, r) / n)} per certificate overall.`;
+  }
+  // ---- usage and revenue (also used on the judges page) ----
+  async function renderStats(box) {
+    box.replaceChildren(); const mk = (k, v, mono) => { const d = document.createElement("div"), a = document.createElement("dt"), b = document.createElement("dd"); a.textContent = k; if (v instanceof Node) b.appendChild(v); else b.textContent = v; if (mono) b.className = "mono"; d.append(a, b); return d; };
+    const dl = document.createElement("dl"); dl.className = "facts";
+    if (!live()) { dl.append(mk("Status", "The paid registry is not deployed yet, so nothing has been collected. When it is, these totals are read from the chain.")); box.appendChild(dl); return; }
+    try {
+      const s = await X.statsV2(), a = document.createElement("a"); a.href = cfg().explorer + "/address/" + cfg().registryV2; a.target = "_blank"; a.rel = "noopener"; a.textContent = cfg().registryV2;
+      dl.append(mk("Fees earned", fmtOKB(s.fees) + " OKB"), mk("Withdrawn to treasury", fmtOKB(s.withdrawn) + " OKB"), mk("Held in the contract", fmtOKB(s.balance) + " OKB"), mk("Batches published", String(s.batches)), mk("Certificates issued", String(s.certificates)), mk("Issuing wallets", String(s.issuers)), mk("Verified issuers", String(s.verified)), mk("Contract", a, true));
+    } catch (e) { dl.append(mk("Status", "Could not read the registry right now. Try again in a moment.")); }
+    box.appendChild(dl);
+  }
+  // ---- publish-time quote (used by the Issue page) ----
+  async function quoteText(issuer, count) {
+    if (!live()) return "Publishing is free right now. Pricing is not live yet.";
+    const q = await X.quote(issuer, count), have = await X.creditsOf(issuer);
+    if (q.fee === 0n) return `This batch is free: ${q.freeNow} covered by your free allowance${q.creditsNow > 0n ? `, ${q.creditsNow} by credits` : ""}.`;
+    const r = usdAssumption();
+    return `This batch costs ${fmtOKB(q.fee)} OKB (about ${fmtUsd(usd(q.fee, r))} at ${r} dollars per OKB). ${q.freeNow} are covered by your free allowance${q.creditsNow > 0n ? `, ${q.creditsNow} by credits` : ""}. You hold ${have} credits. You see the exact amount again in your wallet.`;
+  }
+
+  // ---- credits, verification ----
+  const say = (el, t, cls = "") => { el.textContent = t; el.className = "hint " + cls; };
+  async function refreshVerify() {
+    if (!live()) { $("vrStatus").textContent = "Reviews open once the paid registry is deployed."; return; }
+    let acct = null; try { acct = (await root.ethereum.request({method: "eth_accounts"}))[0]; } catch {} if (!acct) { $("vrStatus").textContent = "Connect your wallet to see the status of your request."; return; }
+    try {
+      const [info, pend, ref] = await Promise.all([X.issuerInfo(acct), X.pendingReview(acct), X.refundableOf(acct)]);
+      const lines = []; if (info.verified) lines.push(`Verified as “${info.name}” until ${new Date(info.verifiedUntil * 1000).toISOString().slice(0, 10)}.`);
+      if (pend.name) lines.push(`A review of “${pend.name}” is pending. Fee held: ${fmtOKB(pend.paid)} OKB, returned in full if we decline.`);
+      if (ref > 0n) lines.push(`${fmtOKB(ref)} OKB is waiting for you to claim.`);
+      $("vrStatus").textContent = lines.join(" ") || "No request yet for this wallet.";
+      $("vrCancel").hidden = !pend.name; $("vrClaim").hidden = !(ref > 0n);
+    } catch { $("vrStatus").textContent = "Could not read the status right now."; }
+  }
+  async function ensureLive(m) { if (!live()) { say(m, "Pricing is not live yet: the paid registry has not been deployed.", "bad"); return false; } return true; }
+  $("crBuy").addEventListener("click", async () => {
+    const m = $("crMsg"); try {
+      if (!(await ensureLive(m))) return; const n = parseUint($("crN").value); if (!n || n > 1000000) throw new Error("Enter a number of credits between 1 and 1,000,000.");
+      const acct = await X.connect(), who = $("crFor").value.trim() || acct; if (!ADDR.test(who)) throw new Error("That is not a wallet address.");
+      await loadPrices(); const cost = BigInt(n) * prices.pricePerCert; say(m, `Confirm ${fmtOKB(cost)} OKB in your wallet…`);
+      await X.paidTx(acct, X.enc.buyCredits(who, n), cost + cost / 100n);
+      say(m, `Done. ${who.toLowerCase() === acct.toLowerCase() ? "You now hold" : who.slice(0, 8) + "… now holds"} ${await X.creditsOf(who)} credits.`, "ok"); renderStats($("prStats"));
+    } catch (e) { say(m, e.message || String(e), "bad"); }
+  });
+  $("vrGo").addEventListener("click", async () => {
+    const m = $("vrMsg"); try {
+      if (!(await ensureLive(m))) return; const name = $("vrName").value.trim(), url = $("vrUrl").value.trim(); if (!name) throw new Error("Enter your organization's name.");
+      const acct = await X.connect(); await loadPrices(); say(m, `Confirm ${fmtOKB(prices.verificationFee)} OKB in your wallet. It is held, not spent, until we decide…`);
+      await X.paidTx(acct, X.enc.requestVerification(name, url), prices.verificationFee + prices.verificationFee / 100n);
+      say(m, "Request sent. We will check it and come back to you.", "ok"); refreshVerify(); renderStats($("prStats"));
+    } catch (e) { say(m, e.message || String(e), "bad"); }
+  });
+  $("vrCancel").addEventListener("click", async () => { const m = $("vrMsg"); try { const acct = await X.connect(); await X.paidTx(acct, X.enc.cancelVerification(), 0n); say(m, "Cancelled. Your fee is waiting for you to claim.", "ok"); refreshVerify(); } catch (e) { say(m, e.message || String(e), "bad"); } });
+  $("vrClaim").addEventListener("click", async () => { const m = $("vrMsg"); try { const acct = await X.connect(); await X.paidTx(acct, X.enc.claimRefund(), 0n); say(m, "Refund sent to your wallet.", "ok"); refreshVerify(); } catch (e) { say(m, e.message || String(e), "bad"); } });
+  ["calcN", "calcUsd"].forEach(id => $(id).addEventListener("input", () => { paintCards(); paintCalc(); }));
+
+  async function open() { await loadPrices(); paintCards(); paintCalc(); renderStats($("prStats")); refreshVerify(); }
+  window.addEventListener("hashchange", () => { if (location.hash === "#pricing") open(); });
+  window.addEventListener("ft-route", e => { if (e.detail === "judges" && $("jRevenue")) renderStats($("jRevenue")); });
+  if (location.hash === "#pricing") open(); if (location.hash === "#judges" && $("jRevenue")) renderStats($("jRevenue"));
+  root.CertPricing = {fmtOKB, fmtUsd, usd, priceFor, parseUint, quoteText, renderStats, loadPrices, open};
+})(window);
 </script>
 <script>
 // Home page behaviour. The demo uses the REAL code (CertCore: salted fingerprints, Merkle tree, proof check; CertQR: QR codes). Nothing is faked:

@@ -19,7 +19,7 @@ Each credential gets a random salt and is hashed into a Merkle tree in the brows
 - Only the configured TapeOut processor is trusted for skill proofs.
 
 ## Status (be honest)
-- Registry deployed on X Layer mainnet: `0xF965f9Fd3A6F36E000abE1288aE1363B9F920670`. FirstTape contracts also on mainnet (see `site/ft/config.js`).
+- Registry (original, free) on X Layer mainnet: `0xF965f9Fd3A6F36E000abE1288aE1363B9F920670`. Paid registry v2 (fee per certificate with a free allowance, credits, verified-issuer listing, public revenue totals): `0x00ed052771048b0895C1f22Ac6E9654805E414a5`, byte-identical to the tested code; nothing collected yet. FirstTape contracts also on mainnet (see `site/ft/config.js`).
 - Tested: core (55), encoding (12), QR vs the `qrencode` reference, contracts (9), the whole certificate flow on a local chain (62), skill and passport flows on a fork of live X Layer with the real processor and LessonVerifier (`tests/e2e-skill.mjs`, `tests/e2e-passport.mjs`), and 13 browser suites for the course and routing (`tests/ft/`).
 - Not done: a real-wallet run of the certificate and passport flows on mainnet, a public hosting address (certificate links embed the page's own URL), real users, an issuer directory.
 - Publishing a batch needs a wallet with a few cents of OKB (see `#wallet`).

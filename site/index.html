@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CertCheck — certificates anyone can verify</title>
+<meta name="description" content="Issue certificates that anyone can check forever, with no personal data on-chain and no server to trust. Built on X Layer.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="bar">
+  <a class="logo" href="#issue" aria-label="CertCheck home"><svg viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><path d="M7 8.5l3 3 6-7" fill="none" stroke="#00d892" stroke-width="2"/></svg>certcheck</a>
+  <nav class="tabs" aria-label="Sections">
+    <a href="#verify" data-tab="verify">Verify</a><a href="#issue" data-tab="issue">Issue</a><a href="#manage" data-tab="manage">Manage</a>
+  </nav>
+  <span class="chip" id="netChip">…</span>
+</header>
+
+<main>
+<!-- ===== VERIFY ===== -->
+<section id="verifyView" class="view" hidden>
+  <h1>Verify a certificate</h1>
+  <p class="lede">Open the link or QR code from the certificate, or paste it here. The check runs in your browser against a public record on X Layer. No account, no server.</p>
+  <div class="field"><label for="vInput">Certificate link or proof</label>
+    <textarea id="vInput" rows="3" spellcheck="false" placeholder="Paste a link ending in #c=… or the proof JSON"></textarea></div>
+  <div class="row"><button id="vBtn" class="btn primary" type="button">Verify</button><span class="hint" id="vHint"></span></div>
+  <article id="vResult" class="result" data-state="idle" hidden aria-live="polite">
+    <div class="rhead"><span class="badge" id="vBadge"></span><h2 id="vTitle"></h2></div>
+    <p id="vWhy"></p>
+    <dl class="facts" id="vFacts"></dl>
+    <p class="note" id="vNote"></p>
+  </article>
+</section>
+
+<!-- ===== ISSUE ===== -->
+<section id="issueView" class="view" hidden>
+  <h1>Issue certificates no one can fake</h1>
+  <p class="lede">Upload your list. Each person gets a link that proves their certificate, and only a fingerprint of the whole batch goes on-chain. Names never leave your browser until you hand out the links.</p>
+
+  <div class="step"><span class="num">1</span><div class="body">
+    <h2>Issuer</h2>
+    <p class="sub">The wallet that publishes the batch. Employers will see this address on every verification.</p>
+    <div class="row"><input id="issuerAddr" type="text" spellcheck="false" placeholder="0x… (connect a wallet to fill this in)" aria-label="Issuer address"><button id="connectBtn" class="btn ghost" type="button">Connect wallet</button></div>
+  </div></div>
+
+  <div class="step"><span class="num">2</span><div class="body">
+    <h2>Recipients</h2>
+    <p class="sub">A CSV with a <code>name</code> column. <code>course</code> and <code>date</code> columns are optional. Other columns, such as email, are ignored and never used.</p>
+    <textarea id="csvText" rows="5" spellcheck="false" placeholder="name,course,date&#10;Ada Lovelace,Digital Logic,2026-11-20"></textarea>
+    <div class="row"><label class="btn ghost filebtn">Choose a CSV file<input id="csvFile" type="file" accept=".csv,text/csv,text/plain" hidden></label><button id="sampleBtn" class="btn ghost" type="button">Use sample</button><span class="hint" id="csvHint"></span></div>
+    <div class="grid3">
+      <div class="field"><label for="course">Default course</label><input id="course" type="text" placeholder="Digital Logic 101"></div>
+      <div class="field"><label for="date">Default date</label><input id="date" type="text" placeholder="2026-11-20"></div>
+      <div class="field"><label for="label">Public batch label</label><input id="label" type="text" maxlength="80" placeholder="Cohort 7"></div>
+    </div>
+    <p class="note">The label is public and permanent. Don't put personal data in it.</p>
+  </div></div>
+
+  <div class="step"><span class="num">3</span><div class="body">
+    <h2>Generate</h2>
+    <div class="row"><button id="genBtn" class="btn primary" type="button">Generate certificates</button><span class="hint" id="genHint"></span></div>
+    <div id="results" hidden>
+      <dl class="facts"><div><dt>Batch fingerprint (Merkle root)</dt><dd class="mono" id="rootOut"></dd></div><div><dt>Certificates</dt><dd id="countOut"></dd></div></dl>
+      <div class="row"><button id="dlLinks" class="btn ghost" type="button">Download links (CSV)</button><button id="dlProofs" class="btn ghost" type="button">Download proofs (JSON)</button></div>
+      <div class="tablewrap"><table id="rows"><thead><tr><th>Name</th><th>Link</th></tr></thead><tbody></tbody></table></div>
+      <p class="hint" id="moreRows"></p>
+      <div class="publish"><h2>4 · Publish the fingerprint</h2>
+        <p class="sub">One transaction records the fingerprint, the count and your label on X Layer. Until you do this, verifiers will show “not registered”.</p>
+        <div class="row"><button id="publishBtn" class="btn primary" type="button">Publish on X Layer</button><span class="hint" id="pubMsg" role="status"></span></div></div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ===== MANAGE ===== -->
+<section id="manageView" class="view" hidden>
+  <h1>Revoke</h1>
+  <p class="lede">Withdraw a single certificate, or a whole batch. Only the wallet that published the batch can do this. The change is public and permanent.</p>
+  <div class="step"><div class="body">
+    <h2>Revoke one certificate</h2>
+    <textarea id="mLink" rows="2" spellcheck="false" placeholder="Paste the certificate's link or proof"></textarea>
+    <div class="row"><button id="mRevokeLeaf" class="btn ghost" type="button">Revoke this certificate</button><span class="hint" id="mLeafMsg" role="status"></span></div>
+  </div></div>
+  <div class="step"><div class="body">
+    <h2>Revoke a whole batch</h2>
+    <input id="mRoot" type="text" spellcheck="false" placeholder="0x… batch fingerprint">
+    <div class="row"><button id="mRevokeBatch" class="btn ghost" type="button">Revoke this batch</button><span class="hint" id="mBatchMsg" role="status"></span></div>
+  </div></div>
+</section>
+</main>
+
+<footer class="foot">
+  <p>No personal data is stored on-chain: only a batch fingerprint, a count and a label. The format is public (<code>docs/FORMAT.md</code>), so anyone can write their own verifier. Hackathon MVP, contracts unaudited.</p>
+</footer>
+
+<script src="core.js"></script>
+<script src="config.js"></script>
+<script src="chain.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+.env
+*.key
+node_modules/
+contracts/out/
+contracts/cache/
+contracts/lib/
+dist-demo/
+.DS_Store

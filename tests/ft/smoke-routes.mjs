@@ -13,17 +13,17 @@ const cases = [["", "cc", "home"], ["#home", "cc", "home"], ["#issue", "cc", "is
 for (const [h, top, view] of cases) { await go(h); const s = await shown(), v = await ccView(); ok(`${h || "(root)"} shows only the certificate site, on its ${view} page`, s.length === 1 && s[0] === top && v.length === 1 && v[0] === view, JSON.stringify([s, v])); }
 for (const [h, top] of [["#play", "game"], ["#circuits", "landing"], ["#judges", "judges"], ["#learners", "verify"], ["#how", "landing"], ["#levels", "landing"], ["#stack", "landing"]]) { await go(h); const s = await shown(); ok(`${h} shows only ${top}`, s.length === 1 && s[0] === top, JSON.stringify(s)); }
 // links
-await go(""); await p.click('#homeView a[href="#issue"]'); await sleep(200); ok("home: 'Issue certificates' opens the issue page", (await ccView())[0] === "issue");
-await go(""); await p.click('#homeView a[href="#verify"]'); await sleep(200); ok("home: 'Check a certificate' opens the verify page", (await ccView())[0] === "verify");
-await go(""); await p.click('#homeView a[href="#play"]'); await sleep(300); ok("home: 'Start learning' opens the game", (await shown())[0] === "game");
-await go(""); await p.click('#homeView a[href="#circuits"]'); await sleep(200); ok("home: 'About the course' opens the course page", (await shown())[0] === "landing");
-await go(""); await p.click('#homeView a[href="#wallet"]'); await sleep(200); ok("home: the wallet guide link works", (await ccView())[0] === "wallet");
-await go(""); await p.click('#homeView a[href="#judges"]'); await sleep(200); ok("home: 'For judges' opens the judges page", (await shown())[0] === "judges");
-await go("#issue"); await p.click('#cc .tabs a[data-tab="exam"]'); await sleep(200); ok("the 'Final exam' tab opens the exam page", (await ccView())[0] === "challenge" && (await p.$eval("#chTitle", e => e.textContent)) === "Final exam");
-await go("#issue"); await p.click('#cc .tabs a[data-tab="learn"]'); await sleep(300); ok("the 'Learn circuits' tab opens the game", (await shown())[0] === "game");
-await go("#circuits"); await p.click("#toCerts"); await sleep(200); ok("course page: 'Certificates' goes back to the certificate home", (await shown())[0] === "cc" && (await ccView())[0] === "home");
+await go(""); await p.$eval('#homeView a[href="#issue"]', a => a.click()); await sleep(200); ok("home: 'Issue certificates' opens the issue page", (await ccView())[0] === "issue");
+await go(""); await p.$eval('#homeView a[href="#verify"]', a => a.click()); await sleep(200); ok("home: 'Check a certificate' opens the verify page", (await ccView())[0] === "verify");
+await go(""); await p.$eval('#homeView a[href="#play"]', a => a.click()); await sleep(300); ok("home: 'Start learning' opens the game", (await shown())[0] === "game");
+await go(""); await p.$eval('#homeView a[href="#circuits"]', a => a.click()); await sleep(200); ok("home: 'About the course' opens the course page", (await shown())[0] === "landing");
+await go(""); await p.$eval('#homeView a[href="#wallet"]', a => a.click()); await sleep(200); ok("home: the wallet guide link works", (await ccView())[0] === "wallet");
+await go(""); await p.$eval('#homeView a[href="#judges"]', a => a.click()); await sleep(200); ok("home: 'For judges' opens the judges page", (await shown())[0] === "judges");
+await go("#issue"); await p.$eval('#cc .tabs a[data-tab="exam"]', a => a.click()); await sleep(200); ok("the 'Final exam' tab opens the exam page", (await ccView())[0] === "challenge" && (await p.$eval("#chTitle", e => e.textContent)) === "Final exam");
+await go("#issue"); await p.$eval('#cc .tabs a[data-tab="learn"]', a => a.click()); await sleep(300); ok("the 'Learn circuits' tab opens the game", (await shown())[0] === "game");
+await go("#circuits"); await p.$eval("#toCerts", a => a.click()); await sleep(200); ok("course page: 'Certificates' goes back to the certificate home", (await shown())[0] === "cc" && (await ccView())[0] === "home");
 await go("#play"); await p.click("#menuBtn"); await p.click("#game .menu a.mi"); await sleep(200); ok("game menu: 'Back to overview' opens the course page", (await shown())[0] === "landing");
-await go("#issue"); await p.click("#cc .logo"); await sleep(200); ok("the certificate logo goes home", (await ccView())[0] === "home");
+await go("#issue"); await p.$eval("#cc .logo", a => a.click()); await sleep(200); ok("the certificate logo goes home", (await ccView())[0] === "home");
 await p.goBack(); await sleep(200); ok("the browser Back button works across pages", (await ccView())[0] === "issue" || (await shown())[0] !== "cc");
 // every page fits a phone
 await p.setViewport({width: 390, height: 844});

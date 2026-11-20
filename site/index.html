@@ -8,6 +8,7 @@
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="ft/style.css">
 <link rel="stylesheet" href="cc/style.css">
+<link rel="stylesheet" href="cc/home.css">
 </head>
 <body>
 <div id="landing">
@@ -322,26 +323,208 @@
   <span class="chip" id="netChip">…</span>
 </header>
 <main>
-<section id="homeView" class="view" hidden>
-  <div class="hero">
-    <p class="eyebrow">Verifiable certificates, built on X Layer</p>
-    <h1>Certificates anyone can check. Nobody can fake.</h1>
-    <p class="lede">Issue certificates for your class, bootcamp or event. Every person gets a link and a QR code. Anyone can scan it and see in seconds that it is real. No personal data goes on-chain, and nothing depends on us staying online.</p>
-    <div class="row"><a class="btn primary" href="#issue">Issue certificates</a><a class="btn ghost" href="#verify">Check a certificate</a></div>
+<section id="homeView" class="view home" hidden>
+
+  <!-- ============ HERO: the terminal and the rack ============ -->
+  <div id="forge" class="forge" aria-label="Interactive demonstration of issuing and checking a certificate">
+    <div class="hwrap hstage">
+      <div class="hl">
+        <p class="live"><i class="pulse"></i>Live on X Layer · registry <a class="ulink" href="https://www.oklink.com/xlayer/address/0xF965f9Fd3A6F36E000abE1288aE1363B9F920670" target="_blank" rel="noopener">0xF965…0670</a></p>
+        <h1>Credentials that <em>prove themselves.</em></h1>
+        <p class="lede">Issue certificates anyone can verify in seconds, with no personal data on-chain. Or learn circuits, take an exam only your wallet can pass, and earn a passport that <b>TapeOut</b> checks for you.</p>
+        <div class="row ctas"><a class="btn primary" href="#issue">Issue certificates</a><a class="btn ghost" href="#verify">Check a certificate</a></div>
+
+        <div class="hterm" id="fTerm">
+          <div class="termbar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="httl">certcheck · live demo, runs in your browser</span><span class="cap" id="fStep" aria-live="polite">Ready</span></div>
+          <div class="termbody" id="fLog" role="log" aria-label="What the demo is doing"></div>
+          <div class="termin">
+            <label for="fName" class="sr">Name on the certificate</label>
+            <span class="pr" aria-hidden="true">~&gt; certcheck issue</span>
+            <input id="fName" type="text" maxlength="36" value="Ada Lovelace" autocomplete="off" spellcheck="false">
+            <button id="fRun" class="btn primary sm" type="button">Issue it ↵</button>
+          </div>
+          <div class="termact"><button id="fTamper" class="btn ghost sm" type="button" disabled>Try to forge it</button><button id="fReset" class="btn ghost sm" type="button" hidden>Start over</button><span class="hint">Everything here is real: real hashes, a real batch, a real check.</span></div>
+        </div>
+      </div>
+
+      <figure class="hr" id="fRackFig">
+        <figcaption class="figcap"><b>Fig. 1</b> The verification rack</figcaption>
+        <svg class="conn" id="fConn" viewBox="0 0 160 300" preserveAspectRatio="none" aria-hidden="true"><path id="fConnPath" d="M0 250 H70 L100 190 H160"/><circle r="3.5" id="fConnDot" cx="0" cy="250"/></svg>
+        <div class="chassis" id="fRack" data-state="idle">
+          <div class="rackhead"><span class="plate">CC&nbsp;·&nbsp;RACK&nbsp;01</span><span class="rstat" id="rStat">AWAITING BATCH</span></div>
+          <div class="blades" id="fBlades"></div>
+          <div class="rackfoot"><span>ROOT</span><code id="rRoot">0x————————————</code></div>
+        </div>
+      </figure>
+    </div>
+
+    <div class="hwrap bench">
+      <div class="benchhead"><span class="figcap"><b>Fig. 2</b> The workbench</span>
+        <ol class="fsteps" aria-label="Progress">
+          <li data-s="1"><i>1</i>Fingerprint</li><li data-s="2"><i>2</i>Batch</li><li data-s="3"><i>3</i>Certificate</li><li data-s="4"><i>4</i>Check</li>
+        </ol></div>
+      <div class="panels">
+        <article class="pn">
+          <h4>Fingerprint and batch</h4>
+          <code id="fLeaf" class="hex">waiting…</code>
+          <svg id="fTree" viewBox="0 0 320 132" role="img" aria-label="Merkle tree of four certificates"></svg>
+          <code id="fRoot" class="hex">waiting…</code>
+          <p>Name plus a secret salt becomes a fingerprint no one can guess. Only the root goes on-chain. Names never do.</p>
+        </article>
+        <article class="pn">
+          <h4>The certificate</h4>
+          <div class="fcard"><div class="fcardtxt"><b id="fCardName">—</b><span>Digital Logic · 2026</span></div><div id="fQr" class="qrbox" aria-label="QR code for this certificate"></div></div>
+          <p>Each person holds their own link and QR code. It contains their proof and nothing else.</p>
+        </article>
+        <article class="pn">
+          <h4>The check</h4>
+          <div class="fresult" id="fResult" data-state="idle"><span class="fbadge" id="fBadge">·</span><div><b id="fResTitle">Not checked yet</b><p id="fResWhy">Press “Issue it” to start.</p></div></div>
+          <p>The checker re-computes the fingerprint and walks up the tree. One changed letter and it no longer fits.</p>
+        </article>
+      </div>
+    </div>
   </div>
-  <div class="trio">
-    <div><span class="num">1</span><h3>Upload your list</h3><p>A simple spreadsheet of names. It stays in your browser and is never uploaded to a server.</p></div>
-    <div><span class="num">2</span><h3>Publish one fingerprint</h3><p>One small transaction records a fingerprint of the whole batch. It costs a fraction of a cent. Names never go on-chain.</p></div>
-    <div><span class="num">3</span><h3>Hand out links and QR codes</h3><p>Each person gets their own. Anyone who scans it can check it against the public record, today or in ten years.</p></div>
+
+  <!-- ============ STATEMENT ============ -->
+  <div class="hwrap statement hreveal">
+    <p class="hbig"><strong>A PDF can be faked in a minute. A database can vanish in a day.</strong> <span>A fingerprint on a public chain can be checked by anyone, for as long as the chain lives.</span></p>
   </div>
-  <div class="two">
-    <div class="panel"><h2>Why people can trust it</h2>
-      <ul><li><b>It cannot be forged.</b> Change one letter and the check fails.</li><li><b>It is private.</b> Only a fingerprint is public. Each person holds their own proof.</li><li><b>No lock-in.</b> The format is public, so anyone can build their own checker.</li><li><b>It can be withdrawn.</b> Revoke one certificate or a whole batch, publicly.</li></ul></div>
-    <div class="panel hot"><h2>Circuit track</h2>
-      <p>For electronics and computing courses. Learn logic gates in the FirstTape game, then take a final exam that is unique to you. Your circuit is built on <b>TapeOut</b>, and anyone can re-run it on-chain to confirm the skill is real.</p>
-      <div class="row"><a class="btn ghost" href="#play">Start learning</a><a class="btn ghost" href="#exam">Take the final exam</a><a class="btn ghost" href="#circuits">About the course</a></div></div>
+
+  <!-- ============ COMPARE ============ -->
+  <div class="hwrap hreveal" id="hWays">
+    <h2 class="sect">Two ways to certify have always asked you to compromise.</h2>
+    <div class="cmp">
+      <article class="cp">
+        <h3>Paper and PDF certificates</h3><p class="sub">Free to issue, but anyone can copy and edit one.</p>
+<pre class="art" aria-hidden="true"><span class="d">┌──────────────────┐</span>
+<span class="d">│</span> CERTIFICATE      <span class="d">│</span>
+<span class="d">│</span> ~~~~~~~~~~~~~~~~ <span class="d">│</span>
+<span class="d">│</span> Ada L.     <span class="r">?????</span> <span class="d">│</span>
+<span class="d">│</span>          <span class="r">▒▒▒▒</span>    <span class="d">│</span>
+<span class="d">└──────────────────┘</span>
+  copy · edit · reissue</pre>
+        <ul class="x"><li>Anyone can forge one</li><li>No way to check it</li><li>Lost when the file is lost</li></ul>
+      </article>
+      <article class="cp">
+        <h3>Closed credential platforms</h3><p class="sub">Hard to forge, but you rent your own records.</p>
+<pre class="art" aria-hidden="true"><span class="d">┌───┐ ┌───┐ ┌───┐</span>
+<span class="d">│</span><span class="r">▓▓▓</span><span class="d">│ │</span><span class="r">▓▓▓</span><span class="d">│ │</span><span class="r">▓▓▓</span><span class="d">│</span>  their servers
+<span class="d">└─┬─┘ └─┬─┘ └─┬─┘</span>
+<span class="d">  └─────┼─────┘</span>
+   ░░░░░░░░░░░░░░░   account
+   ░░░░░░░░░░░░░░░   fees · lock-in</pre>
+        <ul class="x"><li>Subscription forever</li><li>Gone if the vendor is</li><li>Your people's data on their side</li></ul>
+      </article>
+      <article class="cp hot">
+        <h3>CertCheck</h3><p class="sub">Anyone can check it. Nobody can fake it. Nothing to rent.</p>
+<pre class="art" aria-hidden="true">         <span class="g">root</span>   <span class="m">← the only thing public</span>
+        <span class="d">╱    ╲</span>
+      <span class="g">◆</span>        <span class="g">◆</span>
+     <span class="d">╱ ╲      ╱ ╲</span>
+   <span class="g">◇</span>   <span class="g">◆</span>    <span class="g">◇</span>   <span class="g">◇</span>
+   <span class="m">each leaf is one person's proof</span></pre>
+        <ul class="hv"><li>A changed letter fails the check</li><li>Public format, anyone can verify</li><li>Names stay with the holder</li></ul>
+        <div class="row"><a class="btn primary" href="#issue">Issue certificates</a><a class="btn ghost" href="#play">Circuit passport</a></div>
+      </article>
+    </div>
+    <form class="hcheck" id="hCheck" autocomplete="off"><label for="hLink">Got a certificate or passport link? Check it here.</label><div class="row"><input id="hLink" type="text" spellcheck="false" placeholder="Paste a link (#c=… or #p=…)"><button class="btn ghost" type="submit">Check</button></div></form>
   </div>
-  <p class="note center">Publishing needs a wallet with a few cents of OKB. <a href="#wallet">Setting one up takes about two minutes.</a> Checking a certificate needs nothing. <a href="#judges">For judges</a></p>
+
+  <!-- ============ TOOLS: mock UI cards ============ -->
+  <div class="hwrap hreveal">
+    <h2 class="sect">Everything an organizer needs, nothing they have to trust us with.</h2>
+    <div class="tools">
+      <a class="tool" href="#issue"><span class="cap">Issue ▸</span>
+        <div class="mock"><table><tr><td>Ada Lovelace</td><td class="g">4ab9fe…</td></tr><tr><td>Alan Turing</td><td class="g">c56934…</td></tr><tr><td>Grace Hopper</td><td class="g">125f17…</td></tr></table><div class="mb">Publish · 1 transaction</div></div>
+        <p><b>Upload</b> a list</p><p><b>Publish</b> one fingerprint</p><p><b>Print</b> links and QR codes</p></a>
+      <a class="tool" href="#verify"><span class="cap">Verify ▸</span>
+        <div class="mock"><div class="chipok">✓ VALID</div><table><tr><td>Issuer</td><td class="g">0x0aE1…8fD5</td></tr><tr><td>Registered</td><td>2026-11-20</td></tr><tr><td>Batch</td><td>Cohort 7 · 25</td></tr></table></div>
+        <p><b>Scan</b> any QR code</p><p><b>Re-computed</b> in your browser</p><p><b>No account</b> needed</p></a>
+      <a class="tool" href="#manage"><span class="cap">Revoke ▸</span>
+        <div class="mock"><table><tr><td>Ada Lovelace</td><td class="g">active</td></tr><tr class="rv"><td>Alan Turing</td><td class="hc">revoked</td></tr><tr><td>Grace Hopper</td><td class="g">active</td></tr></table><div class="mb off">Revoke one or the whole batch</div></div>
+        <p><b>Withdraw</b> one certificate</p><p><b>Or</b> a whole batch</p><p><b>In public</b>, permanently</p></a>
+      <a class="tool" href="#exam"><span class="cap">Passport ▸</span>
+        <div class="mock"><div class="mbar"><i></i></div><table><tr><td>Course levels</td><td class="g">3 / 3</td></tr><tr><td>Your exam</td><td class="g">8 / 8 rows</td></tr><tr><td>Owner</td><td>your wallet</td></tr></table></div>
+        <p><b>Course record</b> read on-chain</p><p><b>Exam</b> re-run by TapeOut</p><p><b>Link</b> and QR to share</p></a>
+    </div>
+  </div>
+
+  <!-- ============ CIRCUIT TRACK ============ -->
+  <div class="hwrap hreveal" id="hTrack">
+    <h2 class="sect">Learn the gate. Earn the passport.</h2>
+    <p class="sub lead">Everything in the course is built from one gate. Tap the inputs and see for yourself.</p>
+    <div class="track">
+      <figure class="tcell nandbox">
+        <figcaption class="figcap"><b>Fig. 3</b> One gate</figcaption>
+        <svg id="hNand" viewBox="0 0 280 150" role="group" aria-label="A NAND gate. Click A or B to change its inputs.">
+          <path class="hw" id="hwa" d="M70 45 H112"/><path class="hw" id="hwb" d="M70 105 H112"/><path class="hw" id="hwy" d="M214 75 H236"/>
+          <g class="hgate" id="hGate"><path class="hb" d="M112 24 H150 A 40 51 0 0 1 150 126 H112 Z"/><circle class="hb" cx="196" cy="75" r="6"/><text x="128" y="80">NAND</text></g>
+          <g class="hsw" id="hSwA" tabindex="0" role="button" aria-label="Input A"><rect x="14" y="30" width="56" height="30" rx="1"/><text x="42" y="50">A=0</text></g>
+          <g class="hsw" id="hSwB" tabindex="0" role="button" aria-label="Input B"><rect x="14" y="90" width="56" height="30" rx="1"/><text x="42" y="110">B=0</text></g>
+          <circle class="hlamp" id="hLamp" cx="250" cy="75" r="13"/>
+        </svg>
+        <p class="cap rd" id="hRead">A=0 B=0 → Y=1</p>
+        <table class="htt" id="hTT"><thead><tr><th>A</th><th>B</th><th>Y</th></tr></thead><tbody></tbody></table>
+      </figure>
+      <figure class="tcell rackbox">
+        <figcaption class="figcap"><b>Fig. 4</b> Your progress in this browser</figcaption>
+        <div class="hrack" id="hRack" role="group" aria-label="The 16 course levels"></div>
+        <p class="rackfoot" id="hRackFoot">0 of 16 levels cleared</p>
+        <p class="note">Levels 6 to 16 are checked on-chain. Tap a light to jump to that level.</p>
+      </figure>
+      <figure class="tcell passbox">
+        <figcaption class="figcap"><b>Fig. 5</b> The passport</figcaption>
+        <div class="passcard" id="hPass" data-state="locked">
+          <div class="phead"><span class="cap">Passport</span><span class="plock" id="hLock">Locked</span></div>
+          <div class="pline"><span>On-chain levels</span><b id="hOn">0 / 3</b></div>
+          <div class="pbar"><i id="hBar"></i></div>
+          <div class="pline"><span>Final exam</span><b id="hExam">locked</b></div>
+          <a class="btn primary" id="hPassBtn" href="#play">Start the course</a>
+        </div>
+        <p class="note" id="hPassNote">Clear 3 on-chain levels to unlock your exam.</p>
+      </figure>
+    </div>
+  </div>
+
+  <!-- ============ NUMBERS ============ -->
+  <div class="hwrap hreveal">
+    <div class="nums" id="hNums">
+      <div><b data-n="16">0</b><span>course levels,<br>6 to 16 checked on-chain</span></div>
+      <div><b data-n="218">0</b><span>different exams,<br>so no copying a classmate</span></div>
+      <div><b data-n="8">0</b><span>input rows TapeOut<br>re-runs for every exam</span></div>
+      <div><b data-n="0">0</b><span>names ever written<br>to the chain</span></div>
+    </div>
+  </div>
+
+  <!-- ============ TRUST ============ -->
+  <div class="hwrap hreveal">
+    <h2 class="sect">Why people can trust it</h2>
+    <div class="trust">
+      <div class="tc"><i class="ic lock"></i><h3>It cannot be forged</h3><p>Change one letter and the check fails. You just saw that.</p></div>
+      <div class="tc"><i class="ic blur"></i><h3>It is private</h3><p>Only a fingerprint is public. Each person holds their own proof.</p></div>
+      <div class="tc"><i class="ic open"></i><h3>No lock-in</h3><p>The format is public, so anyone can build their own checker.</p></div>
+      <div class="tc"><i class="ic revoke"></i><h3>It can be withdrawn</h3><p>Revoke one certificate or a whole batch, in public.</p></div>
+    </div>
+  </div>
+
+  <!-- ============ STATUS BOARD ============ -->
+  <div class="hwrap hreveal hstatus">
+    <h2 class="sect">What is live today, and what is not.</h2>
+    <div class="board" role="table" aria-label="Project status">
+      <div class="brow" role="row"><span class="dot on"></span><span class="bk">certificate registry</span><span class="bv"><a class="ulink" href="https://www.oklink.com/xlayer/address/0xF965f9Fd3A6F36E000abE1288aE1363B9F920670" target="_blank" rel="noopener">0xF965…0670</a> on X Layer</span><span class="hst ok">LIVE</span></div>
+      <div class="brow" role="row"><span class="dot on"></span><span class="bk">course contracts</span><span class="bv">FirstTape verifier and free NAND faucet</span><span class="hst ok">LIVE</span></div>
+      <div class="brow" role="row"><span class="dot"></span><span class="bk">tested on a fork</span><span class="bv">real contracts and the real TapeOut processor</span><span class="hst ok">PASSING</span></div>
+      <div class="brow" role="row"><span class="dot"></span><span class="bk">real-wallet run</span><span class="bv">certificate and passport flows on mainnet</span><span class="hst no">NOT YET</span></div>
+      <div class="brow" role="row"><span class="dot"></span><span class="bk">public address</span><span class="bv">certificates are only valid from the final address</span><span class="hst no">NOT YET</span></div>
+    </div>
+  </div>
+
+  <!-- ============ CTA ============ -->
+  <div class="hwrap hcta hreveal">
+    <h2 class="big2">Issue your first batch <span>in five minutes.</span></h2>
+    <div class="row"><a class="btn primary" href="#issue">Issue certificates</a><a class="btn ghost" href="#verify">Check a certificate</a><a class="btn ghost" href="#play">Start the course</a></div>
+    <p class="note center">Publishing needs a wallet with a few cents of OKB. <a href="#wallet">Setting one up takes about two minutes.</a> Checking a certificate needs nothing. <a href="#circuits">About the course</a> · <a href="#judges">For judges</a></p>
+  </div>
 </section>
 
 <section id="walletView" class="view" hidden>
@@ -494,5 +677,6 @@
 <script src="cc/board.js"></script>
 <script src="cc/challenge.js"></script>
 <script src="cc/app.js"></script>
+<script src="cc/home.js"></script>
 </body>
 </html>

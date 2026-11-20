@@ -85,6 +85,8 @@ const us = await C.uniqueSeeds(200), tabs = new Set(us.map(x => x.table));
 ok("200 students get 200 different challenge functions", us.length === 200 && tabs.size === 200);
 ok("the full set of 218 functions can be handed out without repeats", new Set((await C.uniqueSeeds(218)).map(x => x.table)).size === 218);
 ok("more students than functions still works (repeats allowed)", (await C.uniqueSeeds(300)).length === 300);
+// ---- tree levels (used by the home page demo to draw the batch) ----
+for (const n of [1, 2, 3, 4, 5, 8, 13]) { const bt = await C.buildBatch(mk(n)); ok(`batch of ${n}: levels[0] has ${n} leaves, the last level is the root, each credential's leaf is in level 0`, bt.levels[0].length === n && bt.levels[bt.levels.length - 1].length === 1 && "0x" + bt.levels[bt.levels.length - 1][0] === bt.root && bt.credentials.every((c, i) => c.leaf === "0x" + bt.levels[0][i])); }
 // ---- passport: wallet-derived seed (value checked against an independent Python implementation) ----
 const DEP = "0x0aE117C07A277D74D9326eb4e33013439dC68fD5";
 ok("walletSeed(deployer) is 7d715e12…b6db8 and its exam table is 92 (matches Python)", (await C.walletSeed(DEP)) === "7d715e127169407be020f063266db6b8" && (await C.challengeTable(await C.walletSeed(DEP))) === 92);

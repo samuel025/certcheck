@@ -35,7 +35,7 @@
     const full = creds.map(c => ({...c, salt: c.salt || newSalt()}));
     const leaves = await Promise.all(full.map(leafHash));
     const proofs = full.map(() => []);
-    let level = leaves.map((h, i) => ({h, members: [i]}));
+    let level = leaves.map((h, i) => ({h, members: [i]})); const levelHexes = [level.map(n => hex(n.h))];
     while (level.length > 1) {
       const next = [];
       for (let i = 0; i < level.length; i += 2) {
@@ -45,9 +45,9 @@
         R.members.forEach(m => proofs[m].push({s: "L", h: hex(L.h)}));
         next.push({h: await nodeHash(L.h, R.h), members: [...L.members, ...R.members]});
       }
-      level = next;
+      level = next; levelHexes.push(level.map(n => hex(n.h)));
     }
-    return {root: "0x" + hex(level[0].h), count: full.length, credentials: full.map((c, i) => ({...c, leaf: "0x" + hex(leaves[i]), proof: proofs[i]}))};
+    return {levels: levelHexes, root: "0x" + hex(level[0].h), count: full.length, credentials: full.map((c, i) => ({...c, leaf: "0x" + hex(leaves[i]), proof: proofs[i]}))};
   }
 
   // Recompute from the credential's own fields; never trusts the stored leaf. -> {ok, root, leaf, error?}

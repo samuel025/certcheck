@@ -870,6 +870,205 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
   .cc .tabs a{padding:6px 10px}
 }
 </style>
+<style>
+/* ===== home v2: verification rack, live terminal, figures, serif headlines ===== */
+.cc{--serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;--amber:#e8b64a}
+.cc main:has(> #homeView:not([hidden])){max-width:none;padding:0}
+.cc #homeView{overflow-x:clip}
+.cc .home .hwrap{max-width:1240px;margin:0 auto;padding:0 clamp(16px,4vw,48px)}
+.cc .home .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.cc .home .figcap{display:flex;align-items:center;gap:10px;font:11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--steel);margin:0 0 14px}
+.cc .home .figcap b{font-weight:400;color:var(--green);border:1px solid #0b4a38;padding:2px 7px}
+.cc .home .figcap::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,#252b32,transparent)}
+.cc .home .sect{text-wrap:balance;font:400 clamp(28px,3.6vw,46px)/1.1 var(--serif);color:var(--bone);margin:0 0 28px;max-width:880px;letter-spacing:-.01em}
+.cc .home .sub.lead{margin:-14px 0 26px;font-size:16px}
+.cc .home .hwrap.hreveal{margin-top:clamp(64px,9vw,120px)}
+.cc .home a.ulink{color:var(--silver);text-decoration:underline;text-underline-offset:3px}
+
+/* ---- hero ---- */
+.cc .home .forge{position:relative;padding:38px 0 6px;background:radial-gradient(900px 560px at 78% 4%,rgba(0,216,146,.12),transparent 62%),radial-gradient(640px 420px at 6% 34%,rgba(0,216,146,.05),transparent 65%)}
+.cc .home .forge::before{content:"";position:absolute;inset:0 0 auto 0;height:640px;background-image:radial-gradient(rgba(93,94,97,.4) 1px,transparent 1.2px);background-size:28px 28px;-webkit-mask-image:radial-gradient(ellipse at 72% 22%,#000,transparent 68%);mask-image:radial-gradient(ellipse at 72% 22%,#000,transparent 68%);pointer-events:none;animation:hgrid 60s linear infinite}
+@keyframes hgrid{to{background-position:28px 28px}}
+.cc .home .hstage{position:relative;display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:clamp(20px,4vw,64px);align-items:start}
+.cc .home .live{display:flex;align-items:center;gap:10px;font:11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--steel);margin:0 0 22px}
+.cc .home .pulse{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(0,216,146,.6);animation:hpulse 2.2s infinite}
+@keyframes hpulse{70%{box-shadow:0 0 0 9px rgba(0,216,146,0)}100%{box-shadow:0 0 0 0 rgba(0,216,146,0)}}
+.cc .home .hl h1{text-wrap:balance;font:400 clamp(42px,6.4vw,88px)/.98 var(--serif);letter-spacing:-.022em;color:var(--bone);margin:0 0 22px;max-width:640px}
+.cc .home .hl h1 em{font-style:italic;color:var(--green);text-shadow:0 0 42px rgba(0,216,146,.28)}
+.cc .home .hl .lede{max-width:560px;margin:0 0 22px;font-size:clamp(16px,1.35vw,19px)}.cc .home .hl .lede b{color:var(--bone);font-weight:400}
+.cc .home .ctas{margin:0 0 30px}
+.cc .home .hterm{border:1px solid #232930;background:linear-gradient(180deg,#0d1116,#090c10);box-shadow:0 24px 60px rgba(0,0,0,.5);max-width:640px}
+.cc .home .termbar{display:flex;align-items:center;gap:12px;padding:9px 12px;border-bottom:1px solid #1b2026;background:#0b0e12}
+.cc .home .dots{display:flex;gap:6px}.cc .home .dots i{width:9px;height:9px;border-radius:50%;background:#252b32}
+.cc .home .httl{flex:1;font:11px var(--mono);letter-spacing:.06em;color:var(--fog);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cc .home .termbar .cap{color:var(--green)}
+.cc .home .termbody{height:236px;overflow:auto;padding:12px 14px;font:12.5px/1.55 var(--mono);scrollbar-width:thin;scrollbar-color:#252b32 transparent}
+.cc .home .ln{white-space:pre-wrap;word-break:break-all;color:var(--steel)}.cc .home .ln.cmd{color:var(--bone)}.cc .home .ln.m{color:var(--fog)}.cc .home .ln.ok{color:var(--green)}.cc .home .ln.bad{color:var(--coral)}
+.cc .home .ln.cmd::before{content:"";}
+.cc .home .termin{display:flex;align-items:center;gap:10px;border-top:1px solid #1b2026;padding:9px 12px;flex-wrap:wrap}
+.cc .home .pr{font:12.5px var(--mono);color:var(--green);white-space:nowrap}
+.cc .home .termin input{flex:1;min-width:120px;background:transparent;border:0;border-bottom:1px solid #2a3138;color:var(--bone);font:13px var(--mono);padding:5px 2px;border-radius:0}
+.cc .home .termin input:focus{outline:0;border-bottom-color:var(--green)}
+.cc .home .termact{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:0 12px 12px}.cc .home .termact .hint{font-size:12px;color:var(--fog)}
+/* rack */
+.cc .home .hr{position:relative;margin:0}
+.cc .home .conn{position:absolute;left:-150px;top:0;width:150px;height:300px;overflow:visible;pointer-events:none}
+.cc .home .conn path{fill:none;stroke:#2b323a;stroke-width:1.5;stroke-dasharray:3 4;vector-effect:non-scaling-stroke}
+.cc .home .conn circle{fill:var(--green);filter:drop-shadow(0 0 6px rgba(0,216,146,.95));opacity:0}
+.cc .home .chassis{position:relative;padding:14px 22px 14px;background:linear-gradient(180deg,#151a20,#0b0e12);border:1px solid #262c33;box-shadow:0 40px 90px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.02),0 0 110px rgba(0,216,146,.07),inset 0 1px 0 rgba(255,255,255,.05);transition:box-shadow .6s}
+.cc .home .chassis::before,.cc .home .chassis::after{content:"";position:absolute;top:50px;bottom:46px;width:10px;background:radial-gradient(circle,#252c34 1.3px,transparent 1.7px) 0 0/10px 10px;opacity:.9}
+.cc .home .chassis::before{left:5px}.cc .home .chassis::after{right:5px}
+.cc .home .chassis[data-state=ok]{box-shadow:0 40px 90px rgba(0,0,0,.65),0 0 0 1px rgba(0,216,146,.25),0 0 130px rgba(0,216,146,.2),inset 0 1px 0 rgba(255,255,255,.05)}
+.cc .home .chassis[data-state=bad]{box-shadow:0 40px 90px rgba(0,0,0,.65),0 0 0 1px rgba(255,107,107,.35),0 0 130px rgba(255,107,107,.16),inset 0 1px 0 rgba(255,255,255,.05)}
+.cc .home .rackhead{display:flex;justify-content:space-between;align-items:center;padding:0 0 10px;border-bottom:1px solid #1d2329;margin-bottom:10px}
+.cc .home .plate{font:11px var(--mono);letter-spacing:.16em;color:var(--silver);border:1px solid #2b323a;padding:3px 8px}
+.cc .home .rstat{font:10.5px var(--mono);letter-spacing:.14em;color:var(--fog)}
+.cc .home .chassis[data-state=hash] .rstat{color:var(--amber)}.cc .home .chassis[data-state=sealed] .rstat{color:#5ad6ae}.cc .home .chassis[data-state=ok] .rstat{color:var(--green)}.cc .home .chassis[data-state=bad] .rstat{color:var(--coral)}
+.cc .home .blade{display:grid;grid-template-columns:12px 1fr auto;gap:12px;align-items:center;height:34px;margin:5px 0;padding:0 12px;background:linear-gradient(90deg,#10141a,#0c1015);border:1px solid #1c2228;position:relative;overflow:hidden;transition:border-color .3s,background .3s}
+.cc .home .blade .led{width:8px;height:20px;background:#15201c;box-shadow:inset 0 0 0 1px #1f2d28;transition:background .25s,box-shadow .25s}
+.cc .home .blade .nm{font:10.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fog);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cc .home .blade .hx{font:10px var(--mono);color:#454a50}
+.cc .home .blade[data-state=idle] .led{animation:hsweep 4.4s ease-in-out infinite;animation-delay:calc(var(--i)*.2s)}
+@keyframes hsweep{0%,80%,100%{background:#15201c;box-shadow:inset 0 0 0 1px #1f2d28}88%{background:#1c7a5c;box-shadow:0 0 8px rgba(0,216,146,.5)}}
+.cc .home .blade[data-state=hash] .led{background:var(--amber);box-shadow:0 0 10px rgba(232,182,74,.8);animation:hflick .25s steps(2) infinite}.cc .home .blade[data-state=hash] .nm{color:var(--silver)}
+@keyframes hflick{50%{opacity:.4}}
+.cc .home .blade[data-state=sealed] .led{background:#1c7a5c;box-shadow:0 0 8px rgba(0,216,146,.4)}.cc .home .blade[data-state=sealed] .nm{color:var(--silver)}.cc .home .blade[data-state=sealed] .hx{color:var(--steel)}
+.cc .home .blade[data-state=ok] .led{background:var(--green);box-shadow:0 0 14px rgba(0,216,146,.95)}.cc .home .blade[data-state=ok]{border-color:#16382e}.cc .home .blade[data-state=ok] .nm{color:var(--bone)}.cc .home .blade[data-state=ok] .hx{color:#6fcdb0}
+.cc .home .blade[data-state=bad]{background:linear-gradient(90deg,#241114,#150c0e);border-color:#5a2a2a;animation:hshake .45s}.cc .home .blade[data-state=bad] .led{background:var(--coral);box-shadow:0 0 14px rgba(255,107,107,.9)}.cc .home .blade[data-state=bad] .nm,.cc .home .blade[data-state=bad] .hx{color:var(--coral)}
+.cc .home .blade.me{outline:1px solid rgba(0,216,146,.55);outline-offset:1px}.cc .home .blade[data-state=bad].me{outline-color:rgba(255,107,107,.7)}
+.cc .home .rackfoot{display:flex;justify-content:space-between;gap:10px;align-items:baseline;border-top:1px solid #1d2329;margin-top:10px;padding-top:10px;font:10.5px var(--mono);letter-spacing:.14em;color:var(--fog)}.cc .home .rackfoot code{color:var(--green);letter-spacing:.04em}
+@keyframes hshake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+/* ---- workbench ---- */
+.cc .home .bench{margin-top:46px}
+.cc .home .benchhead{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:14px}.cc .home .benchhead .figcap{margin:0;flex:1;min-width:200px}
+.cc .home .fsteps{list-style:none;margin:0;padding:0;display:flex;gap:6px;flex-wrap:wrap}
+.cc .home .fsteps li{display:flex;align-items:center;gap:8px;font:11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--fog);border:1px solid #1d2329;padding:6px 12px 6px 7px;transition:color .3s,border-color .3s,background .3s}
+.cc .home .fsteps li i{font-style:normal;display:grid;place-items:center;width:18px;height:18px;border:1px solid #2a3138;font-size:10px}
+.cc .home .fsteps li.on{color:var(--bone);border-color:#0b4a38;background:rgba(0,216,146,.06)}.cc .home .fsteps li.on i{color:var(--green);border-color:var(--green)}
+.cc .home .panels{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:16px}
+.cc .home .pn{border:1px solid #1f252b;background:linear-gradient(180deg,#10141a,#0b0e12);padding:18px;min-width:0;opacity:.5;transition:opacity .5s,border-color .5s}
+.cc .home .pn.lit{opacity:1;border-color:#26303a}
+.cc .home .pn h4{font:11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--steel);margin:0 0 12px;font-weight:400}
+.cc .home .pn>p{margin:12px 0 0;font-size:12.5px;color:var(--fog)}
+.cc .home .hex{display:block;font:12px var(--mono);color:var(--green);word-break:break-all;letter-spacing:.02em;min-height:18px;margin:6px 0}
+.cc .home #fTree{display:block;width:100%;height:auto;max-height:150px}
+.cc .home #fTree .te{stroke:#3a3d42;stroke-width:1.5}.cc .home #fTree .te.path{stroke:var(--green);stroke-dasharray:6 5;animation:hflow 1s linear infinite}
+.cc .home #fTree .tn rect{fill:#14171b;stroke:#3a3d42}.cc .home #fTree .tn.path rect{stroke:#0b4a38}.cc .home #fTree .tn.me rect{stroke:var(--green);fill:rgba(0,41,35,.6)}
+.cc .home #fTree .tn text{font:9px var(--mono);fill:var(--steel)}.cc .home #fTree .tn.path text{fill:var(--silver)}.cc .home #fTree .tl{font:9px var(--sans);fill:var(--fog)}
+@keyframes hflow{to{stroke-dashoffset:-22}}
+.cc .home .fcard{display:flex;justify-content:space-between;gap:16px;align-items:center;border:1px solid var(--slate);background:#0a0d11;padding:14px;position:relative}
+.cc .home .fcardtxt{display:flex;flex-direction:column;gap:4px;min-width:0}.cc .home .fcardtxt b{font:400 24px var(--serif);color:var(--bone);overflow-wrap:anywhere}.cc .home .fcardtxt span{font-size:12px;color:var(--steel)}
+.cc .home .fcard .qrbox{width:96px;margin:0;padding:4px;flex:none}.cc .home .fcardtxt b span.bad{font:inherit;color:var(--coral);background:rgba(255,107,107,.16)}
+.cc .home .fresult{display:flex;gap:14px;align-items:center;border:1px solid var(--slate);padding:14px;position:relative;overflow:hidden}
+.cc .home .fresult p{margin:2px 0 0;font-size:12.5px;color:var(--steel)}.cc .home .fresult b{font:400 17px var(--sans);color:var(--bone)}
+.cc .home .fbadge{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font:18px var(--mono);border:2px solid var(--steel);color:var(--steel)}
+.cc .home .fresult[data-state=valid]{border-color:#0b4a38}.cc .home .fresult[data-state=valid] .fbadge,.cc .home .fresult[data-state=valid] b{color:var(--green)}.cc .home .fresult[data-state=valid] .fbadge{animation:hpop .5s}
+.cc .home .fresult[data-state=invalid]{border-color:#5a2a2a}.cc .home .fresult[data-state=invalid] .fbadge,.cc .home .fresult[data-state=invalid] b{color:var(--coral)}.cc .home .fresult[data-state=invalid] .fbadge{animation:hpop .5s}
+.cc .home .fresult[data-state=busy] .fbadge{animation:hspin 1s linear infinite;border-top-color:transparent}
+@keyframes hpop{0%{transform:scale(.4)}60%{transform:scale(1.18)}100%{transform:scale(1)}}@keyframes hspin{to{transform:rotate(360deg)}}
+.cc .home .forge.scan .fresult::after{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--green);box-shadow:0 0 14px var(--green);animation:hscan .9s ease-in-out}
+@keyframes hscan{from{top:0}to{top:100%}}
+.cc .home .forge.caught .fcard{animation:hshake .45s}.cc .home .forge.passed .fcard{border-color:#0b4a38}
+/* ---- statement ---- */
+.cc .home .statement .hbig{font:400 clamp(26px,3.9vw,52px)/1.14 var(--serif);letter-spacing:-.012em;max-width:1000px;margin:0;color:var(--steel)}
+.cc .home .statement .hbig strong{font-weight:400;color:var(--bone)}.cc .home .statement .hbig span{color:#7fe3c3}
+/* ---- compare ---- */
+.cc .home .cmp{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+.cc .home .cp{padding:4px 28px 8px;border-left:1px dashed #2a3037;min-width:0}.cc .home .cp:first-child{border-left:0;padding-left:0}
+.cc .home .cp h3{font:400 21px var(--sans);color:var(--bone);margin:0 0 4px}.cc .home .cp .sub{margin:0;font-size:14px;color:var(--steel)}
+.cc .home .art{font:12px/1.3 var(--mono);color:#5d6065;white-space:pre;overflow-x:auto;margin:20px 0;padding:14px 0}
+.cc .home .art .d{color:#3c4147}.cc .home .art .r{color:var(--coral)}.cc .home .art .g{color:var(--green)}.cc .home .art .m{color:var(--fog)}
+.cc .home .cp ul{list-style:none;margin:0 0 18px;padding:0;display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--steel)}
+.cc .home .cp .x li::before{content:"✕  ";color:var(--coral)}.cc .home .cp .hv li::before{content:"✓  ";color:var(--green)}
+.cc .home .cp.hot{background:linear-gradient(180deg,rgba(0,216,146,.05),transparent 70%);box-shadow:inset 0 1px 0 rgba(0,216,146,.4)}.cc .home .cp.hot .row{margin:0}
+.cc .home .hcheck{border:1px dashed var(--slate);padding:18px 20px;margin-top:34px}.cc .home .hcheck label{display:block;margin-bottom:8px;text-transform:none;letter-spacing:0;font:14px var(--sans);color:var(--silver)}.cc .home .hcheck .row{margin:0}
+/* ---- tools (mock UI) ---- */
+.cc .home .tools{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.cc .home .tool{display:block;text-decoration:none;color:inherit;border-top:1px solid var(--slate);padding-top:14px;transition:border-color .25s}
+.cc .home .tool .cap{display:block;margin-bottom:12px;transition:color .25s}.cc .home .tool:hover{border-color:var(--green)}.cc .home .tool:hover .cap{color:var(--green)}
+.cc .home .mock{background:#090c10;border:1px solid #1d2329;padding:12px;font:11.5px var(--mono);color:var(--steel);transition:transform .25s,border-color .25s,box-shadow .25s;min-height:132px}
+.cc .home .tool:hover .mock{transform:translateY(-3px);border-color:#26443b;box-shadow:0 14px 34px rgba(0,0,0,.45),0 0 36px rgba(0,216,146,.08)}
+.cc .home .mock table{width:100%;border-collapse:collapse}.cc .home .mock td{padding:5px 0;border-bottom:1px solid #151a20}.cc .home .mock td:last-child{text-align:right}.cc .home .mock .g{color:var(--green)}.cc .home .mock .hc{color:var(--coral)}
+.cc .home .mock tr.rv td:first-child{text-decoration:line-through;opacity:.55}
+.cc .home .chipok{display:inline-block;color:var(--green);border:1px solid #0b4a38;background:rgba(0,216,146,.07);padding:3px 9px;letter-spacing:.12em;margin-bottom:8px}
+.cc .home .mb{margin-top:10px;padding:6px 8px;background:var(--teal);color:var(--green);text-align:center;letter-spacing:.06em}.cc .home .mb.off{background:#241114;color:var(--coral)}
+.cc .home .mbar{height:6px;background:#14171b;border:1px solid #1d2024;margin-bottom:8px}.cc .home .mbar i{display:block;height:100%;width:100%;background:var(--green);box-shadow:0 0 10px rgba(0,216,146,.6)}
+.cc .home .tool p{margin:0;padding:7px 0;border-bottom:1px solid #151a20;font-size:13px;color:var(--steel)}.cc .home .tool p b{font-weight:400;color:var(--silver)}
+/* ---- circuit track ---- */
+.cc .home .track{display:grid;grid-template-columns:1.1fr 1.3fr 1fr;gap:18px;align-items:stretch}
+.cc .home .tcell{margin:0;border:1px solid #1f252b;padding:18px;background:linear-gradient(180deg,#10141a,#0b0e12);min-width:0}
+.cc .home .nandbox svg{display:block;width:100%;height:auto}.cc .home .nandbox .rd{margin:6px 0 10px;color:var(--green);font:12px var(--mono);letter-spacing:.1em}
+.cc .home .hw{fill:none;stroke:#3a3d42;stroke-width:4;transition:stroke .25s}.cc .home .hw.on{stroke:var(--green);stroke-dasharray:10 8;animation:hflow .9s linear infinite;filter:drop-shadow(0 0 5px rgba(0,216,146,.55))}
+.cc .home .hb{fill:#14171b;stroke:#4a4d52;stroke-width:2;transition:stroke .3s,fill .3s}.cc .home .hgate.hot .hb{stroke:var(--green);fill:rgba(0,41,35,.6)}.cc .home .hgate text{font:11px var(--mono);letter-spacing:.14em;fill:#6a6c70;pointer-events:none}
+.cc .home .hsw{cursor:pointer;outline:none}.cc .home .hsw rect{fill:var(--carbon);stroke:var(--slate);stroke-width:1.5;transition:fill .15s,stroke .15s}.cc .home .hsw text{fill:var(--silver);font:13px var(--mono);text-anchor:middle;pointer-events:none}
+.cc .home .hsw:hover rect,.cc .home .hsw:focus-visible rect{stroke:var(--green)}.cc .home .hsw.on rect{fill:var(--teal);stroke:var(--green)}.cc .home .hsw.on text{fill:var(--green)}
+.cc .home .hlamp{fill:#14171b;stroke:#4a4d52;stroke-width:2;transition:fill .25s,stroke .25s}.cc .home .hlamp.on{fill:var(--green);stroke:#7dffd6;filter:drop-shadow(0 0 12px rgba(0,216,146,.9))}
+.cc .home .htt{border-collapse:collapse;width:100%;font:12px var(--mono)}.cc .home .htt th,.cc .home .htt td{text-align:center;padding:4px 6px;border:1px solid #1d2024;color:var(--steel)}.cc .home .htt tr.cur td{background:rgba(0,216,146,.12);color:var(--green)}
+.cc .home .hrack{display:flex;flex-wrap:wrap;gap:14px 18px}.cc .home .rg{display:flex;gap:6px}
+.cc .home .led{display:flex;flex-direction:column;align-items:center;gap:5px;width:34px;padding:8px 0 5px;background:#0a0d11;border:1px solid #1d2024;color:var(--fog);cursor:pointer;font:11px var(--mono);transition:border-color .2s,transform .15s}
+.cc .home .led i{display:block;width:70%;height:10px;background:#14201c;border:1px solid #1f2d28;transition:background .3s,box-shadow .3s}
+.cc .home .led.chain i{border-color:#2a3d52;background:#141c26}.cc .home .led.on i{background:var(--green);border-color:#7dffd6;box-shadow:0 0 12px rgba(0,216,146,.8)}
+.cc .home .led:hover:not(:disabled){border-color:var(--green);transform:translateY(-2px)}.cc .home .led:disabled{cursor:not-allowed;opacity:.45}.cc .home .led.on{color:var(--bone)}
+.cc .home .rackbox .rackfoot{display:block;margin:14px 0 4px;font:13px var(--mono);color:var(--bone);border:0;padding:0;letter-spacing:0}
+.cc .home .passcard{border:1px solid var(--slate);padding:16px;background:#0a0d11;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;transition:border-color .4s}
+.cc .home .passcard .phead{display:flex;justify-content:space-between;align-items:center}.cc .home .plock{font:11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--steel);border:1px solid var(--slate);padding:3px 8px}
+.cc .home .pline{display:flex;justify-content:space-between;font-size:13px;color:var(--steel)}.cc .home .pline b{font:400 13px var(--mono);color:var(--bone)}
+.cc .home .pbar{height:6px;background:#14171b;border:1px solid #1d2024}.cc .home .pbar i{display:block;height:100%;width:0;background:var(--green);transition:width .8s cubic-bezier(.2,.7,.2,1)}
+.cc .home .passcard[data-state=ready]{border-color:#0b4a38;animation:hready 2.4s ease-in-out infinite}.cc .home .passcard[data-state=ready] .plock{color:var(--green);border-color:#0b4a38}
+@keyframes hready{50%{box-shadow:0 0 22px rgba(0,216,146,.2)}}
+.cc .home .passbox .note{margin-top:12px}
+/* ---- numbers ---- */
+.cc .home .nums{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid #1d2329;border-bottom:1px solid #1d2329}
+.cc .home .nums>div{padding:34px 24px;border-left:1px dashed #262c33}.cc .home .nums>div:first-child{border-left:0;padding-left:0}
+.cc .home .nums b{display:block;font:400 clamp(52px,7.4vw,104px)/1 var(--mono);color:var(--green);letter-spacing:-.04em;text-shadow:0 0 50px rgba(0,216,146,.3);margin-bottom:12px}
+.cc .home .nums span{font:11px/1.6 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--steel)}
+/* ---- trust ---- */
+.cc .home .trust{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.cc .home .tc{border-top:1px solid var(--slate);padding-top:18px}.cc .home .tc h3{font:400 17px var(--sans);color:var(--bone);margin:14px 0 6px}.cc .home .tc p{margin:0;color:var(--steel);font-size:14px}
+.cc .home .ic{display:block;width:34px;height:34px;position:relative;border:1px solid var(--slate)}
+.cc .home .ic::before,.cc .home .ic::after{content:"";position:absolute;background:var(--green)}
+.cc .home .ic.lock::before{left:9px;top:15px;width:14px;height:11px}.cc .home .ic.lock::after{left:11px;top:7px;width:10px;height:9px;background:none;border:2px solid var(--green);border-bottom:0;animation:hlock 3s ease-in-out infinite}
+@keyframes hlock{0%,70%,100%{transform:translateY(0)}80%{transform:translateY(-3px)}}
+.cc .home .ic.blur::before{left:7px;top:8px;width:20px;height:4px;box-shadow:0 7px 0 var(--green),0 14px 0 var(--green);animation:hblur 3s ease-in-out infinite}.cc .home .ic.blur::after{display:none}
+@keyframes hblur{50%{filter:blur(2.5px);opacity:.5}}
+.cc .home .ic.open::before{left:7px;top:7px;width:8px;height:8px;box-shadow:12px 0 0 var(--green),0 12px 0 var(--green),12px 12px 0 var(--green)}.cc .home .ic.open::after{display:none}
+.cc .home .ic.revoke::before{left:15px;top:6px;width:3px;height:22px;transform:rotate(45deg);background:var(--coral)}.cc .home .ic.revoke::after{left:15px;top:6px;width:3px;height:22px;transform:rotate(-45deg);background:var(--coral)}
+/* ---- status board ---- */
+.cc .home .board{border:1px solid #232930;background:#090c10;font:13px var(--mono);max-width:980px}
+.cc .home .brow{display:grid;grid-template-columns:14px 200px 1fr auto;gap:16px;align-items:center;padding:13px 16px;border-top:1px solid #151a20;color:var(--steel)}.cc .home .brow:first-child{border-top:0}
+.cc .home .bk{color:var(--bone);letter-spacing:.04em}.cc .home .bv{color:var(--steel);font-family:var(--sans);font-size:14px}
+.cc .home .dot{width:9px;height:9px;border-radius:50%;border:1px solid var(--steel)}.cc .home .dot.on{background:var(--green);border-color:var(--green);box-shadow:0 0 8px rgba(0,216,146,.7);animation:hpulse 2.6s infinite}
+.cc .home .hst{font:11px var(--mono);letter-spacing:.12em;padding:3px 9px;border:1px solid}.cc .home .hst.ok{color:var(--green);border-color:#0b4a38}.cc .home .hst.no{color:var(--amber);border-color:#4d3d17}
+/* ---- cta ---- */
+.cc .home .hcta{padding-bottom:30px}
+.cc .home .big2{font:400 clamp(34px,5.6vw,76px)/1.04 var(--serif);letter-spacing:-.02em;color:var(--bone);margin:0 0 28px;max-width:900px}.cc .home .big2 span{color:var(--green);font-style:italic}
+.cc .home .hcta .row{margin:0 0 6px}.cc .home .hcta .btn{padding:14px 26px}
+.cc .home .note.center{text-align:left;margin:26px 0 0}.cc .home .note a{color:var(--silver)}
+/* ---- reveal ---- */
+.js .cc .home .hreveal:not(.in){opacity:0;transform:translateY(18px)}.cc .home .hreveal{transition:opacity .8s ease,transform .8s ease}
+/* ---- responsive ---- */
+@media (max-width:1000px){
+  .cc .home .hstage{grid-template-columns:minmax(0,1fr)}.cc .home .conn{display:none}.cc .home .panels{grid-template-columns:minmax(0,1fr)}.cc .home .track{grid-template-columns:minmax(0,1fr)}
+  .cc .home .cmp{grid-template-columns:minmax(0,1fr)}.cc .home .cp{border-left:0;border-top:1px dashed #2a3037;padding:22px 0 8px}.cc .home .cp:first-child{border-top:0;padding-top:4px}
+  .cc .home .tools{grid-template-columns:repeat(2,minmax(0,1fr))}.cc .home .nums{grid-template-columns:repeat(2,minmax(0,1fr))}.cc .home .nums>div:nth-child(3){border-left:0;padding-left:0}.cc .home .nums>div:nth-child(n+3){border-top:1px solid #1d2329}
+  .cc .home .trust{grid-template-columns:repeat(2,minmax(0,1fr))}.cc .home .forge::before{height:420px}
+}
+@media (max-width:620px){
+  .cc .home .tools,.cc .home .trust,.cc .home .nums{grid-template-columns:minmax(0,1fr)}.cc .home .nums>div{border-left:0;padding-left:0;border-top:1px solid #1d2329}.cc .home .nums>div:first-child{border-top:0}
+  .cc .home .brow{grid-template-columns:14px 1fr auto;row-gap:2px}.cc .home .bv{grid-column:2/4;grid-row:2}.cc .home .termbody{height:210px}
+  .cc .home .fcard{flex-direction:column;align-items:flex-start}.cc .home .fsteps li{padding-right:8px}
+}
+@media (prefers-reduced-motion:reduce){.cc .home *{animation:none!important;transition:none!important}.js .cc .home .hreveal:not(.in){opacity:1;transform:none}}
+
+/* ghost placeholders before the demo runs */
+.cc .home .gn rect{fill:none;stroke:#262d35;stroke-dasharray:3 3}.cc .home .gn text{font:9px var(--mono);fill:#363d45}.cc .home .ge{stroke:#20262c;stroke-width:1.5;stroke-dasharray:3 4}
+.cc .home .qrbox.ghost{background:#0d1116;opacity:.7}
+.cc .home .pn .hex{color:#2c6b57}.cc .home .pn.lit .hex{color:var(--green)}
+.cc .home .hstatus .board{margin-top:4px}
+
+.cc .home .hterm,.cc .home .hl,.cc .home .hr,.cc .home .panels>*{min-width:0}
+.cc .home .termin .pr{white-space:normal}
+</style>
 </head>
 <body>
 <div id="landing">
@@ -1184,26 +1383,208 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
   <span class="chip" id="netChip">…</span>
 </header>
 <main>
-<section id="homeView" class="view" hidden>
-  <div class="hero">
-    <p class="eyebrow">Verifiable certificates, built on X Layer</p>
-    <h1>Certificates anyone can check. Nobody can fake.</h1>
-    <p class="lede">Issue certificates for your class, bootcamp or event. Every person gets a link and a QR code. Anyone can scan it and see in seconds that it is real. No personal data goes on-chain, and nothing depends on us staying online.</p>
-    <div class="row"><a class="btn primary" href="#issue">Issue certificates</a><a class="btn ghost" href="#verify">Check a certificate</a></div>
+<section id="homeView" class="view home" hidden>
+
+  <!-- ============ HERO: the terminal and the rack ============ -->
+  <div id="forge" class="forge" aria-label="Interactive demonstration of issuing and checking a certificate">
+    <div class="hwrap hstage">
+      <div class="hl">
+        <p class="live"><i class="pulse"></i>Live on X Layer · registry <a class="ulink" href="https://www.oklink.com/xlayer/address/0xF965f9Fd3A6F36E000abE1288aE1363B9F920670" target="_blank" rel="noopener">0xF965…0670</a></p>
+        <h1>Credentials that <em>prove themselves.</em></h1>
+        <p class="lede">Issue certificates anyone can verify in seconds, with no personal data on-chain. Or learn circuits, take an exam only your wallet can pass, and earn a passport that <b>TapeOut</b> checks for you.</p>
+        <div class="row ctas"><a class="btn primary" href="#issue">Issue certificates</a><a class="btn ghost" href="#verify">Check a certificate</a></div>
+
+        <div class="hterm" id="fTerm">
+          <div class="termbar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="httl">certcheck · live demo, runs in your browser</span><span class="cap" id="fStep" aria-live="polite">Ready</span></div>
+          <div class="termbody" id="fLog" role="log" aria-label="What the demo is doing"></div>
+          <div class="termin">
+            <label for="fName" class="sr">Name on the certificate</label>
+            <span class="pr" aria-hidden="true">~&gt; certcheck issue</span>
+            <input id="fName" type="text" maxlength="36" value="Ada Lovelace" autocomplete="off" spellcheck="false">
+            <button id="fRun" class="btn primary sm" type="button">Issue it ↵</button>
+          </div>
+          <div class="termact"><button id="fTamper" class="btn ghost sm" type="button" disabled>Try to forge it</button><button id="fReset" class="btn ghost sm" type="button" hidden>Start over</button><span class="hint">Everything here is real: real hashes, a real batch, a real check.</span></div>
+        </div>
+      </div>
+
+      <figure class="hr" id="fRackFig">
+        <figcaption class="figcap"><b>Fig. 1</b> The verification rack</figcaption>
+        <svg class="conn" id="fConn" viewBox="0 0 160 300" preserveAspectRatio="none" aria-hidden="true"><path id="fConnPath" d="M0 250 H70 L100 190 H160"/><circle r="3.5" id="fConnDot" cx="0" cy="250"/></svg>
+        <div class="chassis" id="fRack" data-state="idle">
+          <div class="rackhead"><span class="plate">CC&nbsp;·&nbsp;RACK&nbsp;01</span><span class="rstat" id="rStat">AWAITING BATCH</span></div>
+          <div class="blades" id="fBlades"></div>
+          <div class="rackfoot"><span>ROOT</span><code id="rRoot">0x————————————</code></div>
+        </div>
+      </figure>
+    </div>
+
+    <div class="hwrap bench">
+      <div class="benchhead"><span class="figcap"><b>Fig. 2</b> The workbench</span>
+        <ol class="fsteps" aria-label="Progress">
+          <li data-s="1"><i>1</i>Fingerprint</li><li data-s="2"><i>2</i>Batch</li><li data-s="3"><i>3</i>Certificate</li><li data-s="4"><i>4</i>Check</li>
+        </ol></div>
+      <div class="panels">
+        <article class="pn">
+          <h4>Fingerprint and batch</h4>
+          <code id="fLeaf" class="hex">waiting…</code>
+          <svg id="fTree" viewBox="0 0 320 132" role="img" aria-label="Merkle tree of four certificates"></svg>
+          <code id="fRoot" class="hex">waiting…</code>
+          <p>Name plus a secret salt becomes a fingerprint no one can guess. Only the root goes on-chain. Names never do.</p>
+        </article>
+        <article class="pn">
+          <h4>The certificate</h4>
+          <div class="fcard"><div class="fcardtxt"><b id="fCardName">—</b><span>Digital Logic · 2026</span></div><div id="fQr" class="qrbox" aria-label="QR code for this certificate"></div></div>
+          <p>Each person holds their own link and QR code. It contains their proof and nothing else.</p>
+        </article>
+        <article class="pn">
+          <h4>The check</h4>
+          <div class="fresult" id="fResult" data-state="idle"><span class="fbadge" id="fBadge">·</span><div><b id="fResTitle">Not checked yet</b><p id="fResWhy">Press “Issue it” to start.</p></div></div>
+          <p>The checker re-computes the fingerprint and walks up the tree. One changed letter and it no longer fits.</p>
+        </article>
+      </div>
+    </div>
   </div>
-  <div class="trio">
-    <div><span class="num">1</span><h3>Upload your list</h3><p>A simple spreadsheet of names. It stays in your browser and is never uploaded to a server.</p></div>
-    <div><span class="num">2</span><h3>Publish one fingerprint</h3><p>One small transaction records a fingerprint of the whole batch. It costs a fraction of a cent. Names never go on-chain.</p></div>
-    <div><span class="num">3</span><h3>Hand out links and QR codes</h3><p>Each person gets their own. Anyone who scans it can check it against the public record, today or in ten years.</p></div>
+
+  <!-- ============ STATEMENT ============ -->
+  <div class="hwrap statement hreveal">
+    <p class="hbig"><strong>A PDF can be faked in a minute. A database can vanish in a day.</strong> <span>A fingerprint on a public chain can be checked by anyone, for as long as the chain lives.</span></p>
   </div>
-  <div class="two">
-    <div class="panel"><h2>Why people can trust it</h2>
-      <ul><li><b>It cannot be forged.</b> Change one letter and the check fails.</li><li><b>It is private.</b> Only a fingerprint is public. Each person holds their own proof.</li><li><b>No lock-in.</b> The format is public, so anyone can build their own checker.</li><li><b>It can be withdrawn.</b> Revoke one certificate or a whole batch, publicly.</li></ul></div>
-    <div class="panel hot"><h2>Circuit track</h2>
-      <p>For electronics and computing courses. Learn logic gates in the FirstTape game, then take a final exam that is unique to you. Your circuit is built on <b>TapeOut</b>, and anyone can re-run it on-chain to confirm the skill is real.</p>
-      <div class="row"><a class="btn ghost" href="#play">Start learning</a><a class="btn ghost" href="#exam">Take the final exam</a><a class="btn ghost" href="#circuits">About the course</a></div></div>
+
+  <!-- ============ COMPARE ============ -->
+  <div class="hwrap hreveal" id="hWays">
+    <h2 class="sect">Two ways to certify have always asked you to compromise.</h2>
+    <div class="cmp">
+      <article class="cp">
+        <h3>Paper and PDF certificates</h3><p class="sub">Free to issue, but anyone can copy and edit one.</p>
+<pre class="art" aria-hidden="true"><span class="d">┌──────────────────┐</span>
+<span class="d">│</span> CERTIFICATE      <span class="d">│</span>
+<span class="d">│</span> ~~~~~~~~~~~~~~~~ <span class="d">│</span>
+<span class="d">│</span> Ada L.     <span class="r">?????</span> <span class="d">│</span>
+<span class="d">│</span>          <span class="r">▒▒▒▒</span>    <span class="d">│</span>
+<span class="d">└──────────────────┘</span>
+  copy · edit · reissue</pre>
+        <ul class="x"><li>Anyone can forge one</li><li>No way to check it</li><li>Lost when the file is lost</li></ul>
+      </article>
+      <article class="cp">
+        <h3>Closed credential platforms</h3><p class="sub">Hard to forge, but you rent your own records.</p>
+<pre class="art" aria-hidden="true"><span class="d">┌───┐ ┌───┐ ┌───┐</span>
+<span class="d">│</span><span class="r">▓▓▓</span><span class="d">│ │</span><span class="r">▓▓▓</span><span class="d">│ │</span><span class="r">▓▓▓</span><span class="d">│</span>  their servers
+<span class="d">└─┬─┘ └─┬─┘ └─┬─┘</span>
+<span class="d">  └─────┼─────┘</span>
+   ░░░░░░░░░░░░░░░   account
+   ░░░░░░░░░░░░░░░   fees · lock-in</pre>
+        <ul class="x"><li>Subscription forever</li><li>Gone if the vendor is</li><li>Your people's data on their side</li></ul>
+      </article>
+      <article class="cp hot">
+        <h3>CertCheck</h3><p class="sub">Anyone can check it. Nobody can fake it. Nothing to rent.</p>
+<pre class="art" aria-hidden="true">         <span class="g">root</span>   <span class="m">← the only thing public</span>
+        <span class="d">╱    ╲</span>
+      <span class="g">◆</span>        <span class="g">◆</span>
+     <span class="d">╱ ╲      ╱ ╲</span>
+   <span class="g">◇</span>   <span class="g">◆</span>    <span class="g">◇</span>   <span class="g">◇</span>
+   <span class="m">each leaf is one person's proof</span></pre>
+        <ul class="hv"><li>A changed letter fails the check</li><li>Public format, anyone can verify</li><li>Names stay with the holder</li></ul>
+        <div class="row"><a class="btn primary" href="#issue">Issue certificates</a><a class="btn ghost" href="#play">Circuit passport</a></div>
+      </article>
+    </div>
+    <form class="hcheck" id="hCheck" autocomplete="off"><label for="hLink">Got a certificate or passport link? Check it here.</label><div class="row"><input id="hLink" type="text" spellcheck="false" placeholder="Paste a link (#c=… or #p=…)"><button class="btn ghost" type="submit">Check</button></div></form>
   </div>
-  <p class="note center">Publishing needs a wallet with a few cents of OKB. <a href="#wallet">Setting one up takes about two minutes.</a> Checking a certificate needs nothing. <a href="#judges">For judges</a></p>
+
+  <!-- ============ TOOLS: mock UI cards ============ -->
+  <div class="hwrap hreveal">
+    <h2 class="sect">Everything an organizer needs, nothing they have to trust us with.</h2>
+    <div class="tools">
+      <a class="tool" href="#issue"><span class="cap">Issue ▸</span>
+        <div class="mock"><table><tr><td>Ada Lovelace</td><td class="g">4ab9fe…</td></tr><tr><td>Alan Turing</td><td class="g">c56934…</td></tr><tr><td>Grace Hopper</td><td class="g">125f17…</td></tr></table><div class="mb">Publish · 1 transaction</div></div>
+        <p><b>Upload</b> a list</p><p><b>Publish</b> one fingerprint</p><p><b>Print</b> links and QR codes</p></a>
+      <a class="tool" href="#verify"><span class="cap">Verify ▸</span>
+        <div class="mock"><div class="chipok">✓ VALID</div><table><tr><td>Issuer</td><td class="g">0x0aE1…8fD5</td></tr><tr><td>Registered</td><td>2026-11-20</td></tr><tr><td>Batch</td><td>Cohort 7 · 25</td></tr></table></div>
+        <p><b>Scan</b> any QR code</p><p><b>Re-computed</b> in your browser</p><p><b>No account</b> needed</p></a>
+      <a class="tool" href="#manage"><span class="cap">Revoke ▸</span>
+        <div class="mock"><table><tr><td>Ada Lovelace</td><td class="g">active</td></tr><tr class="rv"><td>Alan Turing</td><td class="hc">revoked</td></tr><tr><td>Grace Hopper</td><td class="g">active</td></tr></table><div class="mb off">Revoke one or the whole batch</div></div>
+        <p><b>Withdraw</b> one certificate</p><p><b>Or</b> a whole batch</p><p><b>In public</b>, permanently</p></a>
+      <a class="tool" href="#exam"><span class="cap">Passport ▸</span>
+        <div class="mock"><div class="mbar"><i></i></div><table><tr><td>Course levels</td><td class="g">3 / 3</td></tr><tr><td>Your exam</td><td class="g">8 / 8 rows</td></tr><tr><td>Owner</td><td>your wallet</td></tr></table></div>
+        <p><b>Course record</b> read on-chain</p><p><b>Exam</b> re-run by TapeOut</p><p><b>Link</b> and QR to share</p></a>
+    </div>
+  </div>
+
+  <!-- ============ CIRCUIT TRACK ============ -->
+  <div class="hwrap hreveal" id="hTrack">
+    <h2 class="sect">Learn the gate. Earn the passport.</h2>
+    <p class="sub lead">Everything in the course is built from one gate. Tap the inputs and see for yourself.</p>
+    <div class="track">
+      <figure class="tcell nandbox">
+        <figcaption class="figcap"><b>Fig. 3</b> One gate</figcaption>
+        <svg id="hNand" viewBox="0 0 280 150" role="group" aria-label="A NAND gate. Click A or B to change its inputs.">
+          <path class="hw" id="hwa" d="M70 45 H112"/><path class="hw" id="hwb" d="M70 105 H112"/><path class="hw" id="hwy" d="M214 75 H236"/>
+          <g class="hgate" id="hGate"><path class="hb" d="M112 24 H150 A 40 51 0 0 1 150 126 H112 Z"/><circle class="hb" cx="196" cy="75" r="6"/><text x="128" y="80">NAND</text></g>
+          <g class="hsw" id="hSwA" tabindex="0" role="button" aria-label="Input A"><rect x="14" y="30" width="56" height="30" rx="1"/><text x="42" y="50">A=0</text></g>
+          <g class="hsw" id="hSwB" tabindex="0" role="button" aria-label="Input B"><rect x="14" y="90" width="56" height="30" rx="1"/><text x="42" y="110">B=0</text></g>
+          <circle class="hlamp" id="hLamp" cx="250" cy="75" r="13"/>
+        </svg>
+        <p class="cap rd" id="hRead">A=0 B=0 → Y=1</p>
+        <table class="htt" id="hTT"><thead><tr><th>A</th><th>B</th><th>Y</th></tr></thead><tbody></tbody></table>
+      </figure>
+      <figure class="tcell rackbox">
+        <figcaption class="figcap"><b>Fig. 4</b> Your progress in this browser</figcaption>
+        <div class="hrack" id="hRack" role="group" aria-label="The 16 course levels"></div>
+        <p class="rackfoot" id="hRackFoot">0 of 16 levels cleared</p>
+        <p class="note">Levels 6 to 16 are checked on-chain. Tap a light to jump to that level.</p>
+      </figure>
+      <figure class="tcell passbox">
+        <figcaption class="figcap"><b>Fig. 5</b> The passport</figcaption>
+        <div class="passcard" id="hPass" data-state="locked">
+          <div class="phead"><span class="cap">Passport</span><span class="plock" id="hLock">Locked</span></div>
+          <div class="pline"><span>On-chain levels</span><b id="hOn">0 / 3</b></div>
+          <div class="pbar"><i id="hBar"></i></div>
+          <div class="pline"><span>Final exam</span><b id="hExam">locked</b></div>
+          <a class="btn primary" id="hPassBtn" href="#play">Start the course</a>
+        </div>
+        <p class="note" id="hPassNote">Clear 3 on-chain levels to unlock your exam.</p>
+      </figure>
+    </div>
+  </div>
+
+  <!-- ============ NUMBERS ============ -->
+  <div class="hwrap hreveal">
+    <div class="nums" id="hNums">
+      <div><b data-n="16">0</b><span>course levels,<br>6 to 16 checked on-chain</span></div>
+      <div><b data-n="218">0</b><span>different exams,<br>so no copying a classmate</span></div>
+      <div><b data-n="8">0</b><span>input rows TapeOut<br>re-runs for every exam</span></div>
+      <div><b data-n="0">0</b><span>names ever written<br>to the chain</span></div>
+    </div>
+  </div>
+
+  <!-- ============ TRUST ============ -->
+  <div class="hwrap hreveal">
+    <h2 class="sect">Why people can trust it</h2>
+    <div class="trust">
+      <div class="tc"><i class="ic lock"></i><h3>It cannot be forged</h3><p>Change one letter and the check fails. You just saw that.</p></div>
+      <div class="tc"><i class="ic blur"></i><h3>It is private</h3><p>Only a fingerprint is public. Each person holds their own proof.</p></div>
+      <div class="tc"><i class="ic open"></i><h3>No lock-in</h3><p>The format is public, so anyone can build their own checker.</p></div>
+      <div class="tc"><i class="ic revoke"></i><h3>It can be withdrawn</h3><p>Revoke one certificate or a whole batch, in public.</p></div>
+    </div>
+  </div>
+
+  <!-- ============ STATUS BOARD ============ -->
+  <div class="hwrap hreveal hstatus">
+    <h2 class="sect">What is live today, and what is not.</h2>
+    <div class="board" role="table" aria-label="Project status">
+      <div class="brow" role="row"><span class="dot on"></span><span class="bk">certificate registry</span><span class="bv"><a class="ulink" href="https://www.oklink.com/xlayer/address/0xF965f9Fd3A6F36E000abE1288aE1363B9F920670" target="_blank" rel="noopener">0xF965…0670</a> on X Layer</span><span class="hst ok">LIVE</span></div>
+      <div class="brow" role="row"><span class="dot on"></span><span class="bk">course contracts</span><span class="bv">FirstTape verifier and free NAND faucet</span><span class="hst ok">LIVE</span></div>
+      <div class="brow" role="row"><span class="dot"></span><span class="bk">tested on a fork</span><span class="bv">real contracts and the real TapeOut processor</span><span class="hst ok">PASSING</span></div>
+      <div class="brow" role="row"><span class="dot"></span><span class="bk">real-wallet run</span><span class="bv">certificate and passport flows on mainnet</span><span class="hst no">NOT YET</span></div>
+      <div class="brow" role="row"><span class="dot"></span><span class="bk">public address</span><span class="bv">certificates are only valid from the final address</span><span class="hst no">NOT YET</span></div>
+    </div>
+  </div>
+
+  <!-- ============ CTA ============ -->
+  <div class="hwrap hcta hreveal">
+    <h2 class="big2">Issue your first batch <span>in five minutes.</span></h2>
+    <div class="row"><a class="btn primary" href="#issue">Issue certificates</a><a class="btn ghost" href="#verify">Check a certificate</a><a class="btn ghost" href="#play">Start the course</a></div>
+    <p class="note center">Publishing needs a wallet with a few cents of OKB. <a href="#wallet">Setting one up takes about two minutes.</a> Checking a certificate needs nothing. <a href="#circuits">About the course</a> · <a href="#judges">For judges</a></p>
+  </div>
 </section>
 
 <section id="walletView" class="view" hidden>
@@ -2672,7 +3053,7 @@ window.FT_CARD = {
     const full = creds.map(c => ({...c, salt: c.salt || newSalt()}));
     const leaves = await Promise.all(full.map(leafHash));
     const proofs = full.map(() => []);
-    let level = leaves.map((h, i) => ({h, members: [i]}));
+    let level = leaves.map((h, i) => ({h, members: [i]})); const levelHexes = [level.map(n => hex(n.h))];
     while (level.length > 1) {
       const next = [];
       for (let i = 0; i < level.length; i += 2) {
@@ -2682,9 +3063,9 @@ window.FT_CARD = {
         R.members.forEach(m => proofs[m].push({s: "L", h: hex(L.h)}));
         next.push({h: await nodeHash(L.h, R.h), members: [...L.members, ...R.members]});
       }
-      level = next;
+      level = next; levelHexes.push(level.map(n => hex(n.h)));
     }
-    return {root: "0x" + hex(level[0].h), count: full.length, credentials: full.map((c, i) => ({...c, leaf: "0x" + hex(leaves[i]), proof: proofs[i]}))};
+    return {levels: levelHexes, root: "0x" + hex(level[0].h), count: full.length, credentials: full.map((c, i) => ({...c, leaf: "0x" + hex(leaves[i]), proof: proofs[i]}))};
   }
 
   // Recompute from the credential's own fields; never trusts the stored leaf. -> {ok, root, leaf, error?}
@@ -3424,6 +3805,187 @@ window.CC_CONFIG = {
   });
 
   route();
+})();
+</script>
+<script>
+// Home page behaviour. The demo uses the REAL code (CertCore: salted fingerprints, Merkle tree, proof check; CertQR: QR codes). Nothing is faked:
+// every hash, root, proof length and verdict printed in the terminal and shown on the rack comes from the actual functions.
+(function () {
+  const $ = id => document.getElementById(id), C = window.CertCore, Q = window.CertQR, NS = "http://www.w3.org/2000/svg";
+  const REDUCE = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const sleep = ms => REDUCE ? Promise.resolve() : new Promise(r => setTimeout(r, ms));
+  const el = (n, a, p) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
+  const homeVisible = () => !$("homeView").hidden;
+  const short = h => h.slice(0, 10) + "…";
+  document.documentElement.classList.add("js");
+
+  // ---------- scroll reveal + count-up ----------
+  const rev = [...document.querySelectorAll("#homeView .hreveal")];
+  function countUp(root) {
+    root.querySelectorAll("[data-n]").forEach(b => { const to = +b.dataset.n, t0 = performance.now(), dur = 1300; if (REDUCE || !to) { b.textContent = String(to); return; }
+      (function tick() { const t = Math.min(1, (performance.now() - t0) / dur), v = Math.round(to * (1 - Math.pow(1 - t, 3))); b.textContent = String(v); if (t < 1) requestAnimationFrame(tick); })(); });
+  }
+  if (REDUCE || !("IntersectionObserver" in window)) { rev.forEach(e => { e.classList.add("in"); countUp(e); }); }
+  else { const io = new IntersectionObserver(es => es.forEach(x => { if (x.isIntersecting) { x.target.classList.add("in"); countUp(x.target); io.unobserve(x.target); } }), {threshold: 0.12}); rev.forEach(e => io.observe(e)); }
+
+  // ---------- terminal ----------
+  const logEl = $("fLog"), MAXLN = 17;
+  async function say(text, cls = "", type = false) {
+    const ln = document.createElement("div"); ln.className = "ln " + cls; logEl.appendChild(ln);
+    while (logEl.children.length > MAXLN) logEl.removeChild(logEl.firstChild);
+    if (type && !REDUCE) { for (let i = 1; i <= text.length; i++) { ln.textContent = text.slice(0, i); await sleep(13); } } else ln.textContent = text;
+    logEl.scrollTop = logEl.scrollHeight; return ln;
+  }
+  function logReset() { logEl.replaceChildren(); say("certcheck 1.0 · demo mode, runs in this tab", "m"); say("Type a name and press Issue. Then try to forge it.", "m"); }
+
+  // ---------- rack ----------
+  const SLOTS = 12, ACTIVE = [4, 5, 6, 7], MINE = 5, bladesEl = $("fBlades"), blades = [];
+  for (let i = 0; i < SLOTS; i++) {
+    const b = document.createElement("div"); b.className = "blade"; b.dataset.state = "idle";
+    b.innerHTML = '<i class="led"></i><span class="nm"></span><code class="hx"></code>'; b.style.setProperty("--i", i); bladesEl.appendChild(b); blades.push(b);
+  }
+  function bladeSet(i, state, name, hx) { const b = blades[i]; b.dataset.state = state; if (name !== undefined) b.querySelector(".nm").textContent = name; if (hx !== undefined) b.querySelector(".hx").textContent = hx; }
+  function rackReset() {
+    blades.forEach((b, i) => { b.classList.remove("me"); bladeSet(i, "idle", "slot " + i.toString(16).toUpperCase().padStart(2, "0") + " · empty", "— — —"); });
+    $("fRack").dataset.state = "idle"; $("rStat").textContent = "AWAITING BATCH"; $("rRoot").textContent = "0x————————————";
+  }
+  function rackState(text, st) { $("fRack").dataset.state = st; $("rStat").textContent = text; }
+
+  // ---------- connector pulse (terminal to rack) ----------
+  async function pulse() {
+    if (REDUCE) return; const path = $("fConnPath"), dot = $("fConnDot"), len = path.getTotalLength(), t0 = performance.now(), dur = 700; dot.style.opacity = 1;
+    await new Promise(res => (function tick() { const t = Math.min(1, (performance.now() - t0) / dur), p = path.getPointAtLength(len * t); dot.setAttribute("cx", p.x); dot.setAttribute("cy", p.y); t < 1 ? requestAnimationFrame(tick) : res(); })());
+    dot.style.opacity = 0;
+  }
+
+  // ---------- live demo: issue, then try to forge ----------
+  const ISSUER = "0x000000000000000000000000000000000000dEaD", PEERS = ["Alan Turing", "Grace Hopper", "Katherine Johnson"], HEX = "0123456789abcdef";
+  let running = false, batch = null, proof = null, epoch = 0;
+  async function scramble(node, final, ms = 650) {
+    if (REDUCE) { node.textContent = final; return; }
+    const t0 = performance.now();
+    await new Promise(res => (function tick() { const t = Math.min(1, (performance.now() - t0) / ms), n = Math.floor(t * final.length); let s = final.slice(0, n); for (let i = n; i < final.length; i++) s += HEX[Math.random() * 16 | 0]; node.textContent = s; t < 1 ? requestAnimationFrame(tick) : res(); })());
+  }
+  const steps = () => [...document.querySelectorAll("#forge .fsteps li")];
+  function lightUpTo(n) { steps().forEach((li, i) => li.classList.toggle("on", i < n)); const pn = [...document.querySelectorAll("#forge .pn")]; [1, 3, 4].forEach((need, k) => pn[k] && pn[k].classList.toggle("lit", n >= need)); }
+  function setResult(state, badge, title, why) { $("fResult").dataset.state = state; $("fBadge").textContent = badge; $("fResTitle").textContent = title; $("fResWhy").textContent = why; }
+  function resetDemo() {
+    epoch++; running = false; batch = null; proof = null; lightUpTo(0); $("fStep").textContent = "Ready";
+    $("fLeaf").textContent = "waiting…"; $("fRoot").textContent = "waiting…"; ghosts(); $("fCardName").textContent = "—"; $("fCardName").className = "";
+    setResult("idle", "·", "Not checked yet", "Press “Issue it” to start."); $("fTamper").disabled = true; $("fReset").hidden = true; $("fRun").disabled = false; $("forge").classList.remove("scan", "caught", "passed");
+    rackReset(); logReset();
+  }
+  function ghosts() {
+    const svg = $("fTree"); svg.replaceChildren(); const W = 320, w = 64, h = 20, xs = [[40, 120, 200, 280], [80, 240], [160]], ys = [104, 58, 14];
+    for (let k = 0; k < 2; k++) xs[k].forEach((x, i) => el("line", {x1: x, y1: ys[k] - h / 2, x2: xs[k + 1][Math.floor(i / 2)], y2: ys[k + 1] + h / 2, class: "ge"}, svg));
+    xs.forEach((row, k) => row.forEach(x => { const g = el("g", {class: "gn"}, svg); el("rect", {x: x - w / 2, y: ys[k] - h / 2, width: w, height: h, rx: 1}, g); const t = el("text", {x, y: ys[k] + 4, "text-anchor": "middle"}, g); t.textContent = "······"; }));
+    try { $("fQr").innerHTML = Q.toSVG(Q.encode("certcheck demo placeholder", "M"), 4, "#262d35", "#0d1116"); } catch {} $("fQr").classList.add("ghost");
+  }
+  function drawTree(b, mine) {
+    const svg = $("fTree"); svg.replaceChildren(); const L = b.levels, W = 320, w = 64, h = 20;
+    const xs = L.map((lv, k) => lv.map((_, i) => { const span = 4 / lv.length; return (i * span + span / 2) * (W / 4); })), ys = [104, 58, 14];
+    const path = [[0, mine]]; for (let k = 1; k < L.length; k++) path.push([k, Math.floor(path[k - 1][1] / 2)]);
+    const onPath = (k, i) => path.some(p => p[0] === k && p[1] === i);
+    for (let k = 0; k < L.length - 1; k++) L[k].forEach((_, i) => { const j = Math.floor(i / 2); el("line", {x1: xs[k][i], y1: ys[k] - h / 2, x2: xs[k + 1][j], y2: ys[k + 1] + h / 2, class: "te" + (onPath(k, i) ? " path" : "")}, svg); });
+    L.forEach((lv, k) => lv.forEach((hx, i) => { const g = el("g", {class: "tn" + (onPath(k, i) ? " path" : "") + (k === 0 && i === mine ? " me" : "")}, svg); el("rect", {x: xs[k][i] - w / 2, y: ys[k] - h / 2, width: w, height: h, rx: 1}, g); const t = el("text", {x: xs[k][i], y: ys[k] + 4, "text-anchor": "middle"}, g); t.textContent = hx.slice(0, 6) + "…"; }));
+    const names = [PEERS[0], batch.credentials[1].name, PEERS[1], PEERS[2]]; names.forEach((n, i) => { const t = el("text", {x: xs[0][i], y: 128, "text-anchor": "middle", class: "tl"}, svg); t.textContent = n.length > 12 ? n.slice(0, 11) + "…" : n; });
+  }
+  async function check(p, label) {
+    $("forge").classList.add("scan"); setResult("busy", "…", "Checking…", "Re-computing the fingerprint and walking up the batch."); await sleep(900);
+    const r = await C.verifyCredential(p); $("forge").classList.remove("scan");
+    return r;
+  }
+  async function run() {
+    if (running) return; resetDemo(); const my = epoch, alive = () => my === epoch; running = true; $("fRun").disabled = true;
+    let name = C.norm($("fName").value); if (!name) { name = "Ada Lovelace"; $("fName").value = name; }
+    try {
+      logEl.replaceChildren(); await say(`~> certcheck issue "${name.length > 26 ? name.slice(0, 25) + "…" : name}"`, "cmd", true); if (!alive()) return;
+      $("fStep").textContent = "Step 1 of 4: fingerprint"; lightUpTo(1); rackState("HASHING", "hash");
+      batch = await C.buildBatch([PEERS[0], name, PEERS[1], PEERS[2]].map(n => ({issuer: ISSUER, name: n, course: "Digital Logic", date: "2026"})));
+      if (!alive()) return; const cred = batch.credentials[1]; proof = C.toProof(batch, cred); pulse();
+      const names = [PEERS[0], name, PEERS[1], PEERS[2]];
+      for (let k = 0; k < 4; k++) { if (!alive()) return; bladeSet(ACTIVE[k], "hash", names[k].toUpperCase().slice(0, 22), short(batch.levels[0][k])); await sleep(120); }
+      if (!alive()) return;
+      blades[ACTIVE[1]].classList.add("me");
+      await say(`  salt     ${cred.salt.slice(0, 8)}…   random, stays with the holder`, "o");
+      const lf = await say("  leaf     ", "o"); await scramble($("fLeaf"), cred.leaf); if (!alive()) return; lf.textContent = "  leaf     " + short(cred.leaf) + "   " + "fingerprint of this person"; await sleep(250); if (!alive()) return;
+      $("fStep").textContent = "Step 2 of 4: batch"; lightUpTo(2); drawTree(batch, 1); await scramble($("fRoot"), batch.root); if (!alive()) return;
+      await say(`  batch    ${batch.count} certificates → 1 root ${short(batch.root)}`, "o");
+      $("rRoot").textContent = short(batch.root) + "…"; rackState("BATCH SEALED", "sealed"); blades.forEach((b, i) => { if (ACTIVE.includes(i)) b.dataset.state = "sealed"; });
+      await say("  publish  1 transaction · 0 names on-chain", "o"); await sleep(300); if (!alive()) return;
+      $("fStep").textContent = "Step 3 of 4: certificate"; lightUpTo(3); $("fCardName").textContent = name;
+      const link = location.href.split("#")[0] + "#c=" + C.encodeLink(proof); let qrOk = true; $("fQr").classList.remove("ghost"); try { $("fQr").innerHTML = Q.toSVG(Q.encode(link, "M")); } catch { qrOk = false; $("fQr").textContent = "QR too large"; }
+      await say(`  link     ${link.length - location.href.split("#")[0].length - 3} chars · QR ${qrOk ? "ok" : "too large"}`, "o"); await sleep(350); if (!alive()) return;
+      $("fStep").textContent = "Step 4 of 4: check"; lightUpTo(4);
+      await say("~> certcheck verify #c=…", "cmd", true); if (!alive()) return; pulse();
+      const r = await check(proof); if (!alive()) return;
+      await say(`  leaf     recomputed ${short(r.leaf)}`, "o"); await say(`  proof    ${proof.proof.length} steps up to the root`, "o");
+      if (r.ok) {
+        await say("  result   VALID ✓", "ok"); setResult("valid", "✓", "Valid", "This certificate matches the published batch fingerprint. (On the real site the Verify page also looks the batch up on X Layer.)");
+        $("forge").classList.add("passed"); $("forge").classList.remove("caught"); rackState("VERIFIED", "ok");
+        for (let k = 0; k < 4; k++) { if (!alive()) return; blades[ACTIVE[k]].dataset.state = "ok"; await sleep(90); }
+      } else { await say("  result   NOT VALID ✕", "bad"); setResult("invalid", "✕", "Not valid", "The fingerprint does not match the batch."); rackState("REJECTED", "bad"); }
+      $("fStep").textContent = "Done"; $("fTamper").disabled = false; $("fReset").hidden = false;
+    } catch (e) { if (!alive()) return; setResult("invalid", "!", "Something went wrong", String(e.message || e)); await say("  error    " + String(e.message || e), "bad"); }
+    if (!alive()) return; $("fRun").disabled = false; running = false;
+  }
+  function tamperedName(n) { const idx = [...n].map((c, i) => /[A-Za-z]/.test(c) ? i : -1).filter(i => i >= 0).pop(); if (idx === undefined) return n + "!"; const c = n[idx], nc = c === "z" ? "a" : c === "Z" ? "A" : String.fromCharCode(c.charCodeAt(0) + 1); return n.slice(0, idx) + nc + n.slice(idx + 1); }
+  async function forge() {
+    if (!proof || running) return; running = true; $("fTamper").disabled = true; const my = epoch, alive = () => my === epoch, p0 = proof, b0 = batch;
+    const fake = tamperedName(p0.name), idx = [...fake].findIndex((c, i) => c !== p0.name[i]);
+    const cn = $("fCardName"); cn.replaceChildren(); [...fake].forEach((c, i) => { if (i === idx) { const s = document.createElement("span"); s.className = "bad"; s.textContent = c; cn.appendChild(s); } else cn.appendChild(document.createTextNode(c)); });
+    $("fStep").textContent = "Forging: one letter changed"; lightUpTo(4);
+    await say(`~> certcheck forge "${fake.length > 24 ? fake.slice(0, 23) + "…" : fake}"`, "cmd", true); if (!alive()) return; await sleep(300); if (!alive()) return;
+    const r = await check({...p0, name: fake}); if (!alive()) return;
+    await say(`  leaf     ${short(r.leaf || "0x")} ≠ ${short(b0.credentials[1].leaf)}`, "o");
+    await say("  result   NOT VALID ✕  (one letter changed)", "bad");
+    setResult("invalid", "✕", "Not valid: forgery caught", "One changed letter gives a completely different fingerprint, so it no longer fits the batch. Nobody can quietly edit a certificate.");
+    $("forge").classList.add("caught"); $("forge").classList.remove("passed"); bladeSet(ACTIVE[1], "bad", "REJECTED · " + fake.toUpperCase().slice(0, 12), "≠ " + short(b0.credentials[1].leaf)); rackState("FORGERY REJECTED", "bad");
+    if (!alive()) return; $("fStep").textContent = "Forgery rejected"; running = false;
+  }
+  $("fRun").addEventListener("click", run); $("fTamper").addEventListener("click", forge); $("fReset").addEventListener("click", resetDemo);
+  $("fName").addEventListener("input", () => { if (batch || running) resetDemo(); });   // also cancels a run that has started but has not built its batch yet
+  $("fName").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); run(); } });
+  window.__homeDemo = {get proof() { return proof; }, get batch() { return batch; }, running: () => running};   // test hook
+  rackReset(); logReset(); ghosts();
+
+  // ---------- the one gate ----------
+  let A = 0, B = 0, userTouched = false;
+  const nandPaint = () => {
+    const Y = 1 - (A & B); $("hSwA").classList.toggle("on", !!A); $("hSwB").classList.toggle("on", !!B); $("hSwA").querySelector("text").textContent = "A=" + A; $("hSwB").querySelector("text").textContent = "B=" + B;
+    $("hwa").classList.toggle("on", !!A); $("hwb").classList.toggle("on", !!B); $("hwy").classList.toggle("on", !!Y); $("hLamp").classList.toggle("on", !!Y); $("hGate").classList.toggle("hot", !!Y);
+    $("hRead").textContent = `A=${A} B=${B} → Y=${Y}`; [...$("hTT").tBodies[0].rows].forEach((r, i) => r.classList.toggle("cur", i === (A << 1 | B)));
+  };
+  for (let i = 0; i < 4; i++) { const tr = $("hTT").tBodies[0].insertRow(), a = i >> 1, b = i & 1; [a, b, 1 - (a & b)].forEach(v => { tr.insertCell().textContent = v; }); }
+  const flip = w => { userTouched = true; if (w === "a") A ^= 1; else B ^= 1; nandPaint(); };
+  [["hSwA", "a"], ["hSwB", "b"]].forEach(([id, w]) => { const n = $(id); n.addEventListener("click", () => flip(w)); n.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(w); } }); });
+  nandPaint();
+  if (!REDUCE) { const seq = [[0, 1], [1, 1], [1, 0], [0, 0]]; let n = 0; setInterval(() => { if (userTouched || document.hidden || !homeVisible()) return; [A, B] = seq[n++ % 4]; nandPaint(); }, 1900); }
+
+  // ---------- progress rack + passport card ----------
+  const MIN = (window.CC_CONFIG && window.CC_CONFIG.passport && window.CC_CONFIG.passport.minLevels) || 3;
+  const doneLevels = () => { try { const d = JSON.parse(localStorage.getItem("ft_done") || "[]"); return Array.isArray(d) ? d.filter(n => Number.isInteger(n) && n >= 1 && n <= 16) : []; } catch { return []; } };
+  const WORLDS = [5, 4, 4, 3];
+  function renderRack() {
+    const done = doneLevels(), rack = $("hRack"); rack.replaceChildren(); let id = 1;
+    WORLDS.forEach(count => { const grp = document.createElement("div"); grp.className = "rg"; for (let k = 0; k < count; k++, id++) {
+      const L = id, b = document.createElement("button"); b.type = "button"; b.className = "led" + (done.includes(L) ? " on" : "") + (L >= 6 ? " chain" : ""); b.dataset.level = L; b.innerHTML = `<i></i><span>${L}</span>`;
+      const unlocked = L === 1 || done.includes(L) || done.includes(L - 1); b.disabled = !unlocked; b.title = unlocked ? `Level ${L}${L >= 6 ? " (checked on-chain)" : ""}` : `Clear level ${L - 1} first`; b.setAttribute("aria-label", b.title);
+      b.addEventListener("click", () => { try { sessionStorage.setItem("ft_goto", String(L)); } catch {} location.hash = "#play"; }); grp.appendChild(b); } rack.appendChild(grp); });
+    $("hRackFoot").textContent = `${done.length} of 16 levels cleared`;
+    const on = done.filter(l => l >= 6).length, ready = on >= MIN, card = $("hPass");
+    $("hOn").textContent = `${Math.min(on, MIN)} / ${MIN}`; $("hBar").style.width = Math.min(100, on / MIN * 100) + "%"; card.dataset.state = ready ? "ready" : "locked";
+    $("hLock").textContent = ready ? "Unlocked" : "Locked"; $("hExam").textContent = ready ? "ready" : "locked"; const btn = $("hPassBtn");
+    btn.textContent = ready ? "Take the final exam" : done.length ? "Continue the course" : "Start the course"; btn.setAttribute("href", ready ? "#exam" : "#play");
+    $("hPassNote").textContent = ready ? "Your exam is derived from your wallet. The chain's record of your levels is what counts." : `Clear ${MIN - on} more on-chain level${MIN - on === 1 ? "" : "s"} (6 to 16) to unlock your exam.`;
+  }
+  renderRack(); window.addEventListener("hashchange", () => { if (homeVisible()) renderRack(); }); window.addEventListener("storage", renderRack);
+
+  // ---------- paste a link, check it ----------
+  $("hCheck").addEventListener("submit", e => {
+    e.preventDefault(); const t = $("hLink").value.trim(), m = t.match(/#[cp]=\S+/);
+    if (m) location.hash = m[0]; else { const v = $("vInput"); if (v) v.value = t; location.hash = "#verify"; }
+  });
 })();
 </script>
 </body>

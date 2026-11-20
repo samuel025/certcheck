@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CertCheck — certificates anyone can verify</title>
+<meta name="description" content="Issue certificates that anyone can check forever, with no personal data on-chain and no server to trust. Built on X Layer.">
+<style>
+:root{--void:#0b0e12;--carbon:#181a1d;--slate:#303235;--fog:#5d5e61;--steel:#818284;--silver:#bababb;--bone:#dedede;--green:#00d892;--teal:#002923;--amber:#e8b64a;--coral:#ff6b6b;
+ --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;--mono:ui-monospace,SFMono-Regular,"JetBrains Mono","IBM Plex Mono",Menlo,Consolas,monospace}
+*{box-sizing:border-box}html,body{margin:0}body{background:var(--void);color:var(--silver);font:400 15px/1.5 var(--sans);min-height:100vh;display:flex;flex-direction:column}
+a{color:inherit}h1,h2{font-weight:400;color:var(--bone);margin:0}code{font:13px var(--mono);color:var(--bone)}
+.bar{display:flex;align-items:center;gap:28px;padding:18px clamp(16px,4vw,56px);border-bottom:1px solid #1b1e22}
+.logo{display:inline-flex;align-items:center;gap:10px;font:19px var(--mono);color:var(--bone);text-decoration:none}.logo svg{width:30px;height:16px;color:var(--silver)}
+.tabs{display:flex;gap:6px;margin:0 auto}.tabs a{font:12px var(--mono);letter-spacing:.06em;text-transform:uppercase;text-decoration:none;color:var(--steel);padding:8px 14px;border:1px solid transparent}
+.tabs a:hover{color:var(--bone)}.tabs a.on{color:var(--green);border-color:var(--slate)}
+.chip{font:11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--steel);border:1px solid var(--slate);padding:5px 10px}.chip.live{color:var(--green);border-color:#0b4a38}
+main{flex:1;width:100%;max-width:880px;margin:0 auto;padding:44px clamp(16px,4vw,32px) 24px}
+.view h1{font-size:clamp(30px,4.6vw,48px);line-height:1.05;letter-spacing:-.015em;margin-bottom:14px}
+.lede{font-size:clamp(16px,1.5vw,19px);color:var(--steel);max-width:640px;margin:0 0 30px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}label{font:11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--steel)}
+input[type=text],textarea{width:100%;background:#0a0d11;border:1px solid var(--slate);color:var(--bone);font:14px var(--mono);padding:10px 12px;border-radius:1px}
+input[type=text]:focus,textarea:focus{outline:1px solid var(--green);outline-offset:0}
+textarea{resize:vertical}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0}.row input{flex:1;min-width:220px}
+.btn{display:inline-block;font:12px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:11px 20px;border-radius:1px;cursor:pointer;background:none;color:var(--silver);border:1px solid var(--silver)}
+.btn:hover{color:var(--bone);border-color:var(--bone)}.btn.primary{background:var(--teal);color:var(--green);border-color:var(--teal)}.btn.primary:hover{background:#005441}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.hint{font-size:13px;color:var(--steel)}.hint.bad,.bad{color:var(--coral)}.hint.ok,.ok{color:var(--green)}
+.note{font-size:13px;color:var(--fog);margin:10px 0 0}
+.step{display:flex;gap:20px;border-top:1px solid #1b1e22;padding:26px 0}.step .num{font:13px var(--mono);color:var(--green);border:1px solid #0b4a38;width:30px;height:30px;display:grid;place-items:center;flex:none}
+.step .body{flex:1;min-width:0}.step h2{font-size:20px;margin-bottom:6px}.sub{margin:0 0 12px;color:var(--steel);font-size:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+.facts{margin:16px 0}.facts div{display:grid;grid-template-columns:170px 1fr;gap:14px;padding:9px 0;border-bottom:1px solid #1b1e22}.facts dt{font:11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--steel);padding-top:3px}.facts dd{margin:0;color:var(--bone);word-break:break-word}
+.mono{font-family:var(--mono);font-size:13px}
+.tablewrap{max-height:300px;overflow:auto;border:1px solid var(--slate);margin:14px 0 8px}table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:8px 12px;border-bottom:1px solid #1b1e22}th{font:11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--steel);position:sticky;top:0;background:var(--carbon)}
+td .btn{padding:5px 10px;font-size:11px}
+.publish{margin-top:26px;border-top:1px solid #1b1e22;padding-top:22px}.publish h2{font-size:20px;margin-bottom:6px}
+.result{margin-top:26px;border:1px solid var(--slate);padding:24px;background:linear-gradient(180deg,#12151a,#0d1014)}
+.rhead{display:flex;align-items:center;gap:14px;margin-bottom:10px}.rhead h2{font-size:26px}
+.badge{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font:20px var(--mono);border:2px solid currentColor;flex:none}
+.result[data-state=valid]{border-color:#0b4a38}.result[data-state=valid] .badge,.result[data-state=valid] h2{color:var(--green)}
+.result[data-state=invalid] .badge,.result[data-state=invalid] h2,.result[data-state=revoked] .badge,.result[data-state=revoked] h2{color:var(--coral)}
+.result[data-state=unregistered] .badge,.result[data-state=unregistered] h2,.result[data-state=offline] .badge,.result[data-state=offline] h2,.result[data-state=demo] .badge,.result[data-state=demo] h2{color:var(--amber)}
+.foot{border-top:1px solid #1b1e22;padding:22px clamp(16px,4vw,56px);color:var(--fog);font-size:13px}.foot p{max-width:880px;margin:0 auto}
+@media (max-width:700px){.tabs{margin:0}.bar{flex-wrap:wrap;gap:12px}.grid3{grid-template-columns:1fr}.facts div{grid-template-columns:1fr;gap:2px}.step{gap:14px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="bar">
+  <a class="logo" href="#issue" aria-label="CertCheck home"><svg viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><path d="M7 8.5l3 3 6-7" fill="none" stroke="#00d892" stroke-width="2"/></svg>certcheck</a>
+  <nav class="tabs" aria-label="Sections">
+    <a href="#verify" data-tab="verify">Verify</a><a href="#issue" data-tab="issue">Issue</a><a href="#manage" data-tab="manage">Manage</a>
+  </nav>
+  <span class="chip" id="netChip">…</span>
+</header>
+
+<main>
+<!-- ===== VERIFY ===== -->
+<section id="verifyView" class="view" hidden>
+  <h1>Verify a certificate</h1>
+  <p class="lede">Open the link or QR code from the certificate, or paste it here. The check runs in your browser against a public record on X Layer. No account, no server.</p>
+  <div class="field"><label for="vInput">Certificate link or proof</label>
+    <textarea id="vInput" rows="3" spellcheck="false" placeholder="Paste a link ending in #c=… or the proof JSON"></textarea></div>
+  <div class="row"><button id="vBtn" class="btn primary" type="button">Verify</button><span class="hint" id="vHint"></span></div>
+  <article id="vResult" class="result" data-state="idle" hidden aria-live="polite">
+    <div class="rhead"><span class="badge" id="vBadge"></span><h2 id="vTitle"></h2></div>
+    <p id="vWhy"></p>
+    <dl class="facts" id="vFacts"></dl>
+    <p class="note" id="vNote"></p>
+  </article>
+</section>
+
+<!-- ===== ISSUE ===== -->
+<section id="issueView" class="view" hidden>
+  <h1>Issue certificates no one can fake</h1>
+  <p class="lede">Upload your list. Each person gets a link that proves their certificate, and only a fingerprint of the whole batch goes on-chain. Names never leave your browser until you hand out the links.</p>
+
+  <div class="step"><span class="num">1</span><div class="body">
+    <h2>Issuer</h2>
+    <p class="sub">The wallet that publishes the batch. Employers will see this address on every verification.</p>
+    <div class="row"><input id="issuerAddr" type="text" spellcheck="false" placeholder="0x… (connect a wallet to fill this in)" aria-label="Issuer address"><button id="connectBtn" class="btn ghost" type="button">Connect wallet</button></div>
+  </div></div>
+
+  <div class="step"><span class="num">2</span><div class="body">
+    <h2>Recipients</h2>
+    <p class="sub">A CSV with a <code>name</code> column. <code>course</code> and <code>date</code> columns are optional. Other columns, such as email, are ignored and never used.</p>
+    <textarea id="csvText" rows="5" spellcheck="false" placeholder="name,course,date&#10;Ada Lovelace,Digital Logic,2026-11-20"></textarea>
+    <div class="row"><label class="btn ghost filebtn">Choose a CSV file<input id="csvFile" type="file" accept=".csv,text/csv,text/plain" hidden></label><button id="sampleBtn" class="btn ghost" type="button">Use sample</button><span class="hint" id="csvHint"></span></div>
+    <div class="grid3">
+      <div class="field"><label for="course">Default course</label><input id="course" type="text" placeholder="Digital Logic 101"></div>
+      <div class="field"><label for="date">Default date</label><input id="date" type="text" placeholder="2026-11-20"></div>
+      <div class="field"><label for="label">Public batch label</label><input id="label" type="text" maxlength="80" placeholder="Cohort 7"></div>
+    </div>
+    <p class="note">The label is public and permanent. Don't put personal data in it.</p>
+  </div></div>
+
+  <div class="step"><span class="num">3</span><div class="body">
+    <h2>Generate</h2>
+    <div class="row"><button id="genBtn" class="btn primary" type="button">Generate certificates</button><span class="hint" id="genHint"></span></div>
+    <div id="results" hidden>
+      <dl class="facts"><div><dt>Batch fingerprint (Merkle root)</dt><dd class="mono" id="rootOut"></dd></div><div><dt>Certificates</dt><dd id="countOut"></dd></div></dl>
+      <div class="row"><button id="dlLinks" class="btn ghost" type="button">Download links (CSV)</button><button id="dlProofs" class="btn ghost" type="button">Download proofs (JSON)</button></div>
+      <div class="tablewrap"><table id="rows"><thead><tr><th>Name</th><th>Link</th></tr></thead><tbody></tbody></table></div>
+      <p class="hint" id="moreRows"></p>
+      <div class="publish"><h2>4 · Publish the fingerprint</h2>
+        <p class="sub">One transaction records the fingerprint, the count and your label on X Layer. Until you do this, verifiers will show “not registered”.</p>
+        <div class="row"><button id="publishBtn" class="btn primary" type="button">Publish on X Layer</button><span class="hint" id="pubMsg" role="status"></span></div></div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ===== MANAGE ===== -->
+<section id="manageView" class="view" hidden>
+  <h1>Revoke</h1>
+  <p class="lede">Withdraw a single certificate, or a whole batch. Only the wallet that published the batch can do this. The change is public and permanent.</p>
+  <div class="step"><div class="body">
+    <h2>Revoke one certificate</h2>
+    <textarea id="mLink" rows="2" spellcheck="false" placeholder="Paste the certificate's link or proof"></textarea>
+    <div class="row"><button id="mRevokeLeaf" class="btn ghost" type="button">Revoke this certificate</button><span class="hint" id="mLeafMsg" role="status"></span></div>
+  </div></div>
+  <div class="step"><div class="body">
+    <h2>Revoke a whole batch</h2>
+    <input id="mRoot" type="text" spellcheck="false" placeholder="0x… batch fingerprint">
+    <div class="row"><button id="mRevokeBatch" class="btn ghost" type="button">Revoke this batch</button><span class="hint" id="mBatchMsg" role="status"></span></div>
+  </div></div>
+</section>
+</main>
+
+<footer class="foot">
+  <p>No personal data is stored on-chain: only a batch fingerprint, a count and a label. The format is public (<code>docs/FORMAT.md</code>), so anyone can write their own verifier. Hackathon MVP, contracts unaudited.</p>
+</footer>
+
+<script>
+// CertCheck core: salted credential leaves, a Merkle tree and portable proofs. No dependencies; uses the built-in SHA-256 (WebCrypto).
+// Format v1 (also documented in docs/FORMAT.md):
+//   canon(fields)  = for each field: 4-byte big-endian length + UTF-8 bytes          (no ambiguity between fields)
+//   leaf           = SHA-256( 0x00 || canon([issuer, name, course, date, salt]) )
+//   node           = SHA-256( 0x01 || left || right )
+//   An unpaired node is promoted unchanged to the next level (never duplicated), so [a,b,c] and [a,b,c,c] have different roots.
+//   proof          = list of {s:"L"|"R", h:hex}: the sibling's side and hash, from the leaf upward.
+(function (root) {
+  const subtle = (root.crypto || globalThis.crypto).subtle, enc = new TextEncoder();
+  const hex = u8 => Array.from(u8, b => b.toString(16).padStart(2, "0")).join("");
+  const unhex = h => { if (!/^[0-9a-f]*$/i.test(h) || h.length % 2) throw new Error("bad hex"); const o = new Uint8Array(h.length / 2); for (let i = 0; i < o.length; i++) o[i] = parseInt(h.substr(i * 2, 2), 16); return o; };
+  const sha = async u8 => new Uint8Array(await subtle.digest("SHA-256", u8));
+  const cat = (...a) => { const o = new Uint8Array(a.reduce((n, x) => n + x.length, 0)); let p = 0; for (const x of a) { o.set(x, p); p += x.length; } return o; };
+  const norm = s => String(s ?? "").normalize("NFC").replace(/\s+/g, " ").trim();
+  const ADDR = /^0x[0-9a-fA-F]{40}$/;
+
+  function canon(fields) {
+    return cat(...fields.map(f => { const b = enc.encode(f), l = new Uint8Array(4); new DataView(l.buffer).setUint32(0, b.length); return cat(l, b); }));
+  }
+  const fieldsOf = c => [String(c.issuer).toLowerCase(), norm(c.name), norm(c.course), norm(c.date), String(c.salt).toLowerCase()];
+  async function leafHash(c) {
+    if (!ADDR.test(c.issuer)) throw new Error("issuer must be an 0x address");
+    if (!norm(c.name)) throw new Error("name is empty");
+    if (!/^[0-9a-f]{32}$/i.test(c.salt)) throw new Error("salt must be 16 bytes of hex");
+    return sha(cat(new Uint8Array([0]), canon(fieldsOf(c))));
+  }
+  const nodeHash = (l, r) => sha(cat(new Uint8Array([1]), l, r));
+  const newSalt = () => hex(crypto.getRandomValues(new Uint8Array(16)));
+
+  // creds: [{issuer,name,course,date,salt?}] -> {root, count, credentials:[{...cred, salt, leaf, proof}]}
+  async function buildBatch(creds) {
+    if (!creds.length) throw new Error("no credentials");
+    const full = creds.map(c => ({...c, salt: c.salt || newSalt()}));
+    const leaves = await Promise.all(full.map(leafHash));
+    const proofs = full.map(() => []);
+    let level = leaves.map((h, i) => ({h, members: [i]}));
+    while (level.length > 1) {
+      const next = [];
+      for (let i = 0; i < level.length; i += 2) {
+        if (i + 1 === level.length) { next.push(level[i]); continue; }   // promote
+        const L = level[i], R = level[i + 1];
+        L.members.forEach(m => proofs[m].push({s: "R", h: hex(R.h)}));  // the sibling sits to the RIGHT of this member
+        R.members.forEach(m => proofs[m].push({s: "L", h: hex(L.h)}));
+        next.push({h: await nodeHash(L.h, R.h), members: [...L.members, ...R.members]});
+      }
+      level = next;
+    }
+    return {root: "0x" + hex(level[0].h), count: full.length, credentials: full.map((c, i) => ({...c, leaf: "0x" + hex(leaves[i]), proof: proofs[i]}))};
+  }
+
+  // Recompute from the credential's own fields; never trusts the stored leaf. -> {ok, root, leaf, error?}
+  async function verifyCredential(p) {
+    try {
+      if (!p || p.v !== 1) return {ok: false, error: "Unsupported proof version."};
+      let h = await leafHash(p); const leaf = "0x" + hex(h);
+      for (const step of p.proof || []) {
+        const s = unhex(step.h); if (s.length !== 32) throw new Error("bad proof step");
+        if (step.s === "L") h = await nodeHash(s, h); else if (step.s === "R") h = await nodeHash(h, s); else throw new Error("bad proof side");
+      }
+      const root = "0x" + hex(h);
+      return {ok: root === String(p.root).toLowerCase(), root, leaf};
+    } catch (e) { return {ok: false, error: String(e.message || e)}; }
+  }
+
+  const b64u = u8 => btoa(String.fromCharCode(...u8)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  const unb64u = s => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/")), ch => ch.charCodeAt(0));
+  // Portable proof: the fields a verifier needs, nothing else. Short keys keep links small.
+  const toProof = (batch, c) => ({v: 1, root: batch.root, issuer: c.issuer.toLowerCase(), name: norm(c.name), course: norm(c.course), date: norm(c.date), salt: c.salt.toLowerCase(), proof: c.proof});
+  const encodeLink = p => b64u(enc.encode(JSON.stringify(p)));
+  const decodeLink = s => JSON.parse(new TextDecoder().decode(unb64u(String(s).trim().replace(/^#?c=/, ""))));
+
+  // CSV: header row with a "name" column (also accepts "student", "full name"). Quotes, CRLF, BOM, blank lines handled. Extra columns are ignored on purpose (e.g. email never enters a proof).
+  function parseCSV(text) {
+    const rows = []; let row = [], f = "", q = false; const t = String(text).replace(/^﻿/, "");
+    for (let i = 0; i < t.length; i++) {
+      const ch = t[i];
+      if (q) { if (ch === '"') { if (t[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += ch; }
+      else if (ch === '"') q = true;
+      else if (ch === ",") { row.push(f); f = ""; }
+      else if (ch === "\n" || ch === "\r") { if (ch === "\r" && t[i + 1] === "\n") i++; row.push(f); f = ""; if (row.some(x => x.trim() !== "")) rows.push(row); row = []; }
+      else f += ch;
+    }
+    row.push(f); if (row.some(x => x.trim() !== "")) rows.push(row);
+    if (!rows.length) return {error: "The file is empty."};
+    const head = rows[0].map(h => norm(h).toLowerCase()), ni = head.findIndex(h => ["name", "student", "full name", "fullname", "recipient"].includes(h));
+    if (ni < 0) return {error: 'Add a header row with a "name" column.'};
+    const ci = head.indexOf("course"), di = head.indexOf("date"), out = [];
+    for (let r = 1; r < rows.length; r++) { const name = norm(rows[r][ni]); if (name) out.push({name, course: ci >= 0 ? norm(rows[r][ci]) : "", date: di >= 0 ? norm(rows[r][di]) : ""}); }
+    if (!out.length) return {error: "No names found under the name column."};
+    return {rows: out};
+  }
+
+  root.CertCore = {canon, leafHash, buildBatch, verifyCredential, toProof, encodeLink, decodeLink, parseCSV, newSalt, norm, hex};
+})(typeof window !== "undefined" ? window : globalThis);
+</script>
+<script>
+// Network + registry config. The registry address is written by scripts/deploy.sh after deployment.
+window.CC_CONFIG = {
+  registry: "0xF965f9Fd3A6F36E000abE1288aE1363B9F920670",   // CertRegistry on X Layer mainnet (tx 0x6184…c19d). All zeros = demo mode.
+  chainId: 196, chainName: "X Layer", rpc: "https://rpc.xlayer.tech", explorer: "https://www.oklink.com/xlayer",
+  currency: {name: "OKB", symbol: "OKB", decimals: 18}
+};
+</script>
+<script>
+// Minimal chain access for CertRegistry. No libraries; ABI encoding checked against `cast` in tests/chain.test.mjs.
+(function (root) {
+  const C = () => root.CC_CONFIG, ZERO = /^0x0+$/;
+  const SEL = {publish: "0x4cd2aca6", revokeBatch: "0x0c2ad6be", revokeLeaf: "0x1dc9a550", batch: "0x6f7c972c", isLeafRevoked: "0x7e634603"};
+  const w = n => BigInt(n).toString(16).padStart(64, "0"), addr = a => a.toLowerCase().replace("0x", "").padStart(64, "0"), b32 = h => h.toLowerCase().replace("0x", "").padStart(64, "0");
+  const strBytes = s => Array.from(new TextEncoder().encode(s), b => b.toString(16).padStart(2, "0")).join("");
+  const enc = {
+    publish: (rootHex, count, label) => { const d = strBytes(label), len = d.length / 2; return SEL.publish + b32(rootHex) + w(count) + w(96) + w(len) + d.padEnd(Math.ceil(len / 32) * 64, "0"); },
+    revokeBatch: r => SEL.revokeBatch + b32(r),
+    revokeLeaf: (r, l) => SEL.revokeLeaf + b32(r) + b32(l),
+    batch: (issuer, r) => SEL.batch + addr(issuer) + b32(r),
+    isLeafRevoked: (issuer, r, l) => SEL.isLeafRevoked + addr(issuer) + b32(r) + b32(l)
+  };
+  const configured = () => !ZERO.test(C().registry);
+  async function rpc(method, params) {
+    const res = await fetch(C().rpc, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({jsonrpc: "2.0", id: 1, method, params})});
+    if (!res.ok) throw new Error("RPC " + res.status);
+    const j = await res.json(); if (j.error) throw new Error(j.error.message || "RPC error"); return j.result;
+  }
+  const call = data => rpc("eth_call", [{to: C().registry, data}, "latest"]);
+  function decodeBatch(hex) {
+    const h = hex.replace("0x", ""), word = i => h.slice(i * 64, i * 64 + 64);
+    const issuer = "0x" + word(0).slice(24);
+    if (/^0+$/.test(issuer.slice(2))) return {found: false};
+    const off = Number(BigInt("0x" + word(4))) / 32, len = Number(BigInt("0x" + word(off))), data = h.slice((off + 1) * 64, (off + 1) * 64 + len * 2);
+    const label = new TextDecoder().decode(Uint8Array.from(data.match(/../g) || [], x => parseInt(x, 16)));
+    return {found: true, issuer, publishedAt: Number(BigInt("0x" + word(1))), count: Number(BigInt("0x" + word(2))), revoked: BigInt("0x" + word(3)) === 1n, label};
+  }
+  const readBatch = async (issuer, r) => decodeBatch(await call(enc.batch(issuer, r)));
+  const readLeafRevoked = async (issuer, r, l) => BigInt(await call(enc.isLeafRevoked(issuer, r, l))) === 1n;
+
+  const eth = () => root.ethereum;
+  async function ensureChain() {
+    const want = "0x" + C().chainId.toString(16);
+    if ((await eth().request({method: "eth_chainId"})) === want) return;
+    try { await eth().request({method: "wallet_switchEthereumChain", params: [{chainId: want}]}); }
+    catch (e) { if (e.code !== 4902) throw e; await eth().request({method: "wallet_addEthereumChain", params: [{chainId: want, chainName: C().chainName, rpcUrls: [C().rpc], nativeCurrency: C().currency, blockExplorerUrls: [C().explorer]}]}); }
+  }
+  async function connect() {
+    if (!eth()) throw new Error("No wallet found. Install an EVM wallet such as OKX Wallet or MetaMask.");
+    const [a] = await eth().request({method: "eth_requestAccounts"}); await ensureChain(); return a;
+  }
+  async function waitReceipt(hash) {
+    for (let i = 0; i < 90; i++) { const r = await eth().request({method: "eth_getTransactionReceipt", params: [hash]}); if (r) { if (r.status !== "0x1") throw new Error("Transaction failed: " + hash); return r; } await new Promise(r => setTimeout(r, 2000)); }
+    throw new Error("Timed out waiting for " + hash);
+  }
+  async function send(from, data) {
+    if (!configured()) throw new Error("The registry contract is not deployed yet (demo mode).");
+    const hash = await eth().request({method: "eth_sendTransaction", params: [{from, to: C().registry, data}]});
+    await waitReceipt(hash); return hash;
+  }
+  const explorerTx = h => C().explorer + "/tx/" + h, explorerAddr = a => C().explorer + "/address/" + a;
+  root.CertChain = {enc, decodeBatch, configured, readBatch, readLeafRevoked, connect, send, explorerTx, explorerAddr};
+})(typeof window !== "undefined" ? window : globalThis);
+</script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id), C = window.CertCore, X = window.CertChain, cfg = window.CC_CONFIG;
+  const ADDR = /^0x[0-9a-fA-F]{40}$/, MAXROWS = 50;
+  const today = () => new Date().toISOString().slice(0, 10);
+  const say = (el, text, cls = "") => { el.textContent = text; el.className = "hint " + cls; };
+  const short = h => h.slice(0, 10) + "…" + h.slice(-6);
+  const fmtDate = s => new Date(s * 1000).toISOString().slice(0, 10) + " UTC";
+  const mkLink = a => { const x = document.createElement("a"); x.href = a.href; x.textContent = a.text; x.target = "_blank"; x.rel = "noopener"; return x; };
+
+  // ---------- routing ----------
+  const VIEWS = ["verify", "issue", "manage"];
+  function route() {
+    const h = location.hash;
+    let v = h.startsWith("#c=") ? "verify" : VIEWS.includes(h.slice(1)) ? h.slice(1) : "issue";
+    VIEWS.forEach(n => { $(n + "View").hidden = n !== v; });
+    document.querySelectorAll(".tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === v));
+    if (h.startsWith("#c=")) { $("vInput").value = h; runVerify(); }
+  }
+  window.addEventListener("hashchange", route);
+
+  // ---------- network chip ----------
+  const chip = $("netChip");
+  if (X.configured()) { chip.textContent = cfg.chainName; chip.classList.add("live"); } else chip.textContent = "Demo mode · registry not deployed";
+
+  // ---------- verify ----------
+  function parseInput(text) {
+    const t = String(text || "").trim();
+    if (!t) throw new Error("Paste a certificate link or proof first.");
+    if (t.startsWith("{")) return JSON.parse(t);
+    const m = t.match(/[#&?]c=([A-Za-z0-9_-]+)/) || t.match(/^([A-Za-z0-9_-]{40,})$/);
+    if (!m) throw new Error("That doesn't look like a CertCheck link.");
+    return C.decodeLink(m[1]);
+  }
+  const FACT = (dt, dd, mono) => { const d = document.createElement("div"), a = document.createElement("dt"), b = document.createElement("dd"); a.textContent = dt; if (dd instanceof Node) b.appendChild(dd); else b.textContent = dd; if (mono) b.className = "mono"; d.append(a, b); return d; };
+  function show(state, title, why, facts, note) {
+    const r = $("vResult"); r.hidden = false; r.dataset.state = state;
+    $("vBadge").textContent = state === "valid" ? "✓" : state === "invalid" || state === "revoked" ? "✕" : "!";
+    $("vTitle").textContent = title; $("vWhy").textContent = why; $("vNote").textContent = note || "";
+    const f = $("vFacts"); f.replaceChildren(...facts);
+  }
+  let vSeq = 0;
+  async function runVerify() {
+    const seq = ++vSeq; $("vHint").textContent = ""; $("vResult").hidden = true;
+    let p; try { p = parseInput($("vInput").value); } catch (e) { say($("vHint"), e.message, "bad"); return; }
+    const res = await C.verifyCredential(p);
+    if (seq !== vSeq) return;
+    if (!res.ok) { show("invalid", "Not valid", res.error ? "This is not a valid CertCheck proof." : "The details or the proof were changed, or this certificate was not issued as shown. Do not trust it.", [], ""); return; }
+    const facts = [FACT("Name", p.name), FACT("Course", p.course || "—"), FACT("Date", p.date || "—"), FACT("Issuer", mkLink({href: X.explorerAddr(p.issuer), text: p.issuer}), true)];
+    const issuerNote = "A valid check proves this issuer address recorded this certificate. Make sure that address really belongs to the organization you expect, for example by comparing it with the address on their website.";
+    if (!X.configured()) { show("demo", "Proof is correct (registry not checked)", "The mathematics checks out, but the on-chain registry isn't deployed in this build, so registration and revocation were not checked.", facts, issuerNote); return; }
+    let b, leafRev;
+    try { b = await X.readBatch(p.issuer, p.root); leafRev = b.found ? await X.readLeafRevoked(p.issuer, p.root, res.leaf) : false; }
+    catch (e) { if (seq !== vSeq) return; show("offline", "Proof is correct, but the network is unreachable", "The proof itself checks out, but we couldn't reach X Layer to confirm the issuer registered it. Try again in a moment.", facts, ""); return; }
+    if (seq !== vSeq) return;
+    if (!b.found) { show("unregistered", "Not registered", "The proof is mathematically correct, but this issuer has not registered the batch on-chain. Until they do, it can't be trusted.", facts, issuerNote); return; }
+    facts.push(FACT("Registered", fmtDate(b.publishedAt)), FACT("Batch", `${b.label || "(no label)"} · ${b.count} certificate${b.count === 1 ? "" : "s"}`), FACT("Fingerprint", short(p.root), true));
+    if (b.revoked || leafRev) { show("revoked", "Revoked", b.revoked ? "The issuer revoked this whole batch." : "The issuer revoked this certificate.", facts, ""); return; }
+    show("valid", "Valid", `This certificate is part of a batch the issuer registered on ${cfg.chainName} on ${fmtDate(b.publishedAt)}.`, facts, issuerNote);
+  }
+  $("vBtn").addEventListener("click", runVerify);
+  $("vInput").addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) runVerify(); });
+
+  // ---------- issue ----------
+  let batch = null, links = [], sample = "name,course,date\nAda Lovelace,Digital Logic,2026-11-20\nAlan Turing,Digital Logic,2026-11-20\nGrace Hopper,Digital Logic,2026-11-20";
+  $("date").placeholder = today();
+  $("sampleBtn").addEventListener("click", () => { $("csvText").value = sample; if (!$("label").value) $("label").value = "Sample cohort"; say($("csvHint"), "Sample loaded.", "ok"); });
+  $("csvFile").addEventListener("change", async e => { const f = e.target.files[0]; if (!f) return; $("csvText").value = await f.text(); say($("csvHint"), `${f.name} loaded.`, "ok"); });
+  $("connectBtn").addEventListener("click", async () => {
+    try { $("issuerAddr").value = await X.connect(); say($("genHint"), "", ""); } catch (e) { say($("genHint"), e.message, "bad"); }
+  });
+  const csvEsc = s => /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  const download = (name, text, type) => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], {type})); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); };
+  $("genBtn").addEventListener("click", async () => {
+    const h = $("genHint"); batch = null; $("results").hidden = true;
+    const issuer = $("issuerAddr").value.trim(); if (!ADDR.test(issuer)) return say(h, "Enter the issuer address (or connect a wallet).", "bad");
+    const p = C.parseCSV($("csvText").value); if (p.error) return say(h, p.error, "bad");
+    const course = C.norm($("course").value), date = C.norm($("date").value) || today();
+    const creds = p.rows.map(r => ({issuer, name: r.name, course: r.course || course, date: r.date || date}));
+    if (creds.some(c => !c.course)) return say(h, "Add a default course, or a course column.", "bad");
+    say(h, "Working…");
+    try { batch = await C.buildBatch(creds); } catch (e) { return say(h, e.message, "bad"); }
+    const base = location.href.split("#")[0];
+    links = batch.credentials.map(c => ({name: c.name, link: base + "#c=" + C.encodeLink(C.toProof(batch, c))}));
+    $("rootOut").textContent = batch.root; $("countOut").textContent = String(batch.count);
+    const tb = $("rows").tBodies[0]; tb.replaceChildren();
+    links.slice(0, MAXROWS).forEach(l => {
+      const tr = tb.insertRow(), n = tr.insertCell(), k = tr.insertCell(); n.textContent = l.name;
+      const cp = document.createElement("button"); cp.className = "btn ghost"; cp.type = "button"; cp.textContent = "Copy link";
+      cp.addEventListener("click", async () => { try { await navigator.clipboard.writeText(l.link); cp.textContent = "Copied"; } catch { cp.textContent = "Select manually"; } setTimeout(() => cp.textContent = "Copy link", 1500); });
+      k.append(cp, " ", mkLink({href: l.link, text: "Open"}));
+    });
+    $("moreRows").textContent = links.length > MAXROWS ? `Showing ${MAXROWS} of ${links.length}. Download the file for everyone.` : "";
+    $("results").hidden = false; say(h, "Done. Nothing has been sent anywhere yet.", "ok"); say($("pubMsg"), "", "");
+  });
+  $("dlLinks").addEventListener("click", () => download("certcheck-links.csv", "name,link\r\n" + links.map(l => csvEsc(l.name) + "," + csvEsc(l.link)).join("\r\n") + "\r\n", "text/csv"));
+  $("dlProofs").addEventListener("click", () => download("certcheck-proofs.json", JSON.stringify(batch.credentials.map(c => C.toProof(batch, c)), null, 1), "application/json"));
+  $("publishBtn").addEventListener("click", async () => {
+    const m = $("pubMsg"); if (!batch) return;
+    $("publishBtn").disabled = true;
+    try {
+      if (!X.configured()) throw new Error("Demo mode: the registry contract isn't deployed in this build.");
+      const acct = await X.connect(), issuer = batch.credentials[0].issuer.toLowerCase();
+      if (acct.toLowerCase() !== issuer) throw new Error(`Connect the issuer wallet (${issuer}). The connected wallet is ${acct}.`);
+      if (!$("label").value.trim() && !confirm("Publish without a batch label?")) throw new Error("Cancelled.");
+      if ((await X.readBatch(issuer, batch.root)).found) throw new Error("This batch is already published.");
+      say(m, "Confirm the transaction in your wallet…");
+      const tx = await X.send(acct, X.enc.publish(batch.root, batch.count, $("label").value.trim().slice(0, 80)));
+      m.className = "hint ok"; m.textContent = "Published. "; m.appendChild(mkLink({href: X.explorerTx(tx), text: "View transaction"}));
+    } catch (e) { say(m, e.message || String(e), "bad"); }
+    $("publishBtn").disabled = false;
+  });
+
+  // ---------- manage ----------
+  async function asIssuer(issuer) { const acct = await X.connect(); if (acct.toLowerCase() !== issuer.toLowerCase()) throw new Error(`Connect the issuer wallet (${issuer}).`); return acct; }
+  $("mRevokeLeaf").addEventListener("click", async () => {
+    const m = $("mLeafMsg");
+    try {
+      const p = parseInput($("mLink").value), r = await C.verifyCredential(p); if (!r.ok) throw new Error("That certificate is not valid, so there is nothing to revoke.");
+      if (!X.configured()) throw new Error("Demo mode: the registry contract isn't deployed in this build.");
+      const acct = await asIssuer(p.issuer); if (!(await X.readBatch(p.issuer, p.root)).found) throw new Error("This batch was never published, so there is nothing to revoke.");
+      if (!confirm(`Revoke the certificate for ${p.name}? This is permanent.`)) throw new Error("Cancelled.");
+      say(m, "Confirm in your wallet…"); const tx = await X.send(acct, X.enc.revokeLeaf(p.root, r.leaf));
+      m.className = "hint ok"; m.textContent = "Revoked. "; m.appendChild(mkLink({href: X.explorerTx(tx), text: "View transaction"}));
+    } catch (e) { say(m, e.message || String(e), "bad"); }
+  });
+  $("mRevokeBatch").addEventListener("click", async () => {
+    const m = $("mBatchMsg");
+    try {
+      const root = $("mRoot").value.trim(); if (!/^0x[0-9a-fA-F]{64}$/.test(root)) throw new Error("Enter the 0x… batch fingerprint (66 characters).");
+      if (!X.configured()) throw new Error("Demo mode: the registry contract isn't deployed in this build.");
+      const acct = await X.connect(); if (!(await X.readBatch(acct, root)).found) throw new Error("The connected wallet has not published this batch.");
+      if (!confirm("Revoke the whole batch? Every certificate in it will show as revoked, permanently.")) throw new Error("Cancelled.");
+      say(m, "Confirm in your wallet…"); const tx = await X.send(acct, X.enc.revokeBatch(root));
+      m.className = "hint ok"; m.textContent = "Batch revoked. "; m.appendChild(mkLink({href: X.explorerTx(tx), text: "View transaction"}));
+    } catch (e) { say(m, e.message || String(e), "bad"); }
+  });
+
+  route();
+})();
+</script>
+</body>
+</html>

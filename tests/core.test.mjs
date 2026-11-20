@@ -85,4 +85,11 @@ const us = await C.uniqueSeeds(200), tabs = new Set(us.map(x => x.table));
 ok("200 students get 200 different challenge functions", us.length === 200 && tabs.size === 200);
 ok("the full set of 218 functions can be handed out without repeats", new Set((await C.uniqueSeeds(218)).map(x => x.table)).size === 218);
 ok("more students than functions still works (repeats allowed)", (await C.uniqueSeeds(300)).length === 300);
+// ---- passport: wallet-derived seed (value checked against an independent Python implementation) ----
+const DEP = "0x0aE117C07A277D74D9326eb4e33013439dC68fD5";
+ok("walletSeed(deployer) is 7d715e12…b6db8 and its exam table is 92 (matches Python)", (await C.walletSeed(DEP)) === "7d715e127169407be020f063266db6b8" && (await C.challengeTable(await C.walletSeed(DEP))) === 92);
+ok("walletSeed ignores address case and the 0x prefix style", (await C.walletSeed(DEP.toLowerCase())) === (await C.walletSeed(DEP)) && (await C.walletSeed(DEP.toUpperCase().replace("0X", "0x"))) === (await C.walletSeed(DEP)));
+ok("different wallets get different seeds", (await C.walletSeed("0x" + "11".repeat(20))) !== (await C.walletSeed("0x" + "22".repeat(20))));
+let wthrew = 0; for (const bad of ["", "0x12", "nope", "0x" + "zz".repeat(20)]) { try { await C.walletSeed(bad); } catch { wthrew++; } }
+ok("walletSeed refuses anything that is not an address", wthrew === 4);
 console.log(fails ? `\n${fails} FAILED` : "\nall passed"); process.exit(fails ? 1 : 0);

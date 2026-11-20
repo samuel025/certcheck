@@ -138,3 +138,8 @@
 /* FirstTape's global .bar and .tabs also match here; restore the certificate site's own header */
 .cc .bar{max-width:none;margin:0;width:100%;padding:18px clamp(16px,4vw,56px);gap:28px;border-bottom:1px solid #1b1e22}
 .cc .tabs{border-bottom:0;margin:0 auto}
+@media (max-width:700px){
+  .cc .bar{flex-wrap:wrap;gap:10px 16px}
+  .cc .tabs{flex-wrap:wrap;margin:0;width:100%;order:3;justify-content:flex-start}
+  .cc .tabs a{padding:6px 10px}
+}

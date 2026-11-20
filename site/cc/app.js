@@ -12,10 +12,11 @@
   function route() {
     const h = location.hash;
     { const t = h.length > 1 ? document.getElementById(h.slice(1)) : null; if (["#play", "#learners", "#judges", "#circuits"].includes(h) || (t && document.getElementById("landing").contains(t))) return; }   // those pages belong to site/ft
-    let v = h.startsWith("#c=") ? "verify" : h.startsWith("#ch=") ? "challenge" : VIEWS.includes(h.slice(1)) ? h.slice(1) : "home";
+    let v = h.startsWith("#c=") || h.startsWith("#p=") ? "verify" : h.startsWith("#ch=") || h === "#exam" ? "challenge" : VIEWS.includes(h.slice(1)) ? h.slice(1) : "home";
     VIEWS.forEach(n => { $(n + "View").hidden = n !== v; });
-    document.querySelectorAll(".tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === v));
-    if (h.startsWith("#c=")) { $("vInput").value = h; runVerify(); }
+    document.querySelectorAll(".tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === (h === "#exam" ? "exam" : v)));
+    if (h.startsWith("#c=") || h.startsWith("#p=")) { $("vInput").value = h; runVerify(); }
+    if (h === "#exam") CertChallenge.openExam();
     if (h.startsWith("#ch=")) CertChallenge.open(h.slice(4));
   }
   window.addEventListener("hashchange", route);
@@ -52,9 +53,20 @@
     else f.push(FACT("Skill proof", "Not checked: network unreachable."));
     return f;
   }
+  async function runPassport(pp, seq) {
+    const r = await CertPassport.check(pp.wallet, pp.circuitId); if (seq !== vSeq) return;
+    const lv = r.cleared || [], facts = [FACT("Wallet", mkLink({href: X.explorerAddr(pp.wallet), text: pp.wallet}), true), FACT("Course", `${lv.length} on-chain level${lv.length === 1 ? "" : "s"} cleared${lv.length ? " (" + lv.join(", ") + ")" : ""}. ${r.min} required.`)];
+    if (r.skill) facts.push(...skillFactsOf(r.skill));
+    const note = "A passport proves that this wallet cleared the course levels and built the circuit for its own exam. It does not say who owns the wallet.";
+    if (r.state === "ok") show("valid", "Passport verified", `This wallet cleared ${lv.length} on-chain levels of the FirstTape course and built a TapeOut circuit that computes its own exam.`, facts, note);
+    else if (r.state === "incomplete") show("unregistered", "Exam passed, course not complete", r.reason, facts, note);
+    else if (r.state === "offline") show("offline", "The passport could not be checked", "We couldn't reach X Layer to run the checks. Try again in a moment.", facts, "");
+    else show("invalid", "Passport not valid", r.reason, facts, note);
+  }
   let vSeq = 0;
   async function runVerify() {
     const seq = ++vSeq; $("vHint").textContent = ""; $("cvResult").hidden = true;
+    const pp = CertPassport.parse($("vInput").value); if (pp) return runPassport(pp, seq);
     let p; try { p = parseInput($("vInput").value); } catch (e) { say($("vHint"), e.message, "bad"); return; }
     const res = await C.verifyCredential(p);
     if (seq !== vSeq) return;

@@ -109,7 +109,12 @@
     if (out.length < n) throw new Error("could not generate enough distinct challenges");
     return out;
   }
+  // The passport exam is derived from the learner's own wallet, so nobody has to hand out challenge links.
+  async function walletSeed(wallet) {
+    const h = String(wallet).toLowerCase().replace(/^0x/, ""); if (!/^[0-9a-f]{40}$/.test(h)) throw new Error("wallet must be an 0x address");
+    return hex((await sha(cat(enc.encode("firsttape-passport-v1"), unhex(h)))).slice(0, 16));
+  }
   let CHALLENGE_FUNCTIONS = 0; for (let t = 0; t < 256; t++) if (dependsOnAll(t)) CHALLENGE_FUNCTIONS++;
 
-  root.CertCore = {CHALLENGE_FUNCTIONS, challengeTable, skillString, parseSkill, uniqueSeeds, canon, leafHash, buildBatch, verifyCredential, toProof, encodeLink, decodeLink, parseCSV, newSalt, norm, hex};
+  root.CertCore = {walletSeed, CHALLENGE_FUNCTIONS, challengeTable, skillString, parseSkill, uniqueSeeds, canon, leafHash, buildBatch, verifyCredential, toProof, encodeLink, decodeLink, parseCSV, newSalt, norm, hex};
 })(typeof window !== "undefined" ? window : globalThis);

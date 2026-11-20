@@ -864,6 +864,11 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 /* FirstTape's global .bar and .tabs also match here; restore the certificate site's own header */
 .cc .bar{max-width:none;margin:0;width:100%;padding:18px clamp(16px,4vw,56px);gap:28px;border-bottom:1px solid #1b1e22}
 .cc .tabs{border-bottom:0;margin:0 auto}
+@media (max-width:700px){
+  .cc .bar{flex-wrap:wrap;gap:10px 16px}
+  .cc .tabs{flex-wrap:wrap;margin:0;width:100%;order:3;justify-content:flex-start}
+  .cc .tabs a{padding:6px 10px}
+}
 </style>
 </head>
 <body>
@@ -1105,7 +1110,7 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
   <main class="wrap pg">
     <span class="badge">Checkable claims</span>
     <h1 class="pgh">For judges</h1>
-    <p class="lede2">FirstTape: learn circuits by building them. From level 6, X Layer checks your circuit. The course ends in real FabX bounties. Everything below can be checked, and where something is not live, it says so.</p>
+    <p class="lede2">CertCheck: certificates anyone can verify, with no personal data on-chain, plus a skill passport for people who learn circuits in the FirstTape course. Certificates are checked against a public record on X Layer. A passport is checked by the TapeOut processor, which re-runs the learner's own exam circuit. Everything below can be checked, and where something is not live, it says so.</p>
 
     <div id="jNetWarn" class="notice warn" hidden>This deployment is <b>not on X Layer</b>. It is a rehearsal environment. The hackathon requires X Layer, so it does not count as the submission unless the organizers say so.</div>
 
@@ -1120,7 +1125,7 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
     <table class="lvltable jt"><thead><tr><th>Criterion</th><th>What we show</th><th>Status</th></tr></thead><tbody>
       <tr><td>Commercial potential</td><td>Sponsored levels, and a sponsor-funded faucet: one flat-fee mint (0.00066 OKB or 0.01 BEM, depending on the processor) funds thousands of free NAND claims (measured on a fork). No sponsor has signed yet.</td><td><span class="st plan">Plan, no sponsor</span></td></tr>
       <tr><td>Innovation</td><td>A course where a contract checks your circuit by running it through the processor's free <code>eval</code>. Novelty against other entries has not been checked against the leaderboard, so we do not claim "first".</td><td><span class="st test">Built</span></td></tr>
-      <tr><td>Ecosystem integration</td><td>X Layer processor and circuits (tape-out and eval). FabX's task bank: levels 14–16 target real tasks. DeWEB and TapeKit: single-file build is ready, publishing is not done. TapeCode and TapeSend are not used.</td><td><span class="st plan">Partial</span></td></tr>
+      <tr><td>Ecosystem integration</td><td>X Layer processor and circuits (tape-out and eval): the course levels and every passport exam are circuits that the processor re-runs on-chain. FabX's task bank: levels 14–16 target real tasks. DeWEB and TapeKit: single-file build is ready, publishing is not done. TapeCode and TapeSend are not used.</td><td><span class="st plan">Partial</span></td></tr>
       <tr><td>Product readiness and UX</td><td>16 levels and a sandbox, a guided tutorial, stars, XP and ranks, a mobile layout, all tested in a real browser. Contracts are tested on a fork of live X Layer.</td><td><span class="st" id="jReady">Tested on a fork</span></td></tr>
       <tr><td>Demo</td><td>A learner goes from a first puzzle to a verified on-chain level and a FabX hand-off.</td><td><span class="st no">Not recorded yet</span></td></tr>
     </tbody></table>
@@ -1131,6 +1136,10 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
       <tr><td>Every level is solvable at its par</td><td><span class="st test">Tested</span></td><td><code>node tests/solutions.js</code></td></tr>
       <tr><td>On-chain checks for levels 6–16</td><td><span class="st test">Tested on a fork</span></td><td><code>forge test --match-test everyLevelPassesOnChain</code> on a fork of live X Layer</td></tr>
       <tr><td>Wallet flow: faucet, tape-out, submit</td><td><span class="st test">Tested on a fork</span></td><td><code>tests/e2e-fork.mjs</code> (stand-in wallet; a real wallet extension is untested)</td></tr>
+      <tr><td>Certificates for anyone: issue, QR codes, verify, revoke</td><td><span class="st live">Live on X Layer</span></td><td>CertRegistry <a class="ulink" href="https://www.oklink.com/xlayer/address/0xF965f9Fd3A6F36E000abE1288aE1363B9F920670" target="_blank" rel="noopener">0xF965…0670</a>. Tested on a local chain with the real contract: <code>tests/e2e.mjs</code>, plus a real-network read-only check. Not yet tried with a real wallet on mainnet.</td></tr>
+      <tr><td>Skill proof on certificates, checked by TapeOut</td><td><span class="st test">Tested on a fork</span></td><td><code>tests/fork-skill.mjs</code> and <code>tests/e2e-skill.mjs</code> tape out real circuits on a fork of live X Layer and re-verify them with the processor's <code>eval</code></td></tr>
+      <tr><td>Passport: a wallet's own exam plus its on-chain course record</td><td><span class="st test">Tested on a fork</span></td><td><code>tests/e2e-passport.mjs</code>. The passport proves a wallet holds a correct circuit and cleared the course levels. It cannot prove who built the circuit.</td></tr>
+      <tr><td>Hosted at a public address</td><td><span class="st no">Not yet</span></td><td>Certificate links contain the page's own address, so real certificates must be issued from the final public address</td></tr>
       <tr><td>Deployed contracts on X Layer</td><td><span class="st no" id="jDeploy2">Not yet</span></td><td>The <a class="ulink" href="#learners">Verify page</a> reads them once deployed</td></tr>
       <tr><td>Hosted on DeWEB with the TapeKit badge</td><td><span class="st no">Not yet</span></td><td><code>dist/index.html</code> is a single file with no external assets</td></tr>
       <tr><td>FabX mining</td><td><span class="st plan">Hand-off only</span></td><td>We verify a circuit matching the task and link to fabx.tech. Mining needs FabX's own mint, commit and tape-out flow, so a circuit made here cannot be claimed there. We do not send FabX transactions. $FAB rewards come from FabX, depend on the network, and are not guaranteed.</td></tr>
@@ -1170,7 +1179,7 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 <header class="bar">
   <a class="logo" href="#" aria-label="Home"><svg viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><path d="M7 8.5l3 3 6-7" fill="none" stroke="#00d892" stroke-width="2"/></svg>certcheck</a>
   <nav class="tabs" aria-label="Sections">
-    <a href="#issue" data-tab="issue">Issue</a><a href="#verify" data-tab="verify">Verify</a><a href="#manage" data-tab="manage">Manage</a><a href="#play" data-tab="learn">Learn circuits</a>
+    <a href="#issue" data-tab="issue">Issue</a><a href="#verify" data-tab="verify">Verify</a><a href="#manage" data-tab="manage">Manage</a><a href="#play" data-tab="learn">Learn circuits</a><a href="#exam" data-tab="exam">Final exam</a>
   </nav>
   <span class="chip" id="netChip">…</span>
 </header>
@@ -1192,7 +1201,7 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
       <ul><li><b>It cannot be forged.</b> Change one letter and the check fails.</li><li><b>It is private.</b> Only a fingerprint is public. Each person holds their own proof.</li><li><b>No lock-in.</b> The format is public, so anyone can build their own checker.</li><li><b>It can be withdrawn.</b> Revoke one certificate or a whole batch, publicly.</li></ul></div>
     <div class="panel hot"><h2>Circuit track</h2>
       <p>For electronics and computing courses. Learn logic gates in the FirstTape game, then take a final exam that is unique to you. Your circuit is built on <b>TapeOut</b>, and anyone can re-run it on-chain to confirm the skill is real.</p>
-      <div class="row"><a class="btn ghost" href="#play">Start learning</a><a class="btn ghost" href="#circuits">About the course</a></div></div>
+      <div class="row"><a class="btn ghost" href="#play">Start learning</a><a class="btn ghost" href="#exam">Take the final exam</a><a class="btn ghost" href="#circuits">About the course</a></div></div>
   </div>
   <p class="note center">Publishing needs a wallet with a few cents of OKB. <a href="#wallet">Setting one up takes about two minutes.</a> Checking a certificate needs nothing. <a href="#judges">For judges</a></p>
 </section>
@@ -1211,7 +1220,7 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
   <h1>Verify a certificate</h1>
   <p class="lede">Open the link or QR code from the certificate, or paste it here. The check runs in your browser against a public record on X Layer. No account, no server.</p>
   <div class="field"><label for="vInput">Certificate link or proof</label>
-    <textarea id="vInput" rows="3" spellcheck="false" placeholder="Paste a link ending in #c=… or the proof JSON"></textarea></div>
+    <textarea id="vInput" rows="3" spellcheck="false" placeholder="Paste a certificate link (#c=…), a passport link (#p=…) or the proof JSON"></textarea></div>
   <div class="row"><button id="vBtn" class="btn primary" type="button">Verify</button><span class="hint" id="vHint"></span></div>
   <article id="cvResult" class="result" data-state="idle" hidden aria-live="polite">
     <div class="rhead"><span class="badge" id="cvBadge"></span><h2 id="vTitle"></h2></div>
@@ -1275,9 +1284,15 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 
 <!-- ===== STUDENT CHALLENGE ===== -->
 <section id="challengeView" class="view" hidden>
-  <h1>Your skill challenge</h1>
-  <p class="lede">Build a circuit from NAND gates that produces the table below. This table is unique to you. Click an output dot, then an input dot, to wire. Double-click a gate or a wire to remove it.</p>
+  <h1 id="chTitle">Your skill challenge</h1>
+  <p class="lede" id="chLede">Build a circuit from NAND gates that produces the table below. This table is unique to you. Click an output dot, then an input dot, to wire. Double-click a gate or a wire to remove it.</p>
   <p class="hint bad" id="chError" hidden></p>
+  <div id="examGate" class="publish" hidden>
+    <h2>Connect your wallet</h2>
+    <p class="sub">Your exam is derived from your wallet address, so it is yours alone and nobody has to send you a link. You also need to have cleared a few on-chain levels of the course first.</p>
+    <div class="row"><button id="exConnect" class="btn primary" type="button">Connect wallet</button><a class="btn ghost" href="#play">Go to the course</a><span class="hint" id="exMsg" role="status"></span></div>
+    <p class="sub" id="exLevels"></p>
+  </div>
   <div class="chgrid" id="chGrid">
     <table id="chTable" aria-label="Your required truth table"><thead><tr><th>A</th><th>B</th><th>C</th><th>Y</th></tr></thead><tbody></tbody></table>
     <div class="boardbox"><svg id="chBoard"></svg></div>
@@ -1287,7 +1302,7 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
     <h2>Your circuit matches. Put it on TapeOut.</h2>
     <p class="sub">This mints your circuit on X Layer. NAND transistors are free from the faucet (once per wallet). The network fee is about <b id="chFee">0.0013 OKB</b>.</p>
     <div class="row"><button id="chTape" class="btn primary" type="button">Tape out on X Layer</button><span class="hint" id="chMsg" role="status"></span></div>
-    <div id="chCodeBox" hidden><label for="chCode">Your submission code. Send it to your organizer.</label><textarea id="chCode" rows="2" readonly></textarea><div class="row"><button id="chCopy" class="btn ghost" type="button">Copy code</button></div></div>
+    <div id="chCodeBox" hidden><label for="chCode" id="chCodeLabel">Your submission code. Send it to your organizer.</label><textarea id="chCode" rows="2" readonly></textarea><div id="chQr" class="qrbox" hidden></div><div class="row"><button id="chCopy" class="btn ghost" type="button">Copy</button><a id="chOpen" class="btn ghost" href="#" hidden>Open your passport</a></div></div>
   </div>
 </section>
 
@@ -2731,9 +2746,14 @@ window.FT_CARD = {
     if (out.length < n) throw new Error("could not generate enough distinct challenges");
     return out;
   }
+  // The passport exam is derived from the learner's own wallet, so nobody has to hand out challenge links.
+  async function walletSeed(wallet) {
+    const h = String(wallet).toLowerCase().replace(/^0x/, ""); if (!/^[0-9a-f]{40}$/.test(h)) throw new Error("wallet must be an 0x address");
+    return hex((await sha(cat(enc.encode("firsttape-passport-v1"), unhex(h)))).slice(0, 16));
+  }
   let CHALLENGE_FUNCTIONS = 0; for (let t = 0; t < 256; t++) if (dependsOnAll(t)) CHALLENGE_FUNCTIONS++;
 
-  root.CertCore = {CHALLENGE_FUNCTIONS, challengeTable, skillString, parseSkill, uniqueSeeds, canon, leafHash, buildBatch, verifyCredential, toProof, encodeLink, decodeLink, parseCSV, newSalt, norm, hex};
+  root.CertCore = {walletSeed, CHALLENGE_FUNCTIONS, challengeTable, skillString, parseSkill, uniqueSeeds, canon, leafHash, buildBatch, verifyCredential, toProof, encodeLink, decodeLink, parseCSV, newSalt, norm, hex};
 })(typeof window !== "undefined" ? window : globalThis);
 </script>
 <script>
@@ -2826,6 +2846,8 @@ window.CC_CONFIG = {
   chainId: 196, chainName: "X Layer", rpc: "https://rpc.xlayer.tech", explorer: "https://www.oklink.com/xlayer",
   currency: {name: "OKB", symbol: "OKB", decimals: 18},
   // TapeOut processor (the circuits ERC-721 + eval). Skill proofs are checked ONLY against processors listed here.
+  // FirstTape's LessonVerifier: the on-chain record of which course levels (6-16) each wallet cleared. A passport needs at least minLevels of them.
+  passport: {verifier: "0x7F6f07f40e14E9A8D2E2b77170Fe748Bd9C4d6d9", minLevels: 3},
   processors: ["0x9e2849c04a513fe64db07521cbe52d078d905c0e"],
   tapeout: {processor: "0x9e2849c04a513fe64db07521cbe52d078d905c0e", transistors: "0xd0faafc5b9149cae7bd9af64070fee33c46ed619", faucet: "0xBC58802002307fD80048e93A6475335eC65a4f39", feeWei: "1300000000000000"}
 };
@@ -2870,6 +2892,7 @@ window.CC_CONFIG = {
     if (!log) throw new Error("The tape-out went through but no circuit id was found in the logs.");
     return {circuitId: BigInt(log.topics[3]).toString(), tx: r.transactionHash};
   }
+  const readProgress = async (verifier, wallet) => BigInt(await callAt(verifier, "0xda8589a2" + addr(wallet)));   // LessonVerifier.progress(address): bit N = level N cleared
   const configured = () => !ZERO.test(C().registry);
   async function rpc(method, params) {
     const res = await fetch(C().rpc, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({jsonrpc: "2.0", id: 1, method, params})});
@@ -2910,7 +2933,7 @@ window.CC_CONFIG = {
     return (await sendTo(C().registry, from, data)).transactionHash;
   }
   const explorerTx = h => C().explorer + "/tx/" + h, explorerAddr = a => C().explorer + "/address/" + a;
-  root.CertChain = {tapeoutCircuit, evalCircuit, circuitOwner, circuitInfo, decodeBytes, callAt, enc, decodeBatch, configured, readBatch, readLeafRevoked, connect, send, explorerTx, explorerAddr};
+  root.CertChain = {readProgress, tapeoutCircuit, evalCircuit, circuitOwner, circuitInfo, decodeBytes, callAt, enc, decodeBatch, configured, readBatch, readLeafRevoked, connect, send, explorerTx, explorerAddr};
 })(typeof window !== "undefined" ? window : globalThis);
 </script>
 <script>
@@ -2934,6 +2957,40 @@ window.CC_CONFIG = {
     } catch (e) { return {state: "offline", reason: String(e.message || e)}; }
   }
   root.CertSkill = {check};
+})(typeof window !== "undefined" ? window : globalThis);
+</script>
+<script>
+// Skill passport: a wallet-bound credential with no organizer. Verified entirely from chain state:
+//   1. FirstTape's LessonVerifier says which on-chain course levels (6-16) this wallet cleared (a minimum is required);
+//   2. the wallet's own exam (a logic function derived from the wallet address) is checked by the TapeOut processor's eval;
+//   3. the circuit must currently be owned by that same wallet.
+(function (root) {
+  const C = root.CertCore, X = root.CertChain, cfg = () => root.CC_CONFIG;
+  const LEVELS = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
+  const ADDR = /^0x[0-9a-fA-F]{40}$/;
+  const link = (wallet, id) => location.href.split("#")[0] + "#p=" + String(wallet).toLowerCase() + "." + String(id);
+  function parse(text) {
+    const t = String(text || "").trim(), m = t.match(/[#&?]p=(0x[0-9a-fA-F]{40})\.(\d{1,18})/) || t.match(/^(0x[0-9a-fA-F]{40})\.(\d{1,18})$/);
+    return m ? {wallet: m[1].toLowerCase(), circuitId: m[2]} : null;
+  }
+  async function levelsOf(wallet) {
+    const mask = await X.readProgress(cfg().passport.verifier, wallet);
+    return {mask, cleared: LEVELS.filter(l => ((mask >> BigInt(l)) & 1n) === 1n)};
+  }
+  // -> {state: "ok"|"incomplete"|"bad"|"offline", wallet, circuitId, cleared, min, skill?, reason?}
+  async function check(wallet, circuitId) {
+    wallet = String(wallet).toLowerCase(); const min = cfg().passport.minLevels, out = {wallet, circuitId: String(circuitId), min, cleared: []};
+    if (!ADDR.test(wallet) || !/^\d{1,18}$/.test(String(circuitId))) return {...out, state: "bad", reason: "That is not a valid passport."};
+    let lv; try { lv = await levelsOf(wallet); } catch (e) { return {...out, state: "offline", reason: String(e.message || e)}; }
+    out.cleared = lv.cleared;
+    const sk = await root.CertSkill.check(C.skillString(await C.walletSeed(wallet), circuitId, cfg().tapeout.processor)); out.skill = sk;
+    if (sk.state === "offline") return {...out, state: "offline", reason: sk.reason};
+    if (sk.state !== "ok") return {...out, state: "bad", reason: sk.reason || "The circuit does not compute this wallet's exam."};
+    if (!sk.owner || sk.owner.toLowerCase() !== wallet) return {...out, state: "bad", reason: "The exam circuit is not owned by this wallet."};
+    if (lv.cleared.length < min) return {...out, state: "incomplete", reason: `Only ${lv.cleared.length} of the ${min} required on-chain course levels are cleared.`};
+    return {...out, state: "ok"};
+  }
+  root.CertPassport = {LEVELS, link, parse, levelsOf, check};
 })(typeof window !== "undefined" ? window : globalThis);
 </script>
 <script>
@@ -3046,26 +3103,49 @@ window.CC_CONFIG = {
 })(window);
 </script>
 <script>
-// Student challenge page: show the unique truth table, let the student build it on the board, tape it out, and produce a submission code.
+// Challenge page. Two modes share one board:
+//   "class": an organizer's link carries a seed; the student gets a submission code to send back.
+//   "exam":  the seed comes from the student's own wallet; the result is a passport link + QR (no organizer needed).
 (function (root) {
   const $ = id => document.getElementById(id), C = root.CertCore, X = root.CertChain;
   const say = (el, t, cls = "") => { el.textContent = t; el.className = "hint " + cls; };
-  let board = null, seed = null, table = 0;
+  let board = null, seed = null, table = 0, mode = "class", examWallet = null, eligible = true;
   const code = (s, id, proc) => `CCSUB1.${s}.${id}.${proc.toLowerCase()}`;
 
-  async function open(s) {
-    seed = String(s || "").toLowerCase(); $("chError").hidden = true; $("chDone").hidden = true; $("chCodeBox").hidden = true; say($("chMsg"), "");
-    if (!/^[0-9a-f]{32}$/.test(seed)) { $("chError").textContent = "This challenge link is not valid."; $("chError").hidden = false; $("chGrid").hidden = true; return; }
-    $("chGrid").hidden = false; table = await C.challengeTable(seed);
+  function reset() { $("chError").hidden = true; $("chDone").hidden = true; $("chCodeBox").hidden = true; $("chQr").hidden = true; $("chOpen").hidden = true; say($("chMsg"), ""); }
+  async function start(seedHex) {
+    seed = seedHex; reset(); $("chGrid").hidden = false; table = await C.challengeTable(seed);
     const tb = $("chTable").tBodies[0]; tb.replaceChildren();
     for (let m = 0; m < 8; m++) { const tr = tb.insertRow(); tr.dataset.m = m; [m & 1, (m >> 1) & 1, (m >> 2) & 1, (table >> m) & 1].forEach(v => { tr.insertCell().textContent = String(v); }); }
     $("chFee").textContent = (Number(BigInt(root.CC_CONFIG.tapeout.feeWei)) / 1e18).toString() + " OKB";
     board = root.CertBoard.mount($("chBoard"), {table, onChange: st => {
       [...tb.rows].forEach(r => { const row = st.rows[+r.dataset.m]; r.className = row.ok ? "ok" : row.got === undefined ? "" : "bad"; });
       say($("chStatus"), `${st.matched}/8 rows match · ${st.gates} gate${st.gates === 1 ? "" : "s"} used`, st.solved ? "ok" : "");
-      $("chDone").hidden = !st.solved;
+      $("chDone").hidden = !(st.solved && eligible);
+      if (st.solved && !eligible) say($("chStatus"), `${st.matched}/8 rows match. Your circuit is correct, but clear more on-chain course levels before you can tape it out.`, "ok");
     }});
   }
+  // ----- class mode (organizer link) -----
+  async function open(s) {
+    mode = "class"; eligible = true; examWallet = null; $("examGate").hidden = true; $("chTitle").textContent = "Your skill challenge"; $("chCodeLabel").textContent = "Your submission code. Send it to your organizer."; $("chCopy").textContent = "Copy code";
+    const sd = String(s || "").toLowerCase(); reset();
+    if (!/^[0-9a-f]{32}$/.test(sd)) { $("chError").textContent = "This challenge link is not valid."; $("chError").hidden = false; $("chGrid").hidden = true; return; }
+    await start(sd);
+  }
+  // ----- exam mode (wallet-derived) -----
+  function openExam() {
+    mode = "exam"; board = null; examWallet = null; eligible = false; reset(); $("chGrid").hidden = true; $("examGate").hidden = false; $("exLevels").textContent = ""; say($("exMsg"), "");
+    $("chTitle").textContent = "Final exam"; $("chLede").textContent = "Build a circuit from NAND gates that produces the table below. The table is derived from your wallet, so it is unique to you. Click an output dot, then an input dot, to wire. Double-click a gate or a wire to remove it."; $("chCodeLabel").textContent = "Your passport link. Anyone can open it to verify your skills."; $("chCopy").textContent = "Copy link";
+  }
+  $("exConnect").addEventListener("click", async () => {
+    const m = $("exMsg"); try {
+      say(m, "Connecting…"); const acct = (await X.connect()).toLowerCase(); examWallet = acct;
+      const lv = await root.CertPassport.levelsOf(acct), min = root.CC_CONFIG.passport.minLevels; eligible = lv.cleared.length >= min;
+      $("exLevels").textContent = `Course record for ${acct.slice(0, 6)}…${acct.slice(-4)}: ${lv.cleared.length} on-chain level${lv.cleared.length === 1 ? "" : "s"} cleared (${lv.cleared.join(", ") || "none"}). You need at least ${min}.`;
+      say(m, eligible ? "You can take the exam." : `Clear ${min - lv.cleared.length} more on-chain level${min - lv.cleared.length === 1 ? "" : "s"} in the course first. You can still try the exam board below.`, eligible ? "ok" : "bad");
+      await start(await C.walletSeed(acct));
+    } catch (e) { say(m, e.message || String(e), "bad"); }
+  });
   $("chAdd").addEventListener("click", () => board && board.addGate());
   $("chDel").addEventListener("click", () => board && board.removeLast());
   $("chReset").addEventListener("click", () => board && board.reset());
@@ -3074,18 +3154,31 @@ window.CC_CONFIG = {
     try {
       const net = board.netlist(); if (net.error) throw new Error(net.error);
       if (!board.state().solved) throw new Error("The circuit does not match your table yet.");
-      const account = await X.connect(), T = root.CC_CONFIG.tapeout;
+      const account = (await X.connect()).toLowerCase(), T = root.CC_CONFIG.tapeout;
+      if (mode === "exam") {
+        if (account !== examWallet) throw new Error("Connect the wallet this exam was made for (" + examWallet + ").");
+        if (!eligible) throw new Error("Clear more on-chain course levels first.");
+      }
       const {circuitId} = await X.tapeoutCircuit(net.hex, 3, 1, net.gates, account, t => say(m, t));
       say(m, "Checking your circuit on TapeOut…");
-      const res = await root.CertSkill.check(C.skillString(seed, circuitId, T.processor));
-      if (res.state !== "ok") throw new Error("Taped out as circuit #" + circuitId + ", but the TapeOut check did not pass: " + (res.reason || res.state));
-      say(m, `Done. Circuit #${circuitId} is yours and passed the TapeOut check.`, "ok");
-      $("chCode").value = code(seed, circuitId, T.processor); $("chCodeBox").hidden = false;
+      if (mode === "exam") {
+        const res = await root.CertPassport.check(account, circuitId);
+        if (res.state !== "ok") throw new Error("Taped out as circuit #" + circuitId + ", but the passport check did not pass: " + (res.reason || res.state));
+        const url = root.CertPassport.link(account, circuitId); try { localStorage.setItem("cc_passport", JSON.stringify({wallet: account, circuitId})); } catch {}
+        $("chCode").value = url; $("chCodeBox").hidden = false; $("chOpen").href = "#p=" + account + "." + circuitId; $("chOpen").hidden = false;
+        try { const q = root.CertQR.encode(url, "M"); $("chQr").innerHTML = root.CertQR.toSVG(q); $("chQr").hidden = false; } catch { $("chQr").hidden = true; }
+        say(m, `Done. Circuit #${circuitId} is yours, and the passport verified on TapeOut.`, "ok");
+      } else {
+        const res = await root.CertSkill.check(C.skillString(seed, circuitId, T.processor));
+        if (res.state !== "ok") throw new Error("Taped out as circuit #" + circuitId + ", but the TapeOut check did not pass: " + (res.reason || res.state));
+        say(m, `Done. Circuit #${circuitId} is yours and passed the TapeOut check.`, "ok");
+        $("chCode").value = code(seed, circuitId, T.processor); $("chCodeBox").hidden = false;
+      }
     } catch (e) { say(m, e.message || String(e), "bad"); }
     $("chTape").disabled = false;
   });
-  $("chCopy").addEventListener("click", async () => { try { await navigator.clipboard.writeText($("chCode").value); say($("chMsg"), "Code copied. Send it to your organizer.", "ok"); } catch { $("chCode").select(); say($("chMsg"), "Select the code and copy it.", ""); } });
-  root.CertChallenge = {open, code, parse: line => { const m = String(line).trim().match(/^CCSUB1\.([0-9a-f]{32})\.(\d{1,18})\.(0x[0-9a-f]{40})$/i); return m ? {seed: m[1].toLowerCase(), circuitId: m[2], processor: m[3].toLowerCase()} : null; }};
+  $("chCopy").addEventListener("click", async () => { try { await navigator.clipboard.writeText($("chCode").value); say($("chMsg"), "Copied.", "ok"); } catch { $("chCode").select(); say($("chMsg"), "Select the text and copy it.", ""); } });
+  root.CertChallenge = {open, openExam, code, parse: line => { const m = String(line).trim().match(/^CCSUB1\.([0-9a-f]{32})\.(\d{1,18})\.(0x[0-9a-f]{40})$/i); return m ? {seed: m[1].toLowerCase(), circuitId: m[2], processor: m[3].toLowerCase()} : null; }};
 })(window);
 </script>
 <script>
@@ -3103,10 +3196,11 @@ window.CC_CONFIG = {
   function route() {
     const h = location.hash;
     { const t = h.length > 1 ? document.getElementById(h.slice(1)) : null; if (["#play", "#learners", "#judges", "#circuits"].includes(h) || (t && document.getElementById("landing").contains(t))) return; }   // those pages belong to site/ft
-    let v = h.startsWith("#c=") ? "verify" : h.startsWith("#ch=") ? "challenge" : VIEWS.includes(h.slice(1)) ? h.slice(1) : "home";
+    let v = h.startsWith("#c=") || h.startsWith("#p=") ? "verify" : h.startsWith("#ch=") || h === "#exam" ? "challenge" : VIEWS.includes(h.slice(1)) ? h.slice(1) : "home";
     VIEWS.forEach(n => { $(n + "View").hidden = n !== v; });
-    document.querySelectorAll(".tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === v));
-    if (h.startsWith("#c=")) { $("vInput").value = h; runVerify(); }
+    document.querySelectorAll(".tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === (h === "#exam" ? "exam" : v)));
+    if (h.startsWith("#c=") || h.startsWith("#p=")) { $("vInput").value = h; runVerify(); }
+    if (h === "#exam") CertChallenge.openExam();
     if (h.startsWith("#ch=")) CertChallenge.open(h.slice(4));
   }
   window.addEventListener("hashchange", route);
@@ -3143,9 +3237,20 @@ window.CC_CONFIG = {
     else f.push(FACT("Skill proof", "Not checked: network unreachable."));
     return f;
   }
+  async function runPassport(pp, seq) {
+    const r = await CertPassport.check(pp.wallet, pp.circuitId); if (seq !== vSeq) return;
+    const lv = r.cleared || [], facts = [FACT("Wallet", mkLink({href: X.explorerAddr(pp.wallet), text: pp.wallet}), true), FACT("Course", `${lv.length} on-chain level${lv.length === 1 ? "" : "s"} cleared${lv.length ? " (" + lv.join(", ") + ")" : ""}. ${r.min} required.`)];
+    if (r.skill) facts.push(...skillFactsOf(r.skill));
+    const note = "A passport proves that this wallet cleared the course levels and built the circuit for its own exam. It does not say who owns the wallet.";
+    if (r.state === "ok") show("valid", "Passport verified", `This wallet cleared ${lv.length} on-chain levels of the FirstTape course and built a TapeOut circuit that computes its own exam.`, facts, note);
+    else if (r.state === "incomplete") show("unregistered", "Exam passed, course not complete", r.reason, facts, note);
+    else if (r.state === "offline") show("offline", "The passport could not be checked", "We couldn't reach X Layer to run the checks. Try again in a moment.", facts, "");
+    else show("invalid", "Passport not valid", r.reason, facts, note);
+  }
   let vSeq = 0;
   async function runVerify() {
     const seq = ++vSeq; $("vHint").textContent = ""; $("cvResult").hidden = true;
+    const pp = CertPassport.parse($("vInput").value); if (pp) return runPassport(pp, seq);
     let p; try { p = parseInput($("vInput").value); } catch (e) { say($("vHint"), e.message, "bad"); return; }
     const res = await C.verifyCredential(p);
     if (seq !== vSeq) return;

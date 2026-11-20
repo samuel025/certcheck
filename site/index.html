@@ -248,7 +248,7 @@
   <main class="wrap pg">
     <span class="badge">Checkable claims</span>
     <h1 class="pgh">For judges</h1>
-    <p class="lede2">FirstTape: learn circuits by building them. From level 6, X Layer checks your circuit. The course ends in real FabX bounties. Everything below can be checked, and where something is not live, it says so.</p>
+    <p class="lede2">CertCheck: certificates anyone can verify, with no personal data on-chain, plus a skill passport for people who learn circuits in the FirstTape course. Certificates are checked against a public record on X Layer. A passport is checked by the TapeOut processor, which re-runs the learner's own exam circuit. Everything below can be checked, and where something is not live, it says so.</p>
 
     <div id="jNetWarn" class="notice warn" hidden>This deployment is <b>not on X Layer</b>. It is a rehearsal environment. The hackathon requires X Layer, so it does not count as the submission unless the organizers say so.</div>
 
@@ -263,7 +263,7 @@
     <table class="lvltable jt"><thead><tr><th>Criterion</th><th>What we show</th><th>Status</th></tr></thead><tbody>
       <tr><td>Commercial potential</td><td>Sponsored levels, and a sponsor-funded faucet: one flat-fee mint (0.00066 OKB or 0.01 BEM, depending on the processor) funds thousands of free NAND claims (measured on a fork). No sponsor has signed yet.</td><td><span class="st plan">Plan, no sponsor</span></td></tr>
       <tr><td>Innovation</td><td>A course where a contract checks your circuit by running it through the processor's free <code>eval</code>. Novelty against other entries has not been checked against the leaderboard, so we do not claim "first".</td><td><span class="st test">Built</span></td></tr>
-      <tr><td>Ecosystem integration</td><td>X Layer processor and circuits (tape-out and eval). FabX's task bank: levels 14–16 target real tasks. DeWEB and TapeKit: single-file build is ready, publishing is not done. TapeCode and TapeSend are not used.</td><td><span class="st plan">Partial</span></td></tr>
+      <tr><td>Ecosystem integration</td><td>X Layer processor and circuits (tape-out and eval): the course levels and every passport exam are circuits that the processor re-runs on-chain. FabX's task bank: levels 14–16 target real tasks. DeWEB and TapeKit: single-file build is ready, publishing is not done. TapeCode and TapeSend are not used.</td><td><span class="st plan">Partial</span></td></tr>
       <tr><td>Product readiness and UX</td><td>16 levels and a sandbox, a guided tutorial, stars, XP and ranks, a mobile layout, all tested in a real browser. Contracts are tested on a fork of live X Layer.</td><td><span class="st" id="jReady">Tested on a fork</span></td></tr>
       <tr><td>Demo</td><td>A learner goes from a first puzzle to a verified on-chain level and a FabX hand-off.</td><td><span class="st no">Not recorded yet</span></td></tr>
     </tbody></table>
@@ -274,6 +274,10 @@
       <tr><td>Every level is solvable at its par</td><td><span class="st test">Tested</span></td><td><code>node tests/solutions.js</code></td></tr>
       <tr><td>On-chain checks for levels 6–16</td><td><span class="st test">Tested on a fork</span></td><td><code>forge test --match-test everyLevelPassesOnChain</code> on a fork of live X Layer</td></tr>
       <tr><td>Wallet flow: faucet, tape-out, submit</td><td><span class="st test">Tested on a fork</span></td><td><code>tests/e2e-fork.mjs</code> (stand-in wallet; a real wallet extension is untested)</td></tr>
+      <tr><td>Certificates for anyone: issue, QR codes, verify, revoke</td><td><span class="st live">Live on X Layer</span></td><td>CertRegistry <a class="ulink" href="https://www.oklink.com/xlayer/address/0xF965f9Fd3A6F36E000abE1288aE1363B9F920670" target="_blank" rel="noopener">0xF965…0670</a>. Tested on a local chain with the real contract: <code>tests/e2e.mjs</code>, plus a real-network read-only check. Not yet tried with a real wallet on mainnet.</td></tr>
+      <tr><td>Skill proof on certificates, checked by TapeOut</td><td><span class="st test">Tested on a fork</span></td><td><code>tests/fork-skill.mjs</code> and <code>tests/e2e-skill.mjs</code> tape out real circuits on a fork of live X Layer and re-verify them with the processor's <code>eval</code></td></tr>
+      <tr><td>Passport: a wallet's own exam plus its on-chain course record</td><td><span class="st test">Tested on a fork</span></td><td><code>tests/e2e-passport.mjs</code>. The passport proves a wallet holds a correct circuit and cleared the course levels. It cannot prove who built the circuit.</td></tr>
+      <tr><td>Hosted at a public address</td><td><span class="st no">Not yet</span></td><td>Certificate links contain the page's own address, so real certificates must be issued from the final public address</td></tr>
       <tr><td>Deployed contracts on X Layer</td><td><span class="st no" id="jDeploy2">Not yet</span></td><td>The <a class="ulink" href="#learners">Verify page</a> reads them once deployed</td></tr>
       <tr><td>Hosted on DeWEB with the TapeKit badge</td><td><span class="st no">Not yet</span></td><td><code>dist/index.html</code> is a single file with no external assets</td></tr>
       <tr><td>FabX mining</td><td><span class="st plan">Hand-off only</span></td><td>We verify a circuit matching the task and link to fabx.tech. Mining needs FabX's own mint, commit and tape-out flow, so a circuit made here cannot be claimed there. We do not send FabX transactions. $FAB rewards come from FabX, depend on the network, and are not guaranteed.</td></tr>
@@ -313,7 +317,7 @@
 <header class="bar">
   <a class="logo" href="#" aria-label="Home"><svg viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><path d="M7 8.5l3 3 6-7" fill="none" stroke="#00d892" stroke-width="2"/></svg>certcheck</a>
   <nav class="tabs" aria-label="Sections">
-    <a href="#issue" data-tab="issue">Issue</a><a href="#verify" data-tab="verify">Verify</a><a href="#manage" data-tab="manage">Manage</a><a href="#play" data-tab="learn">Learn circuits</a>
+    <a href="#issue" data-tab="issue">Issue</a><a href="#verify" data-tab="verify">Verify</a><a href="#manage" data-tab="manage">Manage</a><a href="#play" data-tab="learn">Learn circuits</a><a href="#exam" data-tab="exam">Final exam</a>
   </nav>
   <span class="chip" id="netChip">…</span>
 </header>
@@ -335,7 +339,7 @@
       <ul><li><b>It cannot be forged.</b> Change one letter and the check fails.</li><li><b>It is private.</b> Only a fingerprint is public. Each person holds their own proof.</li><li><b>No lock-in.</b> The format is public, so anyone can build their own checker.</li><li><b>It can be withdrawn.</b> Revoke one certificate or a whole batch, publicly.</li></ul></div>
     <div class="panel hot"><h2>Circuit track</h2>
       <p>For electronics and computing courses. Learn logic gates in the FirstTape game, then take a final exam that is unique to you. Your circuit is built on <b>TapeOut</b>, and anyone can re-run it on-chain to confirm the skill is real.</p>
-      <div class="row"><a class="btn ghost" href="#play">Start learning</a><a class="btn ghost" href="#circuits">About the course</a></div></div>
+      <div class="row"><a class="btn ghost" href="#play">Start learning</a><a class="btn ghost" href="#exam">Take the final exam</a><a class="btn ghost" href="#circuits">About the course</a></div></div>
   </div>
   <p class="note center">Publishing needs a wallet with a few cents of OKB. <a href="#wallet">Setting one up takes about two minutes.</a> Checking a certificate needs nothing. <a href="#judges">For judges</a></p>
 </section>
@@ -354,7 +358,7 @@
   <h1>Verify a certificate</h1>
   <p class="lede">Open the link or QR code from the certificate, or paste it here. The check runs in your browser against a public record on X Layer. No account, no server.</p>
   <div class="field"><label for="vInput">Certificate link or proof</label>
-    <textarea id="vInput" rows="3" spellcheck="false" placeholder="Paste a link ending in #c=… or the proof JSON"></textarea></div>
+    <textarea id="vInput" rows="3" spellcheck="false" placeholder="Paste a certificate link (#c=…), a passport link (#p=…) or the proof JSON"></textarea></div>
   <div class="row"><button id="vBtn" class="btn primary" type="button">Verify</button><span class="hint" id="vHint"></span></div>
   <article id="cvResult" class="result" data-state="idle" hidden aria-live="polite">
     <div class="rhead"><span class="badge" id="cvBadge"></span><h2 id="vTitle"></h2></div>
@@ -418,9 +422,15 @@
 
 <!-- ===== STUDENT CHALLENGE ===== -->
 <section id="challengeView" class="view" hidden>
-  <h1>Your skill challenge</h1>
-  <p class="lede">Build a circuit from NAND gates that produces the table below. This table is unique to you. Click an output dot, then an input dot, to wire. Double-click a gate or a wire to remove it.</p>
+  <h1 id="chTitle">Your skill challenge</h1>
+  <p class="lede" id="chLede">Build a circuit from NAND gates that produces the table below. This table is unique to you. Click an output dot, then an input dot, to wire. Double-click a gate or a wire to remove it.</p>
   <p class="hint bad" id="chError" hidden></p>
+  <div id="examGate" class="publish" hidden>
+    <h2>Connect your wallet</h2>
+    <p class="sub">Your exam is derived from your wallet address, so it is yours alone and nobody has to send you a link. You also need to have cleared a few on-chain levels of the course first.</p>
+    <div class="row"><button id="exConnect" class="btn primary" type="button">Connect wallet</button><a class="btn ghost" href="#play">Go to the course</a><span class="hint" id="exMsg" role="status"></span></div>
+    <p class="sub" id="exLevels"></p>
+  </div>
   <div class="chgrid" id="chGrid">
     <table id="chTable" aria-label="Your required truth table"><thead><tr><th>A</th><th>B</th><th>C</th><th>Y</th></tr></thead><tbody></tbody></table>
     <div class="boardbox"><svg id="chBoard"></svg></div>
@@ -430,7 +440,7 @@
     <h2>Your circuit matches. Put it on TapeOut.</h2>
     <p class="sub">This mints your circuit on X Layer. NAND transistors are free from the faucet (once per wallet). The network fee is about <b id="chFee">0.0013 OKB</b>.</p>
     <div class="row"><button id="chTape" class="btn primary" type="button">Tape out on X Layer</button><span class="hint" id="chMsg" role="status"></span></div>
-    <div id="chCodeBox" hidden><label for="chCode">Your submission code. Send it to your organizer.</label><textarea id="chCode" rows="2" readonly></textarea><div class="row"><button id="chCopy" class="btn ghost" type="button">Copy code</button></div></div>
+    <div id="chCodeBox" hidden><label for="chCode" id="chCodeLabel">Your submission code. Send it to your organizer.</label><textarea id="chCode" rows="2" readonly></textarea><div id="chQr" class="qrbox" hidden></div><div class="row"><button id="chCopy" class="btn ghost" type="button">Copy</button><a id="chOpen" class="btn ghost" href="#" hidden>Open your passport</a></div></div>
   </div>
 </section>
 
@@ -480,6 +490,7 @@
 <script src="cc/config.js"></script>
 <script src="cc/chain.js"></script>
 <script src="cc/skill.js"></script>
+<script src="cc/passport.js"></script>
 <script src="cc/board.js"></script>
 <script src="cc/challenge.js"></script>
 <script src="cc/app.js"></script>

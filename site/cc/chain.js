@@ -37,6 +37,7 @@
     if (!log) throw new Error("The tape-out went through but no circuit id was found in the logs.");
     return {circuitId: BigInt(log.topics[3]).toString(), tx: r.transactionHash};
   }
+  const readProgress = async (verifier, wallet) => BigInt(await callAt(verifier, "0xda8589a2" + addr(wallet)));   // LessonVerifier.progress(address): bit N = level N cleared
   const configured = () => !ZERO.test(C().registry);
   async function rpc(method, params) {
     const res = await fetch(C().rpc, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({jsonrpc: "2.0", id: 1, method, params})});
@@ -77,5 +78,5 @@
     return (await sendTo(C().registry, from, data)).transactionHash;
   }
   const explorerTx = h => C().explorer + "/tx/" + h, explorerAddr = a => C().explorer + "/address/" + a;
-  root.CertChain = {tapeoutCircuit, evalCircuit, circuitOwner, circuitInfo, decodeBytes, callAt, enc, decodeBatch, configured, readBatch, readLeafRevoked, connect, send, explorerTx, explorerAddr};
+  root.CertChain = {readProgress, tapeoutCircuit, evalCircuit, circuitOwner, circuitInfo, decodeBytes, callAt, enc, decodeBatch, configured, readBatch, readLeafRevoked, connect, send, explorerTx, explorerAddr};
 })(typeof window !== "undefined" ? window : globalThis);

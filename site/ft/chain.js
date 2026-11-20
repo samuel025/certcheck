@@ -1,7 +1,7 @@
 // Minimal X Layer wallet flow, no dependencies. Encoding verified against `cast` (see tests/encode.test.js).
 (() => {
   const C = window.FT_CONFIG, ZERO = /^0x0+$/;
-  const SEL = {claim: "0x4e71d92d", claimed: "0xc884ef83", tapeout: "0x7bd3ac1d", submit: "0x4ce93cc8", progress: "0xda8589a2", balanceOf: "0x00fdd58e"};
+  const SEL = {claim: "0x4e71d92d", claimed: "0xc884ef83", tapeout: "0x7bd3ac1d", submit: "0x4ce93cc8", progress: "0xda8589a2", balanceOf: "0x00fdd58e", mint: "0x1b2ef1ca", protocolFee: "0xb0e21e8a"};
   const w = n => BigInt(n).toString(16).padStart(64, "0");
   const addr = a => a.toLowerCase().replace("0x", "").padStart(64, "0");
   const enc = {
@@ -48,8 +48,17 @@
       const have = BigInt(await call(C.transistors, enc.balanceOf(account, 0)));
       if (have < BigInt(net.gates)) { say("Claiming free NAND transistors…"); await send(account, C.faucet, SEL.claim); }
     }
-    const have = tokensOn ? BigInt(await call(C.transistors, enc.balanceOf(account, 0))) : BigInt(net.gates);
-    if (have < BigInt(net.gates)) throw new Error(`You need ${net.gates} NAND transistors but hold ${have}. Claim from the faucet or mint some.`);
+    let have = tokensOn ? BigInt(await call(C.transistors, enc.balanceOf(account, 0))) : BigInt(net.gates);
+    if (tokensOn && have < BigInt(net.gates)) {   // faucet used up or empty: mint the shortfall from the transistor contract for its flat fee
+      const need = BigInt(net.gates) - have; let fee = null;
+      try { fee = BigInt(await call(C.transistors, SEL.protocolFee)); } catch {}
+      if (fee !== null) {
+        say(`Minting ${need} NAND for a flat fee of ${Number(fee) / 1e18} OKB (confirm in wallet)…`);
+        try { await send(account, C.transistors, SEL.mint + w(0) + w(need), fee); } catch (e) { throw new Error("Could not mint NAND: " + (e && e.message || e)); }
+        have = BigInt(await call(C.transistors, enc.balanceOf(account, 0)));
+      }
+    }
+    if (have < BigInt(net.gates)) throw new Error(`You need ${net.gates} NAND transistors but hold ${have}. The faucet is empty and minting did not work.`);
     say("Taping out your circuit (confirm in wallet)…");
     const r = await send(account, C.circuits, enc.tapeout(net.hex, net.nIn, net.nOut), C.tapeoutFeeWei);
     const log = r.logs.find(l => l.address.toLowerCase() === C.circuits.toLowerCase() && l.topics[0] === TRANSFER && l.topics.length === 4);

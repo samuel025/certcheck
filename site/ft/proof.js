@@ -118,6 +118,22 @@
   $("vMine").addEventListener("click", async () => {
     try { const a = await FT_CHAIN.connect(); $("vAddr").value = a; lookup(a); } catch (e) { setMsg((e && e.message) || "Wallet not available.", "bad"); }
   });
+  // ---------- sponsor section: live, read-only numbers ----------
+  async function loadSponsor() {
+    if (!$("spGrid") || !deployed()) { if ($("spGrid")) { $("spLearners").textContent = "—"; $("spClears").textContent = "—"; $("spFaucet").textContent = "—"; } return; }
+    try {
+      const st = await stats(); $("spLearners").textContent = st.learners; $("spClears").textContent = st.clears;
+      const ids = LEVELS.filter(L => L.onchain).map(L => L.id), counts = await Promise.all(ids.map(clearsOf)), max = Math.max(1, ...counts), bars = $("spBars"); bars.innerHTML = "";
+      ids.forEach((id, i) => { const d = document.createElement("div"); d.className = "spbar"; d.title = `Level ${id}: ${counts[i]} unique wallet${counts[i] === 1 ? "" : "s"}`; d.innerHTML = '<i></i><span></span><em></em>'; d.querySelector("i").style.height = Math.max(3, Math.round(70 * counts[i] / max)) + "px"; d.querySelector("span").textContent = counts[i]; d.querySelector("em").textContent = "L" + id; bars.appendChild(d); });
+    } catch { $("spLearners").textContent = "n/a"; $("spClears").textContent = "n/a"; }
+    try {
+      const r = await fetch(C.rpc, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({jsonrpc: "2.0", id: 1, method: "eth_call", params: [{to: C.transistors, data: "0x00fdd58e" + a32(C.faucet) + w(0)}, "latest"]})});
+      const j = await r.json(), bal = Number(BigInt(j.result)); $("spFaucet").textContent = bal.toLocaleString(); $("spFaucetNote").textContent = `about ${Math.floor(bal / 40)} more learners at 40 NAND each`;
+    } catch { $("spFaucet").textContent = "n/a"; }
+    $("spAddr").textContent = C.faucet;
+  }
+  window.addEventListener("ft-route", e => { if (e.detail === "landing") loadSponsor(); });
+  if ($("landing") && !$("landing").hidden) loadSponsor();   // first paint: the route event already fired before this script loaded
   window.addEventListener("ft-route", e => { if (e.detail === "verify") loadStats(); if (e.detail === "judges") loadJudges(); });
   if (location.hash === "#learners") loadStats(); if (location.hash === "#judges") loadJudges();
 })();

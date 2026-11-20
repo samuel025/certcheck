@@ -757,6 +757,17 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 #brief .funmachine{flex-direction:row;gap:16px;padding:12px 14px;margin:0 0 18px;justify-content:flex-start;background:rgba(0,216,146,.05);border-color:rgba(0,216,146,.35)}
 #brief .funmachine .mtxt{min-width:0}#brief .funmachine .mtxt b{font-size:17px}
 #brief .mlock{width:56px;height:66px}#brief .mseg{width:40px;height:70px}#brief .lamps,#brief .jurors{gap:8px}#brief .lamp i,#brief .juror i{width:22px;height:22px}
+/* sponsor section (live numbers) */
+.spgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:28px 0 18px}
+.spcard{border:1px solid var(--steel);padding:18px 20px;background:rgba(0,0,0,.2);display:flex;flex-direction:column;gap:6px}
+.spcard b{font:600 34px var(--mono);color:var(--green)}.spcard small{color:var(--silver);font-size:13px}
+.spbars{display:flex;align-items:flex-end;gap:10px;height:120px;padding:10px 4px 0;border-bottom:1px solid var(--steel);margin-bottom:22px}
+.spbar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;font:11px var(--mono);color:var(--silver)}
+.spbar i{display:block;width:100%;max-width:34px;background:linear-gradient(180deg,var(--green),#0a5c43)}.spbar em{font-style:normal;color:var(--fog)}
+.sprow{display:grid;grid-template-columns:1fr 1fr;gap:14px}.spbox{border:1px solid var(--steel);padding:18px 20px}.spbox h4{margin:0 0 8px;font-size:17px;color:var(--bone)}.spbox p{margin:0 0 10px;color:var(--silver);font-size:14px;line-height:1.5}
+.spaddr{display:block;word-break:break-all;font:12px var(--mono);color:var(--green)}
+@media (max-width:760px){.spgrid,.sprow{grid-template-columns:1fr}}
+@media (max-width:900px){.gbar #levelNav{display:none}}   /* the Map button reaches every level; the strip only crowds narrow headers */
 </style>
 <style>
 .cc{--void:#0b0e12;--carbon:#181a1d;--slate:#303235;--fog:#5d5e61;--steel:#818284;--silver:#bababb;--bone:#dedede;--green:#00d892;--teal:#002923;--amber:#e8b64a;--coral:#ff6b6b;
@@ -1165,7 +1176,7 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
     <div class="wrap cagewrap">
       <div class="cage" role="group" aria-label="The 16 levels as blades in a card cage. Lit blades are levels you have cleared; dots show your stars.">
         <i class="screw s1"></i><i class="screw s2"></i><i class="screw s3"></i><i class="screw s4"></i>
-        <div class="chead"><b>FIRSTTAPE · CARD CAGE</b><span id="rackNum">0/16 · NEWCOMER</span></div>
+        <div class="chead"><b>CIRCUITS · CARD CAGE</b><span id="rackNum">0/16 · NEWCOMER</span></div>
         <div class="cgroups" id="cage"></div>
         <div class="cfoot"><span>One blade per level. A lit blade is cleared; the dots are your stars.</span><span>Click a blade to play it</span></div>
       </div>
@@ -1191,7 +1202,7 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 
     <section id="how" class="wrap section">
       <h2>Static guides don't check your work.</h2>
-      <p class="sub">Most beginner material for TapeOut is a page you read. FirstTape is a circuit you build, with an answer that is verified.</p>
+      <p class="sub">Most beginner material for TapeOut is a page you read. This course is a circuit you build, with an answer that is verified.</p>
       <div class="compare">
         <div class="panel">
           <svg viewBox="0 0 420 150" aria-hidden="true">
@@ -1240,7 +1251,17 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 
     <section id="sponsor" class="wrap section">
       <h2>Reach learners at the moment they're ready to mine.</h2>
-      <p class="sub">Ecosystem projects can sponsor a branded level. Learners who finish it arrive warm. This is a plan, not a live product: no sponsor has signed yet.</p>
+      <p class="sub">Ecosystem projects can sponsor a branded level or keep the free NAND faucet topped up. Everything below is read live from X Layer. No sponsor has signed yet, and nothing here moves money.</p>
+      <div class="spgrid" id="spGrid">
+        <div class="spcard"><span class="cap">Learners on-chain</span><b id="spLearners">…</b><small>wallets with at least one cleared on-chain level</small></div>
+        <div class="spcard"><span class="cap">On-chain clears</span><b id="spClears">…</b><small>level clears recorded by the verifier contract</small></div>
+        <div class="spcard"><span class="cap">Faucet NAND left</span><b id="spFaucet">…</b><small id="spFaucetNote">free starter NAND for new learners</small></div>
+      </div>
+      <div class="spbars" id="spBars" aria-label="Unique wallets per on-chain level"></div>
+      <div class="sprow">
+        <div class="spbox"><h4>Sponsor a level</h4><p>Pick one of levels 6 to 16 and put your project's name and link on it. The bars above are what you would be paying to reach: unique wallets that cleared that level, counted on-chain, so you can check them yourself.</p></div>
+        <div class="spbox"><h4>Top up the faucet</h4><p>Learners claim 40 NAND each. Anyone can send NAND (token id 0) to the faucet address and we credit you on this page. The faucet contract has the ERC-1155 receiver hook, but we have not yet tested a top-up end to end, so send a small amount first.</p><code id="spAddr" class="spaddr"></code></div>
+      </div>
     </section>
   </main>
 
@@ -1370,7 +1391,7 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
   <main class="wrap pg">
     <span class="badge">Checkable claims</span>
     <h1 class="pgh">For judges</h1>
-    <p class="lede2">CertCheck: certificates anyone can verify, with no personal data on-chain, plus a skill passport for people who learn circuits in the FirstTape course. Certificates are checked against a public record on X Layer. A passport is checked by the TapeOut processor, which re-runs the learner's own exam circuit. Everything below can be checked, and where something is not live, it says so.</p>
+    <p class="lede2">CertCheck: certificates anyone can verify, with no personal data on-chain, plus a skill passport for people who learn circuits in the Circuits course. Certificates are checked against a public record on X Layer. A passport is checked by the TapeOut processor, which re-runs the learner's own exam circuit. Everything below can be checked, and where something is not live, it says so.</p>
 
     <div id="jNetWarn" class="notice warn" hidden>This deployment is <b>not on X Layer</b>. It is a rehearsal environment. The hackathon requires X Layer, so it does not count as the submission unless the organizers say so.</div>
 
@@ -2195,8 +2216,8 @@ window.FT_CARD = {
     const mono = "ui-monospace,SFMono-Regular,Menlo,monospace", sans = "system-ui,sans-serif";
     g.fillStyle = "#0b0e12"; g.fillRect(0, 0, 1200, 630);
     g.strokeStyle = "#303235"; g.lineWidth = 2; g.strokeRect(24, 24, 1152, 582);
-    g.fillStyle = "#00d892"; g.font = `bold 64px ${mono}`; g.fillText("f", 70, 120);
-    g.fillStyle = "#dedede"; g.fillText("irsttape", 106, 120);
+    g.fillStyle = "#00d892"; g.font = `bold 64px ${mono}`; g.fillText("c", 70, 120);
+    g.fillStyle = "#dedede"; g.fillText("ertcheck", 106, 120);
     g.fillStyle = "#818284"; g.font = `26px ${sans}`; g.fillText("Learn circuits from NAND gates, then mine them.", 70, 168);
     const n = done.length, rk = G ? G.rank(p.xp) : {name: ""};
     g.fillStyle = "#dedede"; g.font = `bold 110px ${mono}`; g.fillText(`${n}/${N}`, 70, 300);
@@ -2217,7 +2238,7 @@ window.FT_CARD = {
   },
   download(levels, done, circuits) {
     const a = document.createElement("a");
-    a.href = this.draw(levels, done, circuits).toDataURL("image/png"); a.download = "firsttape-progress.png"; a.click();
+    a.href = this.draw(levels, done, circuits).toDataURL("image/png"); a.download = "certcheck-circuits-progress.png"; a.click();
   }
 };
 </script>
@@ -2315,7 +2336,7 @@ window.FT_CARD = {
     const vt = el("text", {class: "railt", x: 66, y: 31, fill: "rgba(0,216,146,.6)"}, g); vt.textContent = "VCC  1";
     el("line", {class: "rail", x1: 64, x2: W - 64, y1: H - 34, y2: H - 34, stroke: "rgba(163,164,165,.22)"}, g);
     const gt = el("text", {class: "railt", x: 66, y: H - 40, fill: "rgba(163,164,165,.5)"}, g); gt.textContent = "GND  0";
-    const sg = el("text", {class: "railt", x: W - 66, y: H - 40, fill: "rgba(163,164,165,.4)", "text-anchor": "end"}, g); sg.textContent = "FIRSTTAPE · REV A · NAND ONLY";
+    const sg = el("text", {class: "railt", x: W - 66, y: H - 40, fill: "rgba(163,164,165,.4)", "text-anchor": "end"}, g); sg.textContent = "CERTCHECK · REV A · NAND ONLY";
     if (L.sandbox) return;
     // target card: the gate/function you are building
     const key = L.graduation ? ({"GC-001": "NOT", "GC-003": "AND", "GC-006": "XOR"})[L.fabx] : L.title, c = el("g", {class: "tcard", transform: `translate(${Math.round(W / 2 - 110)},44)`}, g);
@@ -2995,7 +3016,7 @@ window.FT_CARD = {
     g.fillStyle = "#dedede"; g.font = `bold 26px ${mono}`; g.textAlign = "center"; g.fillText(L.title.slice(0, 22).toUpperCase(), 320, 52);
     g.fillStyle = col(65); g.font = `20px ${mono}`; g.fillText(`${used} GATE${used === 1 ? "" : "S"}  ${G.starStr(stars)}`, 320, 472);
     g.fillStyle = "#8a8f96"; g.font = `16px ${mono}`; g.fillText(serial, 320, 500);
-    g.fillStyle = "#5d5e61"; g.fillText(ctx.tape ? `X Layer circuit #${ctx.tape}` : "firsttape · NAND only", 320, 600);
+    g.fillStyle = "#5d5e61"; g.fillText(ctx.tape ? `X Layer circuit #${ctx.tape}` : "certcheck · NAND only", 320, 600);
     return c;
   }
   function download(canvas, name) { const a = document.createElement("a"); a.href = canvas.toDataURL("image/png"); a.download = name; a.click(); }
@@ -3048,7 +3069,7 @@ window.FT_CARD = {
       const r = used < race.gates ? `You beat your friend: ${used} vs ${race.gates} gates.` : used === race.gates ? `You tied your friend at ${used} gates.` : `Your friend's ${race.gates} beats your ${used}. Try again?`;
       const s = document.createElement("span"); s.className = "race"; s.textContent = r; row.appendChild(s); G.funMark("races"); race = null;
     }
-    row.appendChild(rowButton("Challenge a friend", () => share("Your challenge link", `Beat my ${used}-gate ${L.title} on FirstTape: ${base()}#race=${L.id}.${used}`)));
+    row.appendChild(rowButton("Challenge a friend", () => share("Your challenge link", `Beat my ${used}-gate ${L.title} on CertCheck Circuits: ${base()}#race=${L.id}.${used}`)));
     if (G.dailyLevel().id === L.id) row.appendChild(rowButton("Share daily result", () => share("Your daily result", dailyText(L, used, res))));
     row.appendChild(rowButton("Chip card", () => { const c = chipCard(L, ctx, used, res.stars); if (c) { download(c, `chip-level-${L.id}.png`); G.funMark("shares"); } }));
     msg.appendChild(row);
@@ -3057,7 +3078,7 @@ window.FT_CARD = {
     const par = L.maxGates || used, n = Math.max(used, par);
     const grid = Array.from({length: n}, (_, i) => i < used ? (i < par ? "🟩" : "🟥") : "⬜").join("");
     const streak = G.load().streak.n;
-    return `FirstTape Daily ${G.today()}\nLevel ${L.id} ${L.title} · ${used}/${par} gates · ${G.starStr(res.stars)}\n${grid}${streak > 1 ? "  🔥" + streak : ""}\n${base()}#daily`;
+    return `CertCheck Circuits Daily ${G.today()}\nLevel ${L.id} ${L.title} · ${used}/${par} gates · ${G.starStr(res.stars)}\n${grid}${streak > 1 ? "  🔥" + streak : ""}\n${base()}#daily`;
   }
 
   // ---------- custom solved ----------
@@ -3169,7 +3190,7 @@ window.FT_CARD = {
   // Terminal mockup. Strings are static and trusted; spans carry syntax colour.
   const TABS = {
     browser:
-`<span class="p">$</span> firsttape check --level 4
+`<span class="p">$</span> certcheck check --level 4
 <span class="k">rows</span>  00 01 10 11
 <span class="k">want</span>   0  1  1  0
 <span class="k">got</span>    0  1  1  0
@@ -3411,6 +3432,22 @@ window.FT_CARD = {
   $("vMine").addEventListener("click", async () => {
     try { const a = await FT_CHAIN.connect(); $("vAddr").value = a; lookup(a); } catch (e) { setMsg((e && e.message) || "Wallet not available.", "bad"); }
   });
+  // ---------- sponsor section: live, read-only numbers ----------
+  async function loadSponsor() {
+    if (!$("spGrid") || !deployed()) { if ($("spGrid")) { $("spLearners").textContent = "—"; $("spClears").textContent = "—"; $("spFaucet").textContent = "—"; } return; }
+    try {
+      const st = await stats(); $("spLearners").textContent = st.learners; $("spClears").textContent = st.clears;
+      const ids = LEVELS.filter(L => L.onchain).map(L => L.id), counts = await Promise.all(ids.map(clearsOf)), max = Math.max(1, ...counts), bars = $("spBars"); bars.innerHTML = "";
+      ids.forEach((id, i) => { const d = document.createElement("div"); d.className = "spbar"; d.title = `Level ${id}: ${counts[i]} unique wallet${counts[i] === 1 ? "" : "s"}`; d.innerHTML = '<i></i><span></span><em></em>'; d.querySelector("i").style.height = Math.max(3, Math.round(70 * counts[i] / max)) + "px"; d.querySelector("span").textContent = counts[i]; d.querySelector("em").textContent = "L" + id; bars.appendChild(d); });
+    } catch { $("spLearners").textContent = "n/a"; $("spClears").textContent = "n/a"; }
+    try {
+      const r = await fetch(C.rpc, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({jsonrpc: "2.0", id: 1, method: "eth_call", params: [{to: C.transistors, data: "0x00fdd58e" + a32(C.faucet) + w(0)}, "latest"]})});
+      const j = await r.json(), bal = Number(BigInt(j.result)); $("spFaucet").textContent = bal.toLocaleString(); $("spFaucetNote").textContent = `about ${Math.floor(bal / 40)} more learners at 40 NAND each`;
+    } catch { $("spFaucet").textContent = "n/a"; }
+    $("spAddr").textContent = C.faucet;
+  }
+  window.addEventListener("ft-route", e => { if (e.detail === "landing") loadSponsor(); });
+  if ($("landing") && !$("landing").hidden) loadSponsor();   // first paint: the route event already fired before this script loaded
   window.addEventListener("ft-route", e => { if (e.detail === "verify") loadStats(); if (e.detail === "judges") loadJudges(); });
   if (location.hash === "#learners") loadStats(); if (location.hash === "#judges") loadJudges();
 })();
@@ -4068,7 +4105,7 @@ window.CC_CONFIG = {
     const lv = r.cleared || [], facts = [FACT("Wallet", mkLink({href: X.explorerAddr(pp.wallet), text: pp.wallet}), true), FACT("Course", `${lv.length} on-chain level${lv.length === 1 ? "" : "s"} cleared${lv.length ? " (" + lv.join(", ") + ")" : ""}. ${r.min} required.`)];
     if (r.skill) facts.push(...skillFactsOf(r.skill));
     const note = "A passport proves that this wallet cleared the course levels and built the circuit for its own exam. It does not say who owns the wallet.";
-    if (r.state === "ok") show("valid", "Passport verified", `This wallet cleared ${lv.length} on-chain levels of the FirstTape course and built a TapeOut circuit that computes its own exam.`, facts, note);
+    if (r.state === "ok") show("valid", "Passport verified", `This wallet cleared ${lv.length} on-chain levels of the Circuits course and built a TapeOut circuit that computes its own exam.`, facts, note);
     else if (r.state === "incomplete") show("unregistered", "Exam passed, course not complete", r.reason, facts, note);
     else if (r.state === "offline") show("offline", "The passport could not be checked", "We couldn't reach X Layer to run the checks. Try again in a moment.", facts, "");
     else show("invalid", "Passport not valid", r.reason, facts, note);

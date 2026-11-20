@@ -58,7 +58,7 @@
     const lv = r.cleared || [], facts = [FACT("Wallet", mkLink({href: X.explorerAddr(pp.wallet), text: pp.wallet}), true), FACT("Course", `${lv.length} on-chain level${lv.length === 1 ? "" : "s"} cleared${lv.length ? " (" + lv.join(", ") + ")" : ""}. ${r.min} required.`)];
     if (r.skill) facts.push(...skillFactsOf(r.skill));
     const note = "A passport proves that this wallet cleared the course levels and built the circuit for its own exam. It does not say who owns the wallet.";
-    if (r.state === "ok") show("valid", "Passport verified", `This wallet cleared ${lv.length} on-chain levels of the FirstTape course and built a TapeOut circuit that computes its own exam.`, facts, note);
+    if (r.state === "ok") show("valid", "Passport verified", `This wallet cleared ${lv.length} on-chain levels of the Circuits course and built a TapeOut circuit that computes its own exam.`, facts, note);
     else if (r.state === "incomplete") show("unregistered", "Exam passed, course not complete", r.reason, facts, note);
     else if (r.state === "offline") show("offline", "The passport could not be checked", "We couldn't reach X Layer to run the checks. Try again in a moment.", facts, "");
     else show("invalid", "Passport not valid", r.reason, facts, note);

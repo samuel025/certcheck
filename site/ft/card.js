@@ -6,8 +6,8 @@ window.FT_CARD = {
     const mono = "ui-monospace,SFMono-Regular,Menlo,monospace", sans = "system-ui,sans-serif";
     g.fillStyle = "#0b0e12"; g.fillRect(0, 0, 1200, 630);
     g.strokeStyle = "#303235"; g.lineWidth = 2; g.strokeRect(24, 24, 1152, 582);
-    g.fillStyle = "#00d892"; g.font = `bold 64px ${mono}`; g.fillText("f", 70, 120);
-    g.fillStyle = "#dedede"; g.fillText("irsttape", 106, 120);
+    g.fillStyle = "#00d892"; g.font = `bold 64px ${mono}`; g.fillText("c", 70, 120);
+    g.fillStyle = "#dedede"; g.fillText("ertcheck", 106, 120);
     g.fillStyle = "#818284"; g.font = `26px ${sans}`; g.fillText("Learn circuits from NAND gates, then mine them.", 70, 168);
     const n = done.length, rk = G ? G.rank(p.xp) : {name: ""};
     g.fillStyle = "#dedede"; g.font = `bold 110px ${mono}`; g.fillText(`${n}/${N}`, 70, 300);
@@ -28,6 +28,6 @@ window.FT_CARD = {
   },
   download(levels, done, circuits) {
     const a = document.createElement("a");
-    a.href = this.draw(levels, done, circuits).toDataURL("image/png"); a.download = "firsttape-progress.png"; a.click();
+    a.href = this.draw(levels, done, circuits).toDataURL("image/png"); a.download = "certcheck-circuits-progress.png"; a.click();
   }
 };

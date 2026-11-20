@@ -118,7 +118,7 @@
     g.fillStyle = "#dedede"; g.font = `bold 26px ${mono}`; g.textAlign = "center"; g.fillText(L.title.slice(0, 22).toUpperCase(), 320, 52);
     g.fillStyle = col(65); g.font = `20px ${mono}`; g.fillText(`${used} GATE${used === 1 ? "" : "S"}  ${G.starStr(stars)}`, 320, 472);
     g.fillStyle = "#8a8f96"; g.font = `16px ${mono}`; g.fillText(serial, 320, 500);
-    g.fillStyle = "#5d5e61"; g.fillText(ctx.tape ? `X Layer circuit #${ctx.tape}` : "firsttape · NAND only", 320, 600);
+    g.fillStyle = "#5d5e61"; g.fillText(ctx.tape ? `X Layer circuit #${ctx.tape}` : "certcheck · NAND only", 320, 600);
     return c;
   }
   function download(canvas, name) { const a = document.createElement("a"); a.href = canvas.toDataURL("image/png"); a.download = name; a.click(); }
@@ -171,7 +171,7 @@
       const r = used < race.gates ? `You beat your friend: ${used} vs ${race.gates} gates.` : used === race.gates ? `You tied your friend at ${used} gates.` : `Your friend's ${race.gates} beats your ${used}. Try again?`;
       const s = document.createElement("span"); s.className = "race"; s.textContent = r; row.appendChild(s); G.funMark("races"); race = null;
     }
-    row.appendChild(rowButton("Challenge a friend", () => share("Your challenge link", `Beat my ${used}-gate ${L.title} on FirstTape: ${base()}#race=${L.id}.${used}`)));
+    row.appendChild(rowButton("Challenge a friend", () => share("Your challenge link", `Beat my ${used}-gate ${L.title} on CertCheck Circuits: ${base()}#race=${L.id}.${used}`)));
     if (G.dailyLevel().id === L.id) row.appendChild(rowButton("Share daily result", () => share("Your daily result", dailyText(L, used, res))));
     row.appendChild(rowButton("Chip card", () => { const c = chipCard(L, ctx, used, res.stars); if (c) { download(c, `chip-level-${L.id}.png`); G.funMark("shares"); } }));
     msg.appendChild(row);
@@ -180,7 +180,7 @@
     const par = L.maxGates || used, n = Math.max(used, par);
     const grid = Array.from({length: n}, (_, i) => i < used ? (i < par ? "🟩" : "🟥") : "⬜").join("");
     const streak = G.load().streak.n;
-    return `FirstTape Daily ${G.today()}\nLevel ${L.id} ${L.title} · ${used}/${par} gates · ${G.starStr(res.stars)}\n${grid}${streak > 1 ? "  🔥" + streak : ""}\n${base()}#daily`;
+    return `CertCheck Circuits Daily ${G.today()}\nLevel ${L.id} ${L.title} · ${used}/${par} gates · ${G.starStr(res.stars)}\n${grid}${streak > 1 ? "  🔥" + streak : ""}\n${base()}#daily`;
   }
 
   // ---------- custom solved ----------

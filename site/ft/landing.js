@@ -18,7 +18,7 @@
   // Terminal mockup. Strings are static and trusted; spans carry syntax colour.
   const TABS = {
     browser:
-`<span class="p">$</span> firsttape check --level 4
+`<span class="p">$</span> certcheck check --level 4
 <span class="k">rows</span>  00 01 10 11
 <span class="k">want</span>   0  1  1  0
 <span class="k">got</span>    0  1  1  0

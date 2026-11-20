@@ -748,3 +748,14 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 #brief .funmachine{flex-direction:row;gap:16px;padding:12px 14px;margin:0 0 18px;justify-content:flex-start;background:rgba(0,216,146,.05);border-color:rgba(0,216,146,.35)}
 #brief .funmachine .mtxt{min-width:0}#brief .funmachine .mtxt b{font-size:17px}
 #brief .mlock{width:56px;height:66px}#brief .mseg{width:40px;height:70px}#brief .lamps,#brief .jurors{gap:8px}#brief .lamp i,#brief .juror i{width:22px;height:22px}
+/* sponsor section (live numbers) */
+.spgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:28px 0 18px}
+.spcard{border:1px solid var(--steel);padding:18px 20px;background:rgba(0,0,0,.2);display:flex;flex-direction:column;gap:6px}
+.spcard b{font:600 34px var(--mono);color:var(--green)}.spcard small{color:var(--silver);font-size:13px}
+.spbars{display:flex;align-items:flex-end;gap:10px;height:120px;padding:10px 4px 0;border-bottom:1px solid var(--steel);margin-bottom:22px}
+.spbar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;font:11px var(--mono);color:var(--silver)}
+.spbar i{display:block;width:100%;max-width:34px;background:linear-gradient(180deg,var(--green),#0a5c43)}.spbar em{font-style:normal;color:var(--fog)}
+.sprow{display:grid;grid-template-columns:1fr 1fr;gap:14px}.spbox{border:1px solid var(--steel);padding:18px 20px}.spbox h4{margin:0 0 8px;font-size:17px;color:var(--bone)}.spbox p{margin:0 0 10px;color:var(--silver);font-size:14px;line-height:1.5}
+.spaddr{display:block;word-break:break-all;font:12px var(--mono);color:var(--green)}
+@media (max-width:760px){.spgrid,.sprow{grid-template-columns:1fr}}
+@media (max-width:900px){.gbar #levelNav{display:none}}   /* the Map button reaches every level; the strip only crowds narrow headers */

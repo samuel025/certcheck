@@ -91,7 +91,7 @@
     const vt = el("text", {class: "railt", x: 66, y: 31, fill: "rgba(0,216,146,.6)"}, g); vt.textContent = "VCC  1";
     el("line", {class: "rail", x1: 64, x2: W - 64, y1: H - 34, y2: H - 34, stroke: "rgba(163,164,165,.22)"}, g);
     const gt = el("text", {class: "railt", x: 66, y: H - 40, fill: "rgba(163,164,165,.5)"}, g); gt.textContent = "GND  0";
-    const sg = el("text", {class: "railt", x: W - 66, y: H - 40, fill: "rgba(163,164,165,.4)", "text-anchor": "end"}, g); sg.textContent = "FIRSTTAPE · REV A · NAND ONLY";
+    const sg = el("text", {class: "railt", x: W - 66, y: H - 40, fill: "rgba(163,164,165,.4)", "text-anchor": "end"}, g); sg.textContent = "CERTCHECK · REV A · NAND ONLY";
     if (L.sandbox) return;
     // target card: the gate/function you are building
     const key = L.graduation ? ({"GC-001": "NOT", "GC-003": "AND", "GC-006": "XOR"})[L.fabx] : L.title, c = el("g", {class: "tcard", transform: `translate(${Math.round(W / 2 - 110)},44)`}, g);

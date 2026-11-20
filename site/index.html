@@ -44,7 +44,7 @@
     <div class="wrap cagewrap">
       <div class="cage" role="group" aria-label="The 16 levels as blades in a card cage. Lit blades are levels you have cleared; dots show your stars.">
         <i class="screw s1"></i><i class="screw s2"></i><i class="screw s3"></i><i class="screw s4"></i>
-        <div class="chead"><b>FIRSTTAPE · CARD CAGE</b><span id="rackNum">0/16 · NEWCOMER</span></div>
+        <div class="chead"><b>CIRCUITS · CARD CAGE</b><span id="rackNum">0/16 · NEWCOMER</span></div>
         <div class="cgroups" id="cage"></div>
         <div class="cfoot"><span>One blade per level. A lit blade is cleared; the dots are your stars.</span><span>Click a blade to play it</span></div>
       </div>
@@ -70,7 +70,7 @@
 
     <section id="how" class="wrap section">
       <h2>Static guides don't check your work.</h2>
-      <p class="sub">Most beginner material for TapeOut is a page you read. FirstTape is a circuit you build, with an answer that is verified.</p>
+      <p class="sub">Most beginner material for TapeOut is a page you read. This course is a circuit you build, with an answer that is verified.</p>
       <div class="compare">
         <div class="panel">
           <svg viewBox="0 0 420 150" aria-hidden="true">
@@ -119,7 +119,17 @@
 
     <section id="sponsor" class="wrap section">
       <h2>Reach learners at the moment they're ready to mine.</h2>
-      <p class="sub">Ecosystem projects can sponsor a branded level. Learners who finish it arrive warm. This is a plan, not a live product: no sponsor has signed yet.</p>
+      <p class="sub">Ecosystem projects can sponsor a branded level or keep the free NAND faucet topped up. Everything below is read live from X Layer. No sponsor has signed yet, and nothing here moves money.</p>
+      <div class="spgrid" id="spGrid">
+        <div class="spcard"><span class="cap">Learners on-chain</span><b id="spLearners">…</b><small>wallets with at least one cleared on-chain level</small></div>
+        <div class="spcard"><span class="cap">On-chain clears</span><b id="spClears">…</b><small>level clears recorded by the verifier contract</small></div>
+        <div class="spcard"><span class="cap">Faucet NAND left</span><b id="spFaucet">…</b><small id="spFaucetNote">free starter NAND for new learners</small></div>
+      </div>
+      <div class="spbars" id="spBars" aria-label="Unique wallets per on-chain level"></div>
+      <div class="sprow">
+        <div class="spbox"><h4>Sponsor a level</h4><p>Pick one of levels 6 to 16 and put your project's name and link on it. The bars above are what you would be paying to reach: unique wallets that cleared that level, counted on-chain, so you can check them yourself.</p></div>
+        <div class="spbox"><h4>Top up the faucet</h4><p>Learners claim 40 NAND each. Anyone can send NAND (token id 0) to the faucet address and we credit you on this page. The faucet contract has the ERC-1155 receiver hook, but we have not yet tested a top-up end to end, so send a small amount first.</p><code id="spAddr" class="spaddr"></code></div>
+      </div>
     </section>
   </main>
 
@@ -249,7 +259,7 @@
   <main class="wrap pg">
     <span class="badge">Checkable claims</span>
     <h1 class="pgh">For judges</h1>
-    <p class="lede2">CertCheck: certificates anyone can verify, with no personal data on-chain, plus a skill passport for people who learn circuits in the FirstTape course. Certificates are checked against a public record on X Layer. A passport is checked by the TapeOut processor, which re-runs the learner's own exam circuit. Everything below can be checked, and where something is not live, it says so.</p>
+    <p class="lede2">CertCheck: certificates anyone can verify, with no personal data on-chain, plus a skill passport for people who learn circuits in the Circuits course. Certificates are checked against a public record on X Layer. A passport is checked by the TapeOut processor, which re-runs the learner's own exam circuit. Everything below can be checked, and where something is not live, it says so.</p>
 
     <div id="jNetWarn" class="notice warn" hidden>This deployment is <b>not on X Layer</b>. It is a rehearsal environment. The hackathon requires X Layer, so it does not count as the submission unless the organizers say so.</div>
 

@@ -122,3 +122,19 @@
 @media (max-width:700px){
 .cc .chgrid{grid-template-columns:1fr}
 }
+
+.cc .hero{padding:24px 0 8px}.cc .eyebrow{font:11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin:0 0 18px}
+.cc .hero h1{font-size:clamp(36px,6vw,64px);max-width:760px}
+.cc .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin:38px 0;border-top:1px solid #1b1e22;padding-top:30px}
+.cc .trio h3{font:400 18px var(--sans);color:var(--bone);margin:12px 0 6px}.cc .trio p{margin:0;color:var(--steel);font-size:14px}
+.cc .trio .num{font:13px var(--mono);color:var(--green);border:1px solid #0b4a38;width:30px;height:30px;display:grid;place-items:center}
+.cc .two{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:10px 0 26px}
+.cc .panel{border:1px solid var(--slate);padding:24px;background:linear-gradient(180deg,#12151a,#0d1014)}.cc .panel h2{font-size:22px;margin-bottom:12px}
+.cc .panel.hot{border-color:#0b4a38}.cc .panel ul{margin:0;padding-left:18px;color:var(--steel);display:flex;flex-direction:column;gap:8px}.cc .panel li b{color:var(--bone);font-weight:400}.cc .panel p{color:var(--steel);margin:0 0 14px}
+.cc .note.center{text-align:center;margin:26px 0}.cc .note a{color:var(--silver)}
+@media (max-width:760px){.cc .trio,.cc .two{grid-template-columns:1fr}}
+
+.cc[hidden]{display:none!important}
+/* FirstTape's global .bar and .tabs also match here; restore the certificate site's own header */
+.cc .bar{max-width:none;margin:0;width:100%;padding:18px clamp(16px,4vw,56px);gap:28px;border-bottom:1px solid #1b1e22}
+.cc .tabs{border-bottom:0;margin:0 auto}

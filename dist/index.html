@@ -716,6 +716,12 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 .improw{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font:11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--steel)}
 .improw select{background:#0a0d11;color:var(--bone);border:1px solid var(--slate);font:12px var(--mono);padding:4px 6px;margin-left:4px}
 #impMsg{margin:0;font-size:13px;line-height:1.5;color:var(--silver)}#impMsg.bad{color:var(--coral)}#impMsg.ok{color:var(--green)}
+
+/* phone fixes (found by tests/ft/smoke-routes.mjs): hover tooltips are useless on touch and overflowed; wide tables scroll inside their box */
+@media (max-width:700px){
+  .btip{display:none!important}
+  .lvltable,#judges table{display:block;max-width:100%;overflow-x:auto}
+}
 </style>
 <style>
 .cc{--void:#0b0e12;--carbon:#181a1d;--slate:#303235;--fog:#5d5e61;--steel:#818284;--silver:#bababb;--bone:#dedede;--green:#00d892;--teal:#002923;--amber:#e8b64a;--coral:#ff6b6b;
@@ -842,13 +848,30 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 @media (max-width:700px){
 .cc .chgrid{grid-template-columns:1fr}
 }
+
+.cc .hero{padding:24px 0 8px}.cc .eyebrow{font:11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin:0 0 18px}
+.cc .hero h1{font-size:clamp(36px,6vw,64px);max-width:760px}
+.cc .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin:38px 0;border-top:1px solid #1b1e22;padding-top:30px}
+.cc .trio h3{font:400 18px var(--sans);color:var(--bone);margin:12px 0 6px}.cc .trio p{margin:0;color:var(--steel);font-size:14px}
+.cc .trio .num{font:13px var(--mono);color:var(--green);border:1px solid #0b4a38;width:30px;height:30px;display:grid;place-items:center}
+.cc .two{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:10px 0 26px}
+.cc .panel{border:1px solid var(--slate);padding:24px;background:linear-gradient(180deg,#12151a,#0d1014)}.cc .panel h2{font-size:22px;margin-bottom:12px}
+.cc .panel.hot{border-color:#0b4a38}.cc .panel ul{margin:0;padding-left:18px;color:var(--steel);display:flex;flex-direction:column;gap:8px}.cc .panel li b{color:var(--bone);font-weight:400}.cc .panel p{color:var(--steel);margin:0 0 14px}
+.cc .note.center{text-align:center;margin:26px 0}.cc .note a{color:var(--silver)}
+@media (max-width:760px){.cc .trio,.cc .two{grid-template-columns:1fr}}
+
+.cc[hidden]{display:none!important}
+/* FirstTape's global .bar and .tabs also match here; restore the certificate site's own header */
+.cc .bar{max-width:none;margin:0;width:100%;padding:18px clamp(16px,4vw,56px);gap:28px;border-bottom:1px solid #1b1e22}
+.cc .tabs{border-bottom:0;margin:0 auto}
 </style>
 </head>
 <body>
 <div id="landing">
   <header class="bar">
-    <a class="logo" href="#"><svg class="mark" viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><circle cx="7" cy="8" r="2.4" fill="#00d892"/><circle cx="15" cy="8" r="2.4" fill="none" stroke="#5d5e61"/><circle cx="23" cy="8" r="2.4" fill="#00d892"/></svg><span class="wordmark">firsttape</span></a>
+    <a class="logo" href="#circuits"><svg class="mark" viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><circle cx="7" cy="8" r="2.4" fill="#00d892"/><circle cx="15" cy="8" r="2.4" fill="none" stroke="#5d5e61"/><circle cx="23" cy="8" r="2.4" fill="#00d892"/></svg><span class="wordmark">firsttape</span></a>
     <nav class="links" aria-label="Sections">
+      <a href="#" id="toCerts">Certificates</a>
       <a href="#how">How it works</a>
       <a href="#levels">Levels</a>
       <a href="#progress">Ranks</a>
@@ -965,7 +988,7 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 <!-- ============ GAME ============ -->
 <div id="game" hidden>
   <header class="gbar">
-    <a class="logo" href="#"><svg class="mark" viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><circle cx="7" cy="8" r="2.4" fill="#00d892"/><circle cx="15" cy="8" r="2.4" fill="none" stroke="#5d5e61"/><circle cx="23" cy="8" r="2.4" fill="#00d892"/></svg><span class="wordmark">firsttape</span></a>
+    <a class="logo" href="#circuits"><svg class="mark" viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><circle cx="7" cy="8" r="2.4" fill="#00d892"/><circle cx="15" cy="8" r="2.4" fill="none" stroke="#5d5e61"/><circle cx="23" cy="8" r="2.4" fill="#00d892"/></svg><span class="wordmark">firsttape</span></a>
     <nav id="levelNav" aria-label="Levels"></nav>
     <div class="gright">
       <div class="rankchip" title="Your rank"><span id="hudRank">Newcomer</span><span class="xpbar"><i id="xpFill"></i></span><span id="xpText" class="cap">0 / 250 XP</span></div>
@@ -983,7 +1006,7 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
             <button id="prefDetail" class="mi" aria-pressed="false">Board details: off</button>
             <button id="prefScope" class="mi" aria-pressed="false">Waveforms open: off</button>
           </div>
-          <a class="mi" href="#">Back to overview</a>
+          <a class="mi" href="#circuits">Back to overview</a>
           <details class="how"><summary>How to play</summary><p>Click an output dot, then an input dot to wire. Click a wire to remove it. Drag gates to move them. Click an input chip (A, B…) to flip it 0/1 and watch the signal. Press <b>Run all inputs</b> to test every row and see the waveforms below the board.</p></details>
         </div>
       </div>
@@ -1152,6 +1175,37 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
   <span class="chip" id="netChip">…</span>
 </header>
 <main>
+<section id="homeView" class="view" hidden>
+  <div class="hero">
+    <p class="eyebrow">Verifiable certificates, built on X Layer</p>
+    <h1>Certificates anyone can check. Nobody can fake.</h1>
+    <p class="lede">Issue certificates for your class, bootcamp or event. Every person gets a link and a QR code. Anyone can scan it and see in seconds that it is real. No personal data goes on-chain, and nothing depends on us staying online.</p>
+    <div class="row"><a class="btn primary" href="#issue">Issue certificates</a><a class="btn ghost" href="#verify">Check a certificate</a></div>
+  </div>
+  <div class="trio">
+    <div><span class="num">1</span><h3>Upload your list</h3><p>A simple spreadsheet of names. It stays in your browser and is never uploaded to a server.</p></div>
+    <div><span class="num">2</span><h3>Publish one fingerprint</h3><p>One small transaction records a fingerprint of the whole batch. It costs a fraction of a cent. Names never go on-chain.</p></div>
+    <div><span class="num">3</span><h3>Hand out links and QR codes</h3><p>Each person gets their own. Anyone who scans it can check it against the public record, today or in ten years.</p></div>
+  </div>
+  <div class="two">
+    <div class="panel"><h2>Why people can trust it</h2>
+      <ul><li><b>It cannot be forged.</b> Change one letter and the check fails.</li><li><b>It is private.</b> Only a fingerprint is public. Each person holds their own proof.</li><li><b>No lock-in.</b> The format is public, so anyone can build their own checker.</li><li><b>It can be withdrawn.</b> Revoke one certificate or a whole batch, publicly.</li></ul></div>
+    <div class="panel hot"><h2>Circuit track</h2>
+      <p>For electronics and computing courses. Learn logic gates in the FirstTape game, then take a final exam that is unique to you. Your circuit is built on <b>TapeOut</b>, and anyone can re-run it on-chain to confirm the skill is real.</p>
+      <div class="row"><a class="btn ghost" href="#play">Start learning</a><a class="btn ghost" href="#circuits">About the course</a></div></div>
+  </div>
+  <p class="note center">Publishing needs a wallet with a few cents of OKB. <a href="#wallet">Setting one up takes about two minutes.</a> Checking a certificate needs nothing. <a href="#judges">For judges</a></p>
+</section>
+
+<section id="walletView" class="view" hidden>
+  <h1>Set up a wallet in two minutes</h1>
+  <p class="lede">You only need a wallet to publish a batch. Checking certificates never needs one. A wallet is an app that holds a small balance and signs the one transaction that records your batch.</p>
+  <div class="step"><span class="num">1</span><div class="body"><h2>Install a wallet</h2><p class="sub">Use a browser wallet such as OKX Wallet or MetaMask. Create a new account and write the recovery phrase on paper. Never type it into any website, including this one, and never share it.</p></div></div>
+  <div class="step"><span class="num">2</span><div class="body"><h2>Get a few cents of OKB</h2><p class="sub">OKB is the coin that pays the tiny network fee. Publishing a batch costs a fraction of a cent, so a very small amount lasts a long time. You can buy OKB on an exchange and withdraw it to your wallet address on the <b>X Layer</b> network.</p></div></div>
+  <div class="step"><span class="num">3</span><div class="body"><h2>Publish</h2><p class="sub">On the Issue page, press <b>Connect wallet</b>. The wallet will offer to add the X Layer network if it is missing. Approve it, then publish.</p><div class="row"><a class="btn primary" href="#issue">Go to Issue</a></div></div></div>
+  <p class="note">Test your first batch with the sample list before using real names. A published batch cannot be edited, only revoked.</p>
+</section>
+
 <!-- ===== VERIFY ===== -->
 <section id="verifyView" class="view" hidden>
   <h1>Verify a certificate</h1>
@@ -2306,9 +2360,10 @@ window.FT_CARD = {
   const landing = $("landing"), game = $("game");
 
   function route() {
-    const h = location.hash, isCC = h.startsWith("#c=") || h.startsWith("#ch=") || ["#issue", "#verify", "#manage"].includes(h);
+    const h = location.hash;
     // #learners = the on-chain learner lookup (old FirstTape verify page); #verify = certificate + passport check
-    const view = h === "#play" ? "game" : h === "#learners" ? "verify" : h === "#judges" ? "judges" : isCC ? "cc" : "landing";
+    const target = h.length > 1 ? document.getElementById(h.slice(1)) : null, inCourse = !!(target && $("landing") && $("landing").contains(target));   // section anchors of the course page
+    const view = h === "#play" ? "game" : h === "#learners" ? "verify" : h === "#judges" ? "judges" : (h === "#circuits" || inCourse) ? "landing" : "cc";   // everything else (home, #issue, #verify, #manage, #wallet, #c=, #ch=) is the certificate site
     ["landing", "game", "verify", "judges", "cc"].forEach(v => { const e = $(v); if (e) e.hidden = v !== view; });
     if (view !== "landing") window.scrollTo(0, 0);
     window.dispatchEvent(new CustomEvent("ft-route", {detail: view}));
@@ -3044,11 +3099,11 @@ window.CC_CONFIG = {
   const mkLink = a => { const x = document.createElement("a"); x.href = a.href; x.textContent = a.text; x.target = "_blank"; x.rel = "noopener"; return x; };
 
   // ---------- routing ----------
-  const VIEWS = ["verify", "issue", "manage", "challenge"];
+  const VIEWS = ["home", "verify", "issue", "manage", "challenge", "wallet"];
   function route() {
     const h = location.hash;
-    if (!(h.startsWith("#c=") || h.startsWith("#ch=") || ["#issue", "#verify", "#manage"].includes(h))) return;   // landing, game and other pages are handled by ft/landing.js
-    let v = h.startsWith("#c=") ? "verify" : h.startsWith("#ch=") ? "challenge" : VIEWS.includes(h.slice(1)) ? h.slice(1) : "issue";
+    { const t = h.length > 1 ? document.getElementById(h.slice(1)) : null; if (["#play", "#learners", "#judges", "#circuits"].includes(h) || (t && document.getElementById("landing").contains(t))) return; }   // those pages belong to site/ft
+    let v = h.startsWith("#c=") ? "verify" : h.startsWith("#ch=") ? "challenge" : VIEWS.includes(h.slice(1)) ? h.slice(1) : "home";
     VIEWS.forEach(n => { $(n + "View").hidden = n !== v; });
     document.querySelectorAll(".tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === v));
     if (h.startsWith("#c=")) { $("vInput").value = h; runVerify(); }

@@ -86,7 +86,7 @@ await p.close();
 
 // ---- landing reflects progress ----
 p = await b.newPage(); p.on("pageerror", e => errs.push(e.message)); await p.setViewport({width: 1280, height: 900});
-await p.goto(BASE + "/index.html"); await p.evaluate(() => { localStorage.clear(); localStorage.setItem("ft_done", "[1]"); localStorage.setItem("ft_prog", JSON.stringify({xp: 300, best: {1: {stars: 3, gates: 1}}, ach: {first_light: 1}, chain: {}, streak: {last: "", n: 0}, daily: {date: "", done: false}, sandbox: false})); }); await p.reload();
+await p.goto(BASE + "/index.html#circuits"); await p.evaluate(() => { localStorage.clear(); localStorage.setItem("ft_done", "[1]"); localStorage.setItem("ft_prog", JSON.stringify({xp: 300, best: {1: {stars: 3, gates: 1}}, ach: {first_light: 1}, chain: {}, streak: {last: "", n: 0}, daily: {date: "", done: false}, sandbox: false})); }); await p.reload();
 ok("landing: 16 level rows in 4 worlds", (await p.$$eval("#lvlTable tbody tr:not(.whead)", r => r.length)) === 16 && (await p.$$eval("#lvlTable tr.whead", r => r.length)) === 4);
 ok("landing: best stars shown for cleared level", (await p.$eval("#lvlTable .starcell.got", e => e.textContent)) === "★★★");
 ok("landing: rank ladder highlights current rank", (await p.$eval("#rankLadder .rung.now b", e => e.textContent)) === "Wirer");

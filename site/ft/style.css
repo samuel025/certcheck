@@ -707,3 +707,9 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 .improw{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font:11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--steel)}
 .improw select{background:#0a0d11;color:var(--bone);border:1px solid var(--slate);font:12px var(--mono);padding:4px 6px;margin-left:4px}
 #impMsg{margin:0;font-size:13px;line-height:1.5;color:var(--silver)}#impMsg.bad{color:var(--coral)}#impMsg.ok{color:var(--green)}
+
+/* phone fixes (found by tests/ft/smoke-routes.mjs): hover tooltips are useless on touch and overflowed; wide tables scroll inside their box */
+@media (max-width:700px){
+  .btip{display:none!important}
+  .lvltable,#judges table{display:block;max-width:100%;overflow-x:auto}
+}

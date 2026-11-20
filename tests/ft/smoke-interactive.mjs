@@ -9,7 +9,7 @@ const open = async (opts = {}) => { const p = await b.newPage(); p.on("pageerror
 
 // --- hero: the card cage ---
 const seed = {ft_done: "[1,2,3]", ft_prog: JSON.stringify({xp: 300, best: {1: {stars: 3, gates: 1}, 2: {stars: 3, gates: 2}, 3: {stars: 2, gates: 5}}, ach: {}, chain: {}, streak: {last: "", n: 1}, daily: {date: "", done: false}, sandbox: false})};
-let p = await open(); await p.goto(BASE + "/index.html"); await p.evaluate(s => { localStorage.clear(); for (const k in s) localStorage.setItem(k, s[k]); }, seed); await p.reload(); await new Promise(r => setTimeout(r, 900));
+let p = await open(); await p.goto(BASE + "/index.html#circuits"); await p.evaluate(s => { localStorage.clear(); for (const k in s) localStorage.setItem(k, s[k]); }, seed); await p.reload(); await new Promise(r => setTimeout(r, 900));
 ok("cage: 16 blades, one per level", (await p.$$eval("#cage .blade", b => b.length)) === 16);
 ok("cage: 4 world groups", (await p.$$eval("#cage .cgrp", g => g.length)) === 4);
 ok("cage: exactly the 3 cleared levels are lit", (await p.$$eval("#cage .blade.on", b => b.map(x => x.dataset.id).join())) === "1,2,3");
@@ -44,7 +44,7 @@ ok("game: just-cleared level button pulses", await p.$eval("#levelNav button", e
 await p.close();
 
 // --- reduced motion: no autoplay, everything visible ---
-p = await open({reduce: true}); await p.goto(BASE + "/index.html"); await new Promise(r => setTimeout(r, 2700));
+p = await open({reduce: true}); await p.goto(BASE + "/index.html#circuits"); await new Promise(r => setTimeout(r, 2700));
 ok("reduced-motion: no scanning light and no entrance animation on the blades", (await p.$$eval("#cage .blade.scan", b => b.length)) === 0 && await p.evaluate(() => getComputedStyle(document.querySelector("#cage .blade")).animationName === "none"));
 ok("reduced-motion: sections visible without scrolling", await p.$eval("#levels", e => getComputedStyle(e).opacity === "1"));
 ok("reduced-motion: terminal lines visible", await p.$eval("#termBody .ln", e => getComputedStyle(e).opacity === "1"));

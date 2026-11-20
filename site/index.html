@@ -12,8 +12,9 @@
 <body>
 <div id="landing">
   <header class="bar">
-    <a class="logo" href="#"><svg class="mark" viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><circle cx="7" cy="8" r="2.4" fill="#00d892"/><circle cx="15" cy="8" r="2.4" fill="none" stroke="#5d5e61"/><circle cx="23" cy="8" r="2.4" fill="#00d892"/></svg><span class="wordmark">firsttape</span></a>
+    <a class="logo" href="#circuits"><svg class="mark" viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><circle cx="7" cy="8" r="2.4" fill="#00d892"/><circle cx="15" cy="8" r="2.4" fill="none" stroke="#5d5e61"/><circle cx="23" cy="8" r="2.4" fill="#00d892"/></svg><span class="wordmark">firsttape</span></a>
     <nav class="links" aria-label="Sections">
+      <a href="#" id="toCerts">Certificates</a>
       <a href="#how">How it works</a>
       <a href="#levels">Levels</a>
       <a href="#progress">Ranks</a>
@@ -130,7 +131,7 @@
 <!-- ============ GAME ============ -->
 <div id="game" hidden>
   <header class="gbar">
-    <a class="logo" href="#"><svg class="mark" viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><circle cx="7" cy="8" r="2.4" fill="#00d892"/><circle cx="15" cy="8" r="2.4" fill="none" stroke="#5d5e61"/><circle cx="23" cy="8" r="2.4" fill="#00d892"/></svg><span class="wordmark">firsttape</span></a>
+    <a class="logo" href="#circuits"><svg class="mark" viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><circle cx="7" cy="8" r="2.4" fill="#00d892"/><circle cx="15" cy="8" r="2.4" fill="none" stroke="#5d5e61"/><circle cx="23" cy="8" r="2.4" fill="#00d892"/></svg><span class="wordmark">firsttape</span></a>
     <nav id="levelNav" aria-label="Levels"></nav>
     <div class="gright">
       <div class="rankchip" title="Your rank"><span id="hudRank">Newcomer</span><span class="xpbar"><i id="xpFill"></i></span><span id="xpText" class="cap">0 / 250 XP</span></div>
@@ -148,7 +149,7 @@
             <button id="prefDetail" class="mi" aria-pressed="false">Board details: off</button>
             <button id="prefScope" class="mi" aria-pressed="false">Waveforms open: off</button>
           </div>
-          <a class="mi" href="#">Back to overview</a>
+          <a class="mi" href="#circuits">Back to overview</a>
           <details class="how"><summary>How to play</summary><p>Click an output dot, then an input dot to wire. Click a wire to remove it. Drag gates to move them. Click an input chip (A, B…) to flip it 0/1 and watch the signal. Press <b>Run all inputs</b> to test every row and see the waveforms below the board.</p></details>
         </div>
       </div>
@@ -317,6 +318,37 @@
   <span class="chip" id="netChip">…</span>
 </header>
 <main>
+<section id="homeView" class="view" hidden>
+  <div class="hero">
+    <p class="eyebrow">Verifiable certificates, built on X Layer</p>
+    <h1>Certificates anyone can check. Nobody can fake.</h1>
+    <p class="lede">Issue certificates for your class, bootcamp or event. Every person gets a link and a QR code. Anyone can scan it and see in seconds that it is real. No personal data goes on-chain, and nothing depends on us staying online.</p>
+    <div class="row"><a class="btn primary" href="#issue">Issue certificates</a><a class="btn ghost" href="#verify">Check a certificate</a></div>
+  </div>
+  <div class="trio">
+    <div><span class="num">1</span><h3>Upload your list</h3><p>A simple spreadsheet of names. It stays in your browser and is never uploaded to a server.</p></div>
+    <div><span class="num">2</span><h3>Publish one fingerprint</h3><p>One small transaction records a fingerprint of the whole batch. It costs a fraction of a cent. Names never go on-chain.</p></div>
+    <div><span class="num">3</span><h3>Hand out links and QR codes</h3><p>Each person gets their own. Anyone who scans it can check it against the public record, today or in ten years.</p></div>
+  </div>
+  <div class="two">
+    <div class="panel"><h2>Why people can trust it</h2>
+      <ul><li><b>It cannot be forged.</b> Change one letter and the check fails.</li><li><b>It is private.</b> Only a fingerprint is public. Each person holds their own proof.</li><li><b>No lock-in.</b> The format is public, so anyone can build their own checker.</li><li><b>It can be withdrawn.</b> Revoke one certificate or a whole batch, publicly.</li></ul></div>
+    <div class="panel hot"><h2>Circuit track</h2>
+      <p>For electronics and computing courses. Learn logic gates in the FirstTape game, then take a final exam that is unique to you. Your circuit is built on <b>TapeOut</b>, and anyone can re-run it on-chain to confirm the skill is real.</p>
+      <div class="row"><a class="btn ghost" href="#play">Start learning</a><a class="btn ghost" href="#circuits">About the course</a></div></div>
+  </div>
+  <p class="note center">Publishing needs a wallet with a few cents of OKB. <a href="#wallet">Setting one up takes about two minutes.</a> Checking a certificate needs nothing. <a href="#judges">For judges</a></p>
+</section>
+
+<section id="walletView" class="view" hidden>
+  <h1>Set up a wallet in two minutes</h1>
+  <p class="lede">You only need a wallet to publish a batch. Checking certificates never needs one. A wallet is an app that holds a small balance and signs the one transaction that records your batch.</p>
+  <div class="step"><span class="num">1</span><div class="body"><h2>Install a wallet</h2><p class="sub">Use a browser wallet such as OKX Wallet or MetaMask. Create a new account and write the recovery phrase on paper. Never type it into any website, including this one, and never share it.</p></div></div>
+  <div class="step"><span class="num">2</span><div class="body"><h2>Get a few cents of OKB</h2><p class="sub">OKB is the coin that pays the tiny network fee. Publishing a batch costs a fraction of a cent, so a very small amount lasts a long time. You can buy OKB on an exchange and withdraw it to your wallet address on the <b>X Layer</b> network.</p></div></div>
+  <div class="step"><span class="num">3</span><div class="body"><h2>Publish</h2><p class="sub">On the Issue page, press <b>Connect wallet</b>. The wallet will offer to add the X Layer network if it is missing. Approve it, then publish.</p><div class="row"><a class="btn primary" href="#issue">Go to Issue</a></div></div></div>
+  <p class="note">Test your first batch with the sample list before using real names. A published batch cannot be edited, only revoked.</p>
+</section>
+
 <!-- ===== VERIFY ===== -->
 <section id="verifyView" class="view" hidden>
   <h1>Verify a certificate</h1>

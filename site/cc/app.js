@@ -8,11 +8,11 @@
   const mkLink = a => { const x = document.createElement("a"); x.href = a.href; x.textContent = a.text; x.target = "_blank"; x.rel = "noopener"; return x; };
 
   // ---------- routing ----------
-  const VIEWS = ["verify", "issue", "manage", "challenge"];
+  const VIEWS = ["home", "verify", "issue", "manage", "challenge", "wallet"];
   function route() {
     const h = location.hash;
-    if (!(h.startsWith("#c=") || h.startsWith("#ch=") || ["#issue", "#verify", "#manage"].includes(h))) return;   // landing, game and other pages are handled by ft/landing.js
-    let v = h.startsWith("#c=") ? "verify" : h.startsWith("#ch=") ? "challenge" : VIEWS.includes(h.slice(1)) ? h.slice(1) : "issue";
+    { const t = h.length > 1 ? document.getElementById(h.slice(1)) : null; if (["#play", "#learners", "#judges", "#circuits"].includes(h) || (t && document.getElementById("landing").contains(t))) return; }   // those pages belong to site/ft
+    let v = h.startsWith("#c=") ? "verify" : h.startsWith("#ch=") ? "challenge" : VIEWS.includes(h.slice(1)) ? h.slice(1) : "home";
     VIEWS.forEach(n => { $(n + "View").hidden = n !== v; });
     document.querySelectorAll(".tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === v));
     if (h.startsWith("#c=")) { $("vInput").value = h; runVerify(); }

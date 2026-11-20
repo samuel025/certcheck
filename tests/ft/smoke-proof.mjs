@@ -7,7 +7,7 @@ const page = async () => { const p = await b.newPage(); p.on("pageerror", e => e
 const views = p => p.evaluate(() => ["landing", "game", "verify", "judges"].filter(v => !document.getElementById(v).hidden));
 
 // ---------- router ----------
-let p = await page(); await p.goto(BASE + "/index.html");
+let p = await page(); await p.goto(BASE + "/index.html#circuits");
 ok("landing shows by default", (await views(p)).join() === "landing");
 await p.evaluate(() => { location.hash = "#judges"; }); ok("#judges shows only the judges page", (await views(p)).join() === "judges");
 await p.evaluate(() => { location.hash = "#learners"; }); ok("#learners shows only the learner lookup page", (await views(p)).join() === "verify");
@@ -33,7 +33,7 @@ ok("judges: states TapeCode and TapeSend are not used", /TapeCode and TapeSend a
 await p.close();
 
 // ---------- verify page, demo mode ----------
-p = await page(); await p.goto(BASE + "/index.html");
+p = await page(); await p.goto(BASE + "/index.html#circuits");
 await p.evaluateOnNewDocument?.(() => {}); let fetchCalls = 0; await p.evaluate(() => { window.__f = 0; const f = window.fetch; window.fetch = (...a) => { window.__f++; return f(...a); }; });
 await p.evaluate(() => { location.hash = "#learners"; }); await new Promise(r => setTimeout(r, 300));
 ok("verify: demo notice is shown", await p.$eval("#vState", e => !e.hidden && /not deployed/.test(e.textContent)));
@@ -46,7 +46,7 @@ ok("verify: made no network call in demo mode", (await p.evaluate(() => window._
 await p.close();
 
 // ---------- deployed mode against a stub chain ----------
-p = await page(); await p.goto(BASE + "/index.html");
+p = await page(); await p.goto(BASE + "/index.html#circuits");
 const A = "0x" + "a1".repeat(20), B = "0x" + "b2".repeat(20), Z = "0x" + "c3".repeat(20);
 await p.evaluate((A, B) => {
   FT_CONFIG.verifier = "0x" + "11".repeat(20); FT_CONFIG.circuits = "0x" + "22".repeat(20);       // flips FT_CHAIN.deployed() to true

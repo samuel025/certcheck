@@ -8,7 +8,8 @@
   const jset = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
   const store = { get: () => jget("ft_done", "[]"), set: v => jset("ft_done", v) };
   const circuitsStore = { get: () => jget("ft_circuits", "{}"), set: v => jset("ft_circuits", v) };
-  const ALL = [...LEVELS, SANDBOX], SB = LEVELS.length;      // sandbox lives at the end, outside progression
+  const ALL = [...LEVELS, SANDBOX, null], SB = LEVELS.length, CUST = SB + 1;   // sandbox lives at the end, outside progression; CUST is the single slot for friend puzzles, machines and repairs
+  let edits = 0, prevOn = new Set();                       // edits: wire changes since the level loaded (repair score); prevOn: wires that were already live (for the surge animation)
 
   let W = 800, H = 480;                                     // logical board size: W adapts to the window so the circuit fills it
   const S = 0.9, gateW = 70 * S, gateH = 50 * S;           // S scales the gate symbol; ports use the same scale
@@ -28,7 +29,7 @@
   // ---------- level setup ----------
   // Node model: {id, kind:'in'|'out'|'nand', x, y, name}. Ports: 'out' of in/nand, 'in0','in1' of nand, 'in0' of out.
   function load(i) {
-    cur = i; const L = ALL[i];
+    cur = i; const L = ALL[i]; edits = 0; prevOn = new Set();
     wires = []; pending = null; nextId = 1; nodes = []; probe = {}; L.inputs.forEach(n => probe[n] = 0);
     t0 = performance.now(); fails = 0; stopRun(); scope.samples = [];
     fit();
@@ -47,7 +48,7 @@
     tut.intro = false; tut.flipped = false; tut.checked = false; tut.force = false;
     const par = L.maxGates;
     $("tutBtn").hidden = i !== 0; $("impPanel").hidden = !L.sandbox; $("impMsg").textContent = "";
-    $("lvlCap").textContent = L.sandbox ? "SANDBOX" : `${(WORLDS[L.world - 1] || {}).name || ""} · LEVEL ${String(L.id).padStart(2, "0")} / ${String(LEVELS.length).padStart(2, "0")}`;
+    $("lvlCap").textContent = L.cap ? L.cap : L.sandbox ? "SANDBOX" : `${(WORLDS[L.world - 1] || {}).name || ""} · LEVEL ${String(L.id).padStart(2, "0")} / ${String(LEVELS.length).padStart(2, "0")}`;
     $("lvlTitle").textContent = L.title;
     $("lvlText").textContent = L.text + (par ? ` (Par: ${par} gate${par === 1 ? "" : "s"}.)` : "");
     $("stWhere").textContent = L.sandbox ? "FREE" : L.onchain ? "X LAYER" : "BROWSER";
@@ -251,6 +252,12 @@
     const results = rowResults();
     renderTable(results);
     const ok = results.every(Boolean), used = usedGates().size, msg = $("msg");
+    if (ok && L.custom) {            // puzzles, machines and repairs: celebrate, never touch XP or the 16 levels
+      msg.className = "ok"; msg.textContent = `Correct! ${used} gate${used === 1 ? "" : "s"} used.`;
+      G.beep("ok"); banner("SOLVED", L.title, ""); burst();
+      if (window.FT_FUN) FT_FUN.onCustomSolved(L, used, edits, {nodes, wires});
+      return;
+    }
     if (ok) {
       const next = cur + 1 < LEVELS.length, seconds = (performance.now() - t0) / 1000;
       const res = G.record(L, used, seconds, fails === 0);
@@ -266,6 +273,7 @@
       $("chainBtn").hidden = !L.onchain; $("fabxBtn").hidden = !L.graduation;
       if (tut.active) { tut.checked = true; render(); }
       celebrate(L, used, res, seconds);
+      if (window.FT_FUN) FT_FUN.afterClear(L, used, res, {nodes, wires, tape: circuitsStore.get()[L.id]});
     } else {
       fails++; G.beep("bad");
       msg.className = "bad"; msg.textContent = `Not yet — ${results.filter(Boolean).length}/${results.length} rows match. Check that every input is wired.`;
@@ -321,18 +329,20 @@
     if (isOut) { pending = {id: n.id, port: p}; render(); return; }
     if (pending.id === n.id) { pending = null; render(); return; }
     wires = wires.filter(w => !(w.to === n.id && w.toPort === p)); // one wire per input
-    wires.push({from: pending.id, to: n.id, toPort: p, fresh: true}); pending = null; G.beep("wire"); render();
+    wires.push({from: pending.id, to: n.id, toPort: p, fresh: true}); edits++; pending = null; G.beep("wire"); render();
   }
 
   function render() {
     board.innerHTML = ""; decor(ALL[cur]); refreshLast();
     const L = ALL[cur], memo = new Map(), val = n => evalNode(n, probe, memo), used = usedGates();
     // wires
+    const nowOn = new Set();
     wires.forEach(w => {
       const a = nodes.find(n => n.id === w.from), b = nodes.find(n => n.id === w.to);
       const [x1, y1] = portPos(a, "out"), [x2, y2] = portPos(b, w.toPort), mx = (x1 + x2) / 2;
       const p = el("path", {d: `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`, class: "wire" + (val(a) === 1 ? " on" : "")});
-      p.addEventListener("click", () => { wires = wires.filter(x => x !== w); render(); });
+      p.addEventListener("click", () => { wires = wires.filter(x => x !== w); edits++; render(); });
+      const wk = w.from + ">" + w.to + w.toPort; if (val(a) === 1) { nowOn.add(wk); if (!prevOn.has(wk) && !REDUCE) { p.classList.add("surge"); p.style.animationDelay = `0s, ${Math.round(Math.max(0, x1) / W * 450)}ms`; } }
       if (w.fresh) {                       // draw-in animation, once
         w.fresh = false;
         if (!REDUCE) {
@@ -383,6 +393,8 @@
     renderTut(ti);
     updateHud(L, used);
     drawScope();
+    prevOn = nowOn;
+    if (window.FT_FUN) FT_FUN.onRender(L, nodes.filter(n => n.kind === "out").map(n => evalNode(n, probe, new Map())), probe);
   }
 
   // ---------- guided tutorial (level 1) ----------
@@ -495,11 +507,12 @@
         n.disabled = locked(i); n.onclick = () => { closeMap(); load(i); };
         n.innerHTML = `<b></b><span class="nt"></span><span class="ns"></span>`;
         n.querySelector("b").textContent = L.id; n.querySelector(".nt").textContent = L.title.replace(/^Bounty /, "");
-        n.querySelector(".ns").textContent = locked(i) ? "LOCKED" : b ? G.starStr(b.stars) : "NEW";
+        n.querySelector(".ns").textContent = locked(i) ? "LOCKED" : b ? G.starStr(b.stars) + (L.maxGates ? ` ${b.gates}/${L.maxGates}` : "") : "NEW";
         sec.querySelector(".nodes").appendChild(n);
       });
       m.appendChild(sec);
     });
+    if (window.FT_FUN) FT_FUN.mapExtras(m);
     const sb = document.createElement("section"); sb.className = "world";
     sb.innerHTML = `<h3>Sandbox</h3><p class="sub2">Free build with no goal. The truth table shows what you made.</p><div class="nodes"></div>`;
     const sn = document.createElement("button"); sn.className = "node"; sn.id = "sandboxNode"; sn.innerHTML = `<b>∞</b><span class="nt">Free build</span><span class="ns">OPEN</span>`;
@@ -519,7 +532,7 @@
   // ---------- controls ----------
   function removeGate(id) {
     const n = nodes.find(k => k.id === id); if (!n || n.kind !== "nand") return;
-    nodes = nodes.filter(k => k.id !== id); wires = wires.filter(w => w.from !== id && w.to !== id);
+    nodes = nodes.filter(k => k.id !== id); wires = wires.filter(w => w.from !== id && w.to !== id); edits++;
     if (pending && pending.id === id) pending = null;
     G.beep("wire"); render();
   }
@@ -624,6 +637,14 @@
     if (want) { const gi = LEVELS.findIndex(l => l.id === +want); if (gi >= 0 && !locked(gi)) load(gi); }
     refit(); drawScope();
   });
+  // Small surface for the fun pack (fun.js): load a real level by id, or a custom puzzle/machine/repair into the spare slot.
+  window.FT_APP = {
+    loadLevelId(id) { const i = LEVELS.findIndex(l => l.id === +id); if (i < 0) return false; load(i); return true; },
+    loadCustom(L, gates) { ALL[CUST] = Object.assign({custom: true, onchain: false, world: 0}, L); load(CUST); if (gates) { placeGates(gates, L.inputs.length, L.outputs.length); edits = 0; render(); } return true; },
+    openSandbox() { load(SB); },
+    snapshot() { return {level: ALL[cur], nodes, wires, isSandbox: !!ALL[cur].sandbox}; },
+    closeMap() { closeMap(); }
+  };
   applyPrefs();
   const firstOpen = LEVELS.findIndex(l => !done.includes(l.id));
   load(firstOpen < 0 ? LEVELS.length - 1 : firstOpen);

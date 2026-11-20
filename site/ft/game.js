@@ -20,10 +20,18 @@
     {id: "graduate", name: "Bounty Hunter", desc: "Clear a FabX bounty", test: p => [14, 15, 16].some(i => p.best[i])},
     {id: "on_chain", name: "On-Chain", desc: "Tape out a circuit on X Layer", test: p => Object.keys(p.chain).length > 0},
     {id: "streak3", name: "On a Roll", desc: "Play 3 days in a row", test: p => p.streak.n >= 3},
-    {id: "tinkerer", name: "Tinkerer", desc: "Build a working circuit in the sandbox", test: p => !!p.sandbox}
+    {id: "tinkerer", name: "Tinkerer", desc: "Build a working circuit in the sandbox", test: p => !!p.sandbox},
+    // ---- the fun pack (races, puzzles, machines, repairs, sharing); counters live in p.fun ----
+    {id: "golfer", name: "Golfer", desc: "Beat par: use fewer gates than par on any level", test: p => Object.entries(p.best).some(([id, b]) => { const L = (window.LEVELS || []).find(l => l.id === +id); return !!(L && L.maxGates && b.gates < L.maxGates); })},
+    {id: "minimalist", name: "Minimalist", desc: "Clear all five Gate levels at par or better", test: p => [1, 2, 3, 4, 5].every(i => { const L = (window.LEVELS || [])[i - 1]; return p.best[i] && L && L.maxGates && p.best[i].gates <= L.maxGates; })},
+    {id: "racer", name: "Racer", desc: "Take on a friend's challenge or puzzle", test: p => ((p.fun || {}).races || 0) > 0},
+    {id: "maker", name: "Puzzle Maker", desc: "Share a puzzle you made", test: p => ((p.fun || {}).makes || 0) > 0},
+    {id: "mechanic", name: "Mechanic", desc: "Repair a broken circuit", test: p => Object.keys((p.fun || {}).repairs || {}).length > 0},
+    {id: "machinist", name: "Machinist", desc: "Make all four workshop machines work", test: p => Object.keys((p.fun || {}).machines || {}).length >= 4},
+    {id: "showoff", name: "Show-off", desc: "Share a daily result, a challenge or a chip card", test: p => ((p.fun || {}).shares || 0) > 0}
   ];
 
-  const fresh = () => ({xp: 0, best: {}, ach: {}, chain: {}, streak: {last: "", n: 0}, daily: {date: "", done: false}, sandbox: false});
+  const fresh = () => ({xp: 0, best: {}, ach: {}, chain: {}, streak: {last: "", n: 0}, daily: {date: "", done: false}, sandbox: false, fun: {}});
   const load = () => { try { return Object.assign(fresh(), JSON.parse(localStorage.getItem(KEY) || "{}")); } catch { return fresh(); } };
   const save = p => { try { localStorage.setItem(KEY, JSON.stringify(p)); } catch {} };
   const ymd = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -122,7 +130,16 @@
     ach.forEach((a, i) => setTimeout(() => toast("Badge unlocked: " + a.name, a.desc, "ach"), 700 + i * 700));
   }
 
+  // Fun-pack progress (races, shares, machines, repairs): never touches XP or the 16-level progression.
+  function funMark(kind, key) {        // kind: "races" | "makes" | "shares" (counters) or "machines" | "repairs" (sets, keyed by id)
+    const p = load(); p.fun = p.fun || {};
+    if (kind === "machines" || kind === "repairs") { p.fun[kind] = p.fun[kind] || {}; p.fun[kind][key] = 1; } else p.fun[kind] = (p.fun[kind] || 0) + 1;
+    const ach = unlock(p, null); save(p);
+    ach.forEach((a, i) => setTimeout(() => { toast("Badge unlocked: " + a.name, a.desc, "ach"); beep("ach"); }, 500 + i * 700));
+    return ach;
+  }
   window.FT_GAME = {
+    funMark,
     RANKS, ACH, load, save, rank, starsFor, starStr, dailyLevel, today, record, chainDone, sandboxUsed, toast, beep, toggleSound,
     soundOn: () => soundOn,
     totalStars: () => Object.values(load().best).reduce((a, b) => a + b.stars, 0),

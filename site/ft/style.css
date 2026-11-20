@@ -713,3 +713,23 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
   .btip{display:none!important}
   .lvltable,#judges table{display:block;max-width:100%;overflow-x:auto}
 }
+
+/* ---- fun pack ---- */
+.wire.surge{animation:flow .8s linear infinite,surge .7s ease-out both}
+@keyframes surge{0%{stroke:#fff;stroke-width:6;filter:drop-shadow(0 0 8px #fff)}100%{}}
+@media (prefers-reduced-motion:reduce){.wire.surge{animation:none}}
+.funrow{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin-top:10px}
+.funrow .golf,.funrow .race{font:600 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--bone);border:1px solid var(--green);padding:5px 9px;background:rgba(0,41,35,.45)}
+.funrow .race{border-color:var(--fog)}
+.funbtn{padding:6px 12px;font-size:13px}
+.funmachine{display:flex;align-items:center;justify-content:center;gap:28px;border:1px solid var(--steel);margin-top:10px;padding:14px 18px;background:rgba(0,0,0,.25)}
+.funmachine[hidden]{display:none}
+.mtxt{display:flex;flex-direction:column;gap:4px;min-width:200px}.mtxt b{font:700 22px var(--mono);letter-spacing:.08em;color:var(--green)}.mtxt b.bad{color:var(--coral)}.mtxt span{color:var(--silver);font-size:13px}
+.mlock{width:90px;height:105px}.mlock rect{fill:#2a2f35;stroke:var(--fog);stroke-width:3}.mlock .shackle{fill:none;stroke:var(--fog);stroke-width:9;transition:transform .35s}.mlock .keyhole{fill:#0b0e12}
+.mlock.open rect{fill:#0c3a2e;stroke:var(--green)}.mlock.open .shackle{stroke:var(--green);transform:translateY(-16px) rotate(-14deg);transform-origin:35px 62px}
+.lamps,.jurors{display:flex;gap:14px}
+.lamp,.juror{display:flex;flex-direction:column;align-items:center;gap:6px;font:12px var(--mono);color:var(--silver)}
+.lamp i,.juror i{width:34px;height:34px;border-radius:50%;background:#20252b;border:2px solid var(--steel);transition:all .2s}
+.lamp.on i{background:var(--green);border-color:var(--green);box-shadow:0 0 14px var(--green)}
+.juror.on i{background:var(--coral);border-color:var(--coral);box-shadow:0 0 12px var(--coral)}
+.mseg{width:62px;height:108px}.mseg path{fill:#20252b;transition:fill .15s,filter .15s}.mseg path.on{fill:var(--green);filter:drop-shadow(0 0 5px var(--green))}

@@ -7,7 +7,8 @@
     const h = location.hash;
     // #learners = the on-chain learner lookup (old FirstTape verify page); #verify = certificate + passport check
     const target = h.length > 1 ? document.getElementById(h.slice(1)) : null, inCourse = !!(target && $("landing") && $("landing").contains(target));   // section anchors of the course page
-    const view = h === "#play" ? "game" : h === "#learners" ? "verify" : h === "#judges" ? "judges" : (h === "#circuits" || inCourse) ? "landing" : "cc";   // everything else (home, #issue, #verify, #manage, #wallet, #c=, #ch=) is the certificate site
+    const isGame = h === "#play" || h === "#daily" || h.startsWith("#race=") || h.startsWith("#puzzle=");
+    const view = isGame ? "game" : h === "#learners" ? "verify" : h === "#judges" ? "judges" : (h === "#circuits" || inCourse) ? "landing" : "cc";   // everything else (home, #issue, #verify, #manage, #wallet, #c=, #ch=) is the certificate site
     ["landing", "game", "verify", "judges", "cc"].forEach(v => { const e = $(v); if (e) e.hidden = v !== view; });
     if (view !== "landing") window.scrollTo(0, 0);
     window.dispatchEvent(new CustomEvent("ft-route", {detail: view}));

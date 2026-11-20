@@ -722,6 +722,26 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
   .btip{display:none!important}
   .lvltable,#judges table{display:block;max-width:100%;overflow-x:auto}
 }
+
+/* ---- fun pack ---- */
+.wire.surge{animation:flow .8s linear infinite,surge .7s ease-out both}
+@keyframes surge{0%{stroke:#fff;stroke-width:6;filter:drop-shadow(0 0 8px #fff)}100%{}}
+@media (prefers-reduced-motion:reduce){.wire.surge{animation:none}}
+.funrow{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin-top:10px}
+.funrow .golf,.funrow .race{font:600 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--bone);border:1px solid var(--green);padding:5px 9px;background:rgba(0,41,35,.45)}
+.funrow .race{border-color:var(--fog)}
+.funbtn{padding:6px 12px;font-size:13px}
+.funmachine{display:flex;align-items:center;justify-content:center;gap:28px;border:1px solid var(--steel);margin-top:10px;padding:14px 18px;background:rgba(0,0,0,.25)}
+.funmachine[hidden]{display:none}
+.mtxt{display:flex;flex-direction:column;gap:4px;min-width:200px}.mtxt b{font:700 22px var(--mono);letter-spacing:.08em;color:var(--green)}.mtxt b.bad{color:var(--coral)}.mtxt span{color:var(--silver);font-size:13px}
+.mlock{width:90px;height:105px}.mlock rect{fill:#2a2f35;stroke:var(--fog);stroke-width:3}.mlock .shackle{fill:none;stroke:var(--fog);stroke-width:9;transition:transform .35s}.mlock .keyhole{fill:#0b0e12}
+.mlock.open rect{fill:#0c3a2e;stroke:var(--green)}.mlock.open .shackle{stroke:var(--green);transform:translateY(-16px) rotate(-14deg);transform-origin:35px 62px}
+.lamps,.jurors{display:flex;gap:14px}
+.lamp,.juror{display:flex;flex-direction:column;align-items:center;gap:6px;font:12px var(--mono);color:var(--silver)}
+.lamp i,.juror i{width:34px;height:34px;border-radius:50%;background:#20252b;border:2px solid var(--steel);transition:all .2s}
+.lamp.on i{background:var(--green);border-color:var(--green);box-shadow:0 0 14px var(--green)}
+.juror.on i{background:var(--coral);border-color:var(--coral);box-shadow:0 0 12px var(--coral)}
+.mseg{width:62px;height:108px}.mseg path{fill:#20252b;transition:fill .15s,filter .15s}.mseg path.on{fill:var(--green);filter:drop-shadow(0 0 5px var(--green))}
 </style>
 <style>
 .cc{--void:#0b0e12;--carbon:#181a1d;--slate:#303235;--fog:#5d5e61;--steel:#818284;--silver:#bababb;--bone:#dedede;--green:#00d892;--teal:#002923;--amber:#e8b64a;--coral:#ff6b6b;
@@ -1811,10 +1831,18 @@ window.SANDBOX = {id: 99, world: 0, title: "Sandbox", text: "Free build. Wire an
     {id: "graduate", name: "Bounty Hunter", desc: "Clear a FabX bounty", test: p => [14, 15, 16].some(i => p.best[i])},
     {id: "on_chain", name: "On-Chain", desc: "Tape out a circuit on X Layer", test: p => Object.keys(p.chain).length > 0},
     {id: "streak3", name: "On a Roll", desc: "Play 3 days in a row", test: p => p.streak.n >= 3},
-    {id: "tinkerer", name: "Tinkerer", desc: "Build a working circuit in the sandbox", test: p => !!p.sandbox}
+    {id: "tinkerer", name: "Tinkerer", desc: "Build a working circuit in the sandbox", test: p => !!p.sandbox},
+    // ---- the fun pack (races, puzzles, machines, repairs, sharing); counters live in p.fun ----
+    {id: "golfer", name: "Golfer", desc: "Beat par: use fewer gates than par on any level", test: p => Object.entries(p.best).some(([id, b]) => { const L = (window.LEVELS || []).find(l => l.id === +id); return !!(L && L.maxGates && b.gates < L.maxGates); })},
+    {id: "minimalist", name: "Minimalist", desc: "Clear all five Gate levels at par or better", test: p => [1, 2, 3, 4, 5].every(i => { const L = (window.LEVELS || [])[i - 1]; return p.best[i] && L && L.maxGates && p.best[i].gates <= L.maxGates; })},
+    {id: "racer", name: "Racer", desc: "Take on a friend's challenge or puzzle", test: p => ((p.fun || {}).races || 0) > 0},
+    {id: "maker", name: "Puzzle Maker", desc: "Share a puzzle you made", test: p => ((p.fun || {}).makes || 0) > 0},
+    {id: "mechanic", name: "Mechanic", desc: "Repair a broken circuit", test: p => Object.keys((p.fun || {}).repairs || {}).length > 0},
+    {id: "machinist", name: "Machinist", desc: "Make all four workshop machines work", test: p => Object.keys((p.fun || {}).machines || {}).length >= 4},
+    {id: "showoff", name: "Show-off", desc: "Share a daily result, a challenge or a chip card", test: p => ((p.fun || {}).shares || 0) > 0}
   ];
 
-  const fresh = () => ({xp: 0, best: {}, ach: {}, chain: {}, streak: {last: "", n: 0}, daily: {date: "", done: false}, sandbox: false});
+  const fresh = () => ({xp: 0, best: {}, ach: {}, chain: {}, streak: {last: "", n: 0}, daily: {date: "", done: false}, sandbox: false, fun: {}});
   const load = () => { try { return Object.assign(fresh(), JSON.parse(localStorage.getItem(KEY) || "{}")); } catch { return fresh(); } };
   const save = p => { try { localStorage.setItem(KEY, JSON.stringify(p)); } catch {} };
   const ymd = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -1913,7 +1941,16 @@ window.SANDBOX = {id: 99, world: 0, title: "Sandbox", text: "Free build. Wire an
     ach.forEach((a, i) => setTimeout(() => toast("Badge unlocked: " + a.name, a.desc, "ach"), 700 + i * 700));
   }
 
+  // Fun-pack progress (races, shares, machines, repairs): never touches XP or the 16-level progression.
+  function funMark(kind, key) {        // kind: "races" | "makes" | "shares" (counters) or "machines" | "repairs" (sets, keyed by id)
+    const p = load(); p.fun = p.fun || {};
+    if (kind === "machines" || kind === "repairs") { p.fun[kind] = p.fun[kind] || {}; p.fun[kind][key] = 1; } else p.fun[kind] = (p.fun[kind] || 0) + 1;
+    const ach = unlock(p, null); save(p);
+    ach.forEach((a, i) => setTimeout(() => { toast("Badge unlocked: " + a.name, a.desc, "ach"); beep("ach"); }, 500 + i * 700));
+    return ach;
+  }
   window.FT_GAME = {
+    funMark,
     RANKS, ACH, load, save, rank, starsFor, starStr, dailyLevel, today, record, chainDone, sandboxUsed, toast, beep, toggleSound,
     soundOn: () => soundOn,
     totalStars: () => Object.values(load().best).reduce((a, b) => a + b.stars, 0),
@@ -2156,7 +2193,8 @@ window.FT_CARD = {
   const jset = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
   const store = { get: () => jget("ft_done", "[]"), set: v => jset("ft_done", v) };
   const circuitsStore = { get: () => jget("ft_circuits", "{}"), set: v => jset("ft_circuits", v) };
-  const ALL = [...LEVELS, SANDBOX], SB = LEVELS.length;      // sandbox lives at the end, outside progression
+  const ALL = [...LEVELS, SANDBOX, null], SB = LEVELS.length, CUST = SB + 1;   // sandbox lives at the end, outside progression; CUST is the single slot for friend puzzles, machines and repairs
+  let edits = 0, prevOn = new Set();                       // edits: wire changes since the level loaded (repair score); prevOn: wires that were already live (for the surge animation)
 
   let W = 800, H = 480;                                     // logical board size: W adapts to the window so the circuit fills it
   const S = 0.9, gateW = 70 * S, gateH = 50 * S;           // S scales the gate symbol; ports use the same scale
@@ -2176,7 +2214,7 @@ window.FT_CARD = {
   // ---------- level setup ----------
   // Node model: {id, kind:'in'|'out'|'nand', x, y, name}. Ports: 'out' of in/nand, 'in0','in1' of nand, 'in0' of out.
   function load(i) {
-    cur = i; const L = ALL[i];
+    cur = i; const L = ALL[i]; edits = 0; prevOn = new Set();
     wires = []; pending = null; nextId = 1; nodes = []; probe = {}; L.inputs.forEach(n => probe[n] = 0);
     t0 = performance.now(); fails = 0; stopRun(); scope.samples = [];
     fit();
@@ -2195,7 +2233,7 @@ window.FT_CARD = {
     tut.intro = false; tut.flipped = false; tut.checked = false; tut.force = false;
     const par = L.maxGates;
     $("tutBtn").hidden = i !== 0; $("impPanel").hidden = !L.sandbox; $("impMsg").textContent = "";
-    $("lvlCap").textContent = L.sandbox ? "SANDBOX" : `${(WORLDS[L.world - 1] || {}).name || ""} · LEVEL ${String(L.id).padStart(2, "0")} / ${String(LEVELS.length).padStart(2, "0")}`;
+    $("lvlCap").textContent = L.cap ? L.cap : L.sandbox ? "SANDBOX" : `${(WORLDS[L.world - 1] || {}).name || ""} · LEVEL ${String(L.id).padStart(2, "0")} / ${String(LEVELS.length).padStart(2, "0")}`;
     $("lvlTitle").textContent = L.title;
     $("lvlText").textContent = L.text + (par ? ` (Par: ${par} gate${par === 1 ? "" : "s"}.)` : "");
     $("stWhere").textContent = L.sandbox ? "FREE" : L.onchain ? "X LAYER" : "BROWSER";
@@ -2399,6 +2437,12 @@ window.FT_CARD = {
     const results = rowResults();
     renderTable(results);
     const ok = results.every(Boolean), used = usedGates().size, msg = $("msg");
+    if (ok && L.custom) {            // puzzles, machines and repairs: celebrate, never touch XP or the 16 levels
+      msg.className = "ok"; msg.textContent = `Correct! ${used} gate${used === 1 ? "" : "s"} used.`;
+      G.beep("ok"); banner("SOLVED", L.title, ""); burst();
+      if (window.FT_FUN) FT_FUN.onCustomSolved(L, used, edits, {nodes, wires});
+      return;
+    }
     if (ok) {
       const next = cur + 1 < LEVELS.length, seconds = (performance.now() - t0) / 1000;
       const res = G.record(L, used, seconds, fails === 0);
@@ -2414,6 +2458,7 @@ window.FT_CARD = {
       $("chainBtn").hidden = !L.onchain; $("fabxBtn").hidden = !L.graduation;
       if (tut.active) { tut.checked = true; render(); }
       celebrate(L, used, res, seconds);
+      if (window.FT_FUN) FT_FUN.afterClear(L, used, res, {nodes, wires, tape: circuitsStore.get()[L.id]});
     } else {
       fails++; G.beep("bad");
       msg.className = "bad"; msg.textContent = `Not yet — ${results.filter(Boolean).length}/${results.length} rows match. Check that every input is wired.`;
@@ -2469,18 +2514,20 @@ window.FT_CARD = {
     if (isOut) { pending = {id: n.id, port: p}; render(); return; }
     if (pending.id === n.id) { pending = null; render(); return; }
     wires = wires.filter(w => !(w.to === n.id && w.toPort === p)); // one wire per input
-    wires.push({from: pending.id, to: n.id, toPort: p, fresh: true}); pending = null; G.beep("wire"); render();
+    wires.push({from: pending.id, to: n.id, toPort: p, fresh: true}); edits++; pending = null; G.beep("wire"); render();
   }
 
   function render() {
     board.innerHTML = ""; decor(ALL[cur]); refreshLast();
     const L = ALL[cur], memo = new Map(), val = n => evalNode(n, probe, memo), used = usedGates();
     // wires
+    const nowOn = new Set();
     wires.forEach(w => {
       const a = nodes.find(n => n.id === w.from), b = nodes.find(n => n.id === w.to);
       const [x1, y1] = portPos(a, "out"), [x2, y2] = portPos(b, w.toPort), mx = (x1 + x2) / 2;
       const p = el("path", {d: `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`, class: "wire" + (val(a) === 1 ? " on" : "")});
-      p.addEventListener("click", () => { wires = wires.filter(x => x !== w); render(); });
+      p.addEventListener("click", () => { wires = wires.filter(x => x !== w); edits++; render(); });
+      const wk = w.from + ">" + w.to + w.toPort; if (val(a) === 1) { nowOn.add(wk); if (!prevOn.has(wk) && !REDUCE) { p.classList.add("surge"); p.style.animationDelay = `0s, ${Math.round(Math.max(0, x1) / W * 450)}ms`; } }
       if (w.fresh) {                       // draw-in animation, once
         w.fresh = false;
         if (!REDUCE) {
@@ -2531,6 +2578,8 @@ window.FT_CARD = {
     renderTut(ti);
     updateHud(L, used);
     drawScope();
+    prevOn = nowOn;
+    if (window.FT_FUN) FT_FUN.onRender(L, nodes.filter(n => n.kind === "out").map(n => evalNode(n, probe, new Map())), probe);
   }
 
   // ---------- guided tutorial (level 1) ----------
@@ -2643,11 +2692,12 @@ window.FT_CARD = {
         n.disabled = locked(i); n.onclick = () => { closeMap(); load(i); };
         n.innerHTML = `<b></b><span class="nt"></span><span class="ns"></span>`;
         n.querySelector("b").textContent = L.id; n.querySelector(".nt").textContent = L.title.replace(/^Bounty /, "");
-        n.querySelector(".ns").textContent = locked(i) ? "LOCKED" : b ? G.starStr(b.stars) : "NEW";
+        n.querySelector(".ns").textContent = locked(i) ? "LOCKED" : b ? G.starStr(b.stars) + (L.maxGates ? ` ${b.gates}/${L.maxGates}` : "") : "NEW";
         sec.querySelector(".nodes").appendChild(n);
       });
       m.appendChild(sec);
     });
+    if (window.FT_FUN) FT_FUN.mapExtras(m);
     const sb = document.createElement("section"); sb.className = "world";
     sb.innerHTML = `<h3>Sandbox</h3><p class="sub2">Free build with no goal. The truth table shows what you made.</p><div class="nodes"></div>`;
     const sn = document.createElement("button"); sn.className = "node"; sn.id = "sandboxNode"; sn.innerHTML = `<b>∞</b><span class="nt">Free build</span><span class="ns">OPEN</span>`;
@@ -2667,7 +2717,7 @@ window.FT_CARD = {
   // ---------- controls ----------
   function removeGate(id) {
     const n = nodes.find(k => k.id === id); if (!n || n.kind !== "nand") return;
-    nodes = nodes.filter(k => k.id !== id); wires = wires.filter(w => w.from !== id && w.to !== id);
+    nodes = nodes.filter(k => k.id !== id); wires = wires.filter(w => w.from !== id && w.to !== id); edits++;
     if (pending && pending.id === id) pending = null;
     G.beep("wire"); render();
   }
@@ -2772,9 +2822,265 @@ window.FT_CARD = {
     if (want) { const gi = LEVELS.findIndex(l => l.id === +want); if (gi >= 0 && !locked(gi)) load(gi); }
     refit(); drawScope();
   });
+  // Small surface for the fun pack (fun.js): load a real level by id, or a custom puzzle/machine/repair into the spare slot.
+  window.FT_APP = {
+    loadLevelId(id) { const i = LEVELS.findIndex(l => l.id === +id); if (i < 0) return false; load(i); return true; },
+    loadCustom(L, gates) { ALL[CUST] = Object.assign({custom: true, onchain: false, world: 0}, L); load(CUST); if (gates) { placeGates(gates, L.inputs.length, L.outputs.length); edits = 0; render(); } return true; },
+    openSandbox() { load(SB); },
+    snapshot() { return {level: ALL[cur], nodes, wires, isSandbox: !!ALL[cur].sandbox}; },
+    closeMap() { closeMap(); }
+  };
   applyPrefs();
   const firstOpen = LEVELS.findIndex(l => !done.includes(l.id));
   load(firstOpen < 0 ? LEVELS.length - 1 : firstOpen);
+})();
+</script>
+<script>
+// The fun pack: friend challenges (#race=), shareable daily result (#daily), puzzle maker (#puzzle=), workshop machines that
+// react to your circuit, repair shop (debug), gate golf names, and chip cards. No server, no contract, no network.
+// Nothing here touches XP or the 16-level progression: custom play goes through FT_APP.loadCustom and is only counted in p.fun.
+(() => {
+  const $ = id => document.getElementById(id), G = window.FT_GAME, APP = () => window.FT_APP;
+  if (!G || !$("game")) return;
+  const NAMES = ["A", "B", "C", "D", "E"], ONAMES = ["Y", "Z", "W", "V"];
+  const base = () => location.href.split("#")[0];
+  // truth table rows, inputs listed MSB-first (same shape levels.js uses)
+  const rowsOf = (n, fn) => Array.from({length: 1 << n}, (_, i) => { const ins = Array.from({length: n}, (_, b) => (i >> (n - 1 - b)) & 1); return [ins, [].concat(fn(...ins)).map(Number)]; });
+  const note = (cls, text) => { const m = $("msg"); m.className = cls; m.textContent = text; };
+
+  async function copy(text) {
+    try { await navigator.clipboard.writeText(text); return true; } catch {}
+    try { const t = document.createElement("textarea"); t.value = text; t.style.cssText = "position:fixed;opacity:0"; document.body.appendChild(t); t.select(); const ok = document.execCommand("copy"); t.remove(); return ok; } catch { return false; }
+  }
+  async function share(what, text) {
+    const ok = await copy(text);
+    G.toast(ok ? "Copied" : "Copy this", ok ? `${what} is on your clipboard. Paste it anywhere.` : text, "xp");
+    G.funMark("shares");
+    return ok;
+  }
+
+  // ---------- gate golf ----------
+  function golfName(used, par) {
+    if (!par) return "";
+    const d = used - par;
+    if (used === 1 && par > 1) return "Hole in one";
+    return d <= -3 ? "Albatross" : d === -2 ? "Eagle" : d === -1 ? "Birdie" : d === 0 ? "Par" : d === 1 ? "Bogey" : "Double bogey+";
+  }
+
+  // ---------- the workshop: machines that react to the circuit ----------
+  const SEG = ["1111110", "0110000", "1101101", "1111001"].map(s => [...s].map(Number));
+  const MACHINES = [
+    {mid: "lock", title: "Combination lock", inputs: ["A", "B", "C"], outputs: ["OPEN"], ref: 5, fn: (A, B, C) => A & (1 - B) & C,
+     text: "Build a lock that opens only for the code A=1, B=0, C=1. Flip the dials and watch the padlock."},
+    {mid: "floors", title: "Lift controller", inputs: ["A", "B"], outputs: ["F0", "F1", "F2", "F3"], ref: 10, fn: (A, B) => [0, 1, 2, 3].map(x => x === 2 * A + B ? 1 : 0),
+     text: "A 2-bit floor number comes in; exactly one floor lamp must light. A decoder."},
+    {mid: "jury", title: "Jury of three", inputs: ["A", "B", "C"], outputs: ["GUILTY"], ref: 6, fn: (A, B, C) => +(A + B + C >= 2),
+     text: "Each juror votes 1 for guilty. The verdict is guilty when at least two of three agree. A majority vote."},
+    {mid: "digit", title: "Seven-segment digit", inputs: ["A", "B"], outputs: ["a", "b", "c", "d", "e", "f", "g"], ref: 19, fn: (A, B) => SEG[2 * A + B],
+     text: "Show the digit 0 to 3 on a seven-segment display. Segment b is lit for every digit: how do you make a constant 1 from NAND?"}
+  ];
+  const machineLevel = (M, i) => ({machine: M.mid, title: M.title, cap: `WORKSHOP · MACHINE ${i + 1} / ${MACHINES.length}`, text: M.text, inputs: M.inputs, outputs: M.outputs, rows: rowsOf(M.inputs.length, M.fn), maxGates: M.ref});
+
+  const mHost = document.createElement("div"); mHost.id = "funMachine"; mHost.className = "funmachine"; mHost.hidden = true;
+  $("boardwrap").insertAdjacentElement("afterend", mHost);
+  let mBuilt = "";
+  const SEGP = {a: "M16 8H64L58 16H22Z", b: "M68 12V64L62 58V20Z", c: "M68 76V128L62 120V82Z", d: "M16 132H64L58 124H22Z", e: "M12 76V128L18 120V82Z", f: "M12 12V64L18 58V20Z", g: "M18 70L24 64H56L62 70L56 76H24Z"};
+  function buildMachine(id) {
+    mBuilt = id; let h = "";
+    if (id === "lock") h = `<svg viewBox="0 0 120 140" class="mlock" role="img" aria-label="padlock"><path class="shackle" d="M35 62V42a25 25 0 0 1 50 0v20"/><rect x="20" y="62" width="80" height="62" rx="8"/><circle cx="60" cy="90" r="8" class="keyhole"/></svg><div class="mtxt"><b id="mState">LOCKED</b><span id="mSub"></span></div>`;
+    else if (id === "floors") h = `<div class="lamps">${[0, 1, 2, 3].map(k => `<div class="lamp" data-k="${k}"><i></i><span>${k === 0 ? "G" : k}</span></div>`).join("")}</div><div class="mtxt"><b id="mState"></b><span id="mSub"></span></div>`;
+    else if (id === "jury") h = `<div class="jurors">${["A", "B", "C"].map(n => `<div class="juror" data-n="${n}"><i></i><span>${n}</span></div>`).join("")}</div><div class="mtxt"><b id="mState">NO VERDICT</b><span id="mSub"></span></div>`;
+    else if (id === "digit") h = `<svg viewBox="0 0 80 140" class="mseg" role="img" aria-label="seven segment display">${Object.entries(SEGP).map(([k, d]) => `<path data-s="${k}" d="${d}"/>`).join("")}</svg><div class="mtxt"><b id="mState"></b><span id="mSub">Input value: shown digit</span></div>`;
+    mHost.innerHTML = h;
+  }
+  function renderMachine(L, outs, probe) {
+    if (mBuilt !== L.machine) buildMachine(L.machine);
+    const on = k => outs[k] === 1, st = $("mState"), sub = $("mSub"), val = (probe.A || 0) * 2 + (probe.B || 0);
+    if (L.machine === "lock") {
+      mHost.querySelector(".mlock").classList.toggle("open", on(0)); st.textContent = on(0) ? "UNLOCKED" : "LOCKED";
+      sub.textContent = `Dials: ${probe.A}${probe.B}${probe.C}   (the code is 101)`;
+    } else if (L.machine === "floors") {
+      mHost.querySelectorAll(".lamp").forEach(e => e.classList.toggle("on", on(+e.dataset.k)));
+      st.textContent = `Floor ${val} requested`; sub.textContent = `Lit lamps: ${outs.map((v, k) => v === 1 ? k : "").join("") || "none"}`;
+    } else if (L.machine === "jury") {
+      mHost.querySelectorAll(".juror").forEach(e => e.classList.toggle("on", probe[e.dataset.n] === 1));
+      st.textContent = outs[0] === undefined ? "NO VERDICT" : on(0) ? "GUILTY" : "NOT GUILTY";
+      st.className = on(0) ? "bad" : ""; sub.textContent = `${(probe.A || 0) + (probe.B || 0) + (probe.C || 0)} of 3 jurors say guilty`;
+    } else if (L.machine === "digit") {
+      "abcdefg".split("").forEach((s, k) => mHost.querySelector(`[data-s="${s}"]`).classList.toggle("on", on(k)));
+      st.textContent = `Input ${probe.A}${probe.B}`; sub.textContent = `Should show the digit ${val}`;
+    }
+  }
+
+  // ---------- the repair shop: debug a broken circuit ----------
+  // good = a correct NAND netlist (refs: 2.. inputs, then gates); fault = which gate input is rewired, and to what.
+  const REPAIRS = [
+    {rid: "xor", title: "XOR is stuck", nIn: 2, nOut: 1, good: [{a: 2, b: 3}, {a: 2, b: 4}, {a: 3, b: 4}, {a: 5, b: 6}], fault: {g: 1, p: "b", to: 3}, text: "This XOR circuit gives wrong answers. One wire goes to the wrong place. Find it and rewire it."},
+    {rid: "half", title: "Half adder glitch", nIn: 2, nOut: 2, good: [{a: 2, b: 3}, {a: 2, b: 4}, {a: 3, b: 4}, {a: 5, b: 6}, {a: 4, b: 4}], fault: {g: 4, p: "a", to: 2}, text: "Outputs are S (sum) and C (carry). The carry wire is miswired. Rewire one input."},
+    {rid: "vote", title: "Rigged jury", nIn: 3, nOut: 1, good: [{a: 2, b: 3}, {a: 3, b: 4}, {a: 2, b: 4}, {a: 5, b: 6}, {a: 8, b: 8}, {a: 9, b: 7}], fault: {g: 4, p: "b", to: 5}, text: "A majority-vote circuit that sometimes returns the wrong verdict. One gate is wired to the wrong signal."},
+    {rid: "mux", title: "Crossed selector", nIn: 3, nOut: 1, good: [{a: 4, b: 4}, {a: 2, b: 5}, {a: 3, b: 4}, {a: 6, b: 7}], fault: {g: 1, p: "b", to: 4}, text: "Inputs A, B, S: the output should be A when S=0 and B when S=1. The selector is crossed somewhere."}
+  ];
+  const faulty = R => R.good.map((g, i) => i === R.fault.g ? Object.assign({}, g, {[R.fault.p]: R.fault.to}) : g);
+  const repairLevel = (R, i) => {
+    const good = window.evalGates(R.good, R.nIn, R.nOut);
+    const rows = Array.from({length: 1 << R.nIn}, (_, i2) => {
+      const ins = Array.from({length: R.nIn}, (_, b) => (i2 >> (R.nIn - 1 - b)) & 1); let m = 0; ins.forEach((v, k) => m |= v << k);   // MSB-first display row -> bit k of m = input k
+      return [ins, good[m]];
+    });
+    return {rid: R.rid, title: R.title, cap: `REPAIR SHOP · ${i + 1} / ${REPAIRS.length}`, text: R.text, inputs: NAMES.slice(0, R.nIn), outputs: R.nOut === 2 ? ["S", "C"] : ONAMES.slice(0, R.nOut), rows};
+  };
+
+  // ---------- chip card ----------
+  const fnv = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  function chipCard(L, ctx, used, stars) {
+    const net = window.encodeNetlist(L, ctx.nodes, ctx.wires); if (net.error) return null;
+    const d = window.decodeNetlist(net.hex, net.nIn, net.nOut); if (d.error) return null;
+    const seed = fnv(net.hex), hue = seed % 360, serial = "FT-" + seed.toString(16).toUpperCase().padStart(8, "0");
+    const c = document.createElement("canvas"); c.width = c.height = 640; const g = c.getContext("2d"), mono = "ui-monospace,SFMono-Regular,Menlo,monospace";
+    const col = (l, a = 1) => `hsla(${hue},70%,${l}%,${a})`;
+    g.fillStyle = "#0b0e12"; g.fillRect(0, 0, 640, 640);
+    // package + pins
+    g.fillStyle = "#1b1f24"; g.strokeStyle = "#394049"; g.lineWidth = 3; g.beginPath(); g.roundRect(100, 100, 440, 440, 18); g.fill(); g.stroke();
+    g.fillStyle = "#8a8f96"; for (let i = 0; i < 9; i++) { const p = 130 + i * 47; g.fillRect(p, 72, 16, 28); g.fillRect(p, 540, 16, 28); g.fillRect(72, p, 28, 16); g.fillRect(540, p, 28, 16); }
+    g.fillStyle = col(60); g.beginPath(); g.arc(128, 128, 7, 0, 7); g.fill();           // pin-1 marker
+    // die: gates in columns by depth (same idea as the board)
+    const gates = d.gates, nIn = net.nIn, baseRef = 2 + nIn, depth = gates.map(() => 1);
+    gates.forEach((q, k) => { depth[k] = 1 + Math.max(0, ...[q.a, q.b].map(r => r >= baseRef ? depth[r - baseRef] : 0)); });
+    const D = Math.max(...depth), cnt = {}, seen = {}; depth.forEach(x => cnt[x] = (cnt[x] || 0) + 1);
+    g.fillStyle = "#0e1a17"; g.strokeStyle = col(45, .8); g.lineWidth = 2; g.fillRect(170, 170, 300, 270); g.strokeRect(170, 170, 300, 270);
+    const pos = gates.map((q, k) => { const dd = depth[k], i = seen[dd] = (seen[dd] || 0) + 1; return {x: D === 1 ? 320 : 200 + (dd - 1) * (240 / (D - 1)), y: cnt[dd] === 1 ? 305 : 195 + (i - 1) * (220 / (cnt[dd] - 1))}; });
+    const inPos = r => ({x: 178, y: 195 + (r - 2) * (220 / Math.max(1, nIn - 1))}), at = r => r >= baseRef ? pos[r - baseRef] : inPos(r);
+    g.lineWidth = 2; gates.forEach((q, k) => [q.a, q.b].forEach(r => { const s = at(r), e = pos[k]; g.strokeStyle = col(55, .75); g.beginPath(); g.moveTo(s.x, s.y); g.bezierCurveTo((s.x + e.x) / 2, s.y, (s.x + e.x) / 2, e.y, e.x - 10, e.y); g.stroke(); }));
+    gates.forEach((q, k) => { const p = pos[k]; g.fillStyle = col(50); g.beginPath(); g.roundRect(p.x - 10, p.y - 8, 20, 16, 4); g.fill(); g.fillStyle = "#0b0e12"; g.beginPath(); g.arc(p.x + 10, p.y, 3.2, 0, 7); g.fill(); });
+    // labels
+    g.fillStyle = "#dedede"; g.font = `bold 26px ${mono}`; g.textAlign = "center"; g.fillText(L.title.slice(0, 22).toUpperCase(), 320, 52);
+    g.fillStyle = col(65); g.font = `20px ${mono}`; g.fillText(`${used} GATE${used === 1 ? "" : "S"}  ${G.starStr(stars)}`, 320, 472);
+    g.fillStyle = "#8a8f96"; g.font = `16px ${mono}`; g.fillText(serial, 320, 500);
+    g.fillStyle = "#5d5e61"; g.fillText(ctx.tape ? `X Layer circuit #${ctx.tape}` : "firsttape · NAND only", 320, 600);
+    return c;
+  }
+  function download(canvas, name) { const a = document.createElement("a"); a.href = canvas.toDataURL("image/png"); a.download = name; a.click(); }
+
+  // ---------- links: #race= and #puzzle= ----------
+  const hexToBits = (h, len) => [...h].map(x => parseInt(x, 16).toString(2).padStart(4, "0")).join("").slice(0, len);
+  function encodePuzzle(nIn, nOut, tableMSB, par) {              // tableMSB[i] = output bits for display row i
+    let bits = tableMSB.map(r => r.join("")).join(""); while (bits.length % 4) bits += "0";
+    let hex = ""; for (let i = 0; i < bits.length; i += 4) hex += parseInt(bits.slice(i, i + 4), 2).toString(16);
+    return `${nIn}.${nOut}.${hex}.${par}`;
+  }
+  function decodePuzzle(s) {
+    const m = /^(\d)\.(\d)\.([0-9a-f]{1,16})\.(\d{1,2})$/.exec(s); if (!m) return null;
+    const nIn = +m[1], nOut = +m[2], par = +m[4];
+    if (nIn < 2 || nIn > 4 || nOut < 1 || nOut > 4 || par < 1 || par > 60) return null;
+    const need = (1 << nIn) * nOut; if (m[3].length * 4 < need || m[3].length > Math.ceil(need / 4)) return null;
+    const bits = hexToBits(m[3], need);
+    return {nIn, nOut, par, rows: Array.from({length: 1 << nIn}, (_, i) => [Array.from({length: nIn}, (_, b) => (i >> (nIn - 1 - b)) & 1), Array.from({length: nOut}, (_, o) => +bits[i * nOut + o])])};
+  }
+  let race = null;                                                 // {id, gates} from a friend's link
+  let puzzle = null;                                               // {par} when a friend's puzzle is open
+  function route() {
+    const h = location.hash, app = APP(); if (!app) return;
+    let m;
+    if (h === "#daily") {
+      const dl = G.dailyLevel(); race = null; puzzle = null; app.loadLevelId(dl.id);
+      note("", `Daily challenge: clear it in ${dl.maxGates} gate${dl.maxGates === 1 ? "" : "s"} or fewer for +50 XP, then share your result.`);
+    } else if ((m = /^#race=(\d{1,2})\.(\d{1,3})$/.exec(h))) {
+      const id = +m[1], gates = +m[2];
+      if (!app.loadLevelId(id) || gates < 1) { note("bad", "That challenge link does not look right."); return; }
+      race = {id, gates}; puzzle = null;
+      note("", `A friend cleared this level in ${gates} gate${gates === 1 ? "" : "s"}. Can you match or beat it?`);
+    } else if ((m = /^#puzzle=(.+)$/.exec(h))) {
+      const p = decodePuzzle(m[1]); race = null;
+      if (!p) { note("bad", "That puzzle link does not look right."); return; }
+      puzzle = {par: p.par};
+      app.loadCustom({kind: "puzzle", title: "Friend's puzzle", cap: "FRIEND'S PUZZLE", text: "Someone drew this truth table and solved it. Wire it up yourself.", inputs: NAMES.slice(0, p.nIn), outputs: ONAMES.slice(0, p.nOut), rows: p.rows, maxGates: p.par});
+      note("", `A friend's puzzle: they solved it in ${p.par} gate${p.par === 1 ? "" : "s"}. Match or beat that.`);
+    }
+  }
+  window.addEventListener("ft-route", e => { if (e.detail === "game") route(); });
+
+  // ---------- buttons after a clear ----------
+  function rowButton(label, fn) { const b = document.createElement("button"); b.className = "btn ghost funbtn"; b.textContent = label; b.onclick = fn; return b; }
+  function afterClear(L, used, res, ctx) {
+    const msg = $("msg"), row = document.createElement("div"); row.className = "funrow";
+    const par = L.maxGates, g = golfName(used, par);
+    if (g && used <= par) { const s = document.createElement("span"); s.className = "golf"; s.textContent = `${g}${used < par ? ` (${used - par})` : ""}`; row.appendChild(s); }
+    if (race && race.id === L.id) {
+      const r = used < race.gates ? `You beat your friend: ${used} vs ${race.gates} gates.` : used === race.gates ? `You tied your friend at ${used} gates.` : `Your friend's ${race.gates} beats your ${used}. Try again?`;
+      const s = document.createElement("span"); s.className = "race"; s.textContent = r; row.appendChild(s); G.funMark("races"); race = null;
+    }
+    row.appendChild(rowButton("Challenge a friend", () => share("Your challenge link", `Beat my ${used}-gate ${L.title} on FirstTape: ${base()}#race=${L.id}.${used}`)));
+    if (G.dailyLevel().id === L.id) row.appendChild(rowButton("Share daily result", () => share("Your daily result", dailyText(L, used, res))));
+    row.appendChild(rowButton("Chip card", () => { const c = chipCard(L, ctx, used, res.stars); if (c) { download(c, `chip-level-${L.id}.png`); G.funMark("shares"); } }));
+    msg.appendChild(row);
+  }
+  function dailyText(L, used, res) {
+    const par = L.maxGates || used, n = Math.max(used, par);
+    const grid = Array.from({length: n}, (_, i) => i < used ? (i < par ? "🟩" : "🟥") : "⬜").join("");
+    const streak = G.load().streak.n;
+    return `FirstTape Daily ${G.today()}\nLevel ${L.id} ${L.title} · ${used}/${par} gates · ${G.starStr(res.stars)}\n${grid}${streak > 1 ? "  🔥" + streak : ""}\n${base()}#daily`;
+  }
+
+  // ---------- custom solved ----------
+  function onCustomSolved(L, used, edits, board) {
+    const msg = $("msg"), row = document.createElement("div"); row.className = "funrow";
+    if (L.machine) {
+      const had = (G.load().fun || {}).machines || {}; G.funMark("machines", L.machine);
+      const s = document.createElement("span"); s.className = "golf"; s.textContent = used <= L.maxGates ? `${golfName(used, L.maxGates)} (reference ${L.maxGates})` : `Reference design: ${L.maxGates} gates`; row.appendChild(s);
+      if (!had[L.machine]) G.toast("Machine works", L.title, "ach");
+    } else if (L.rid) {
+      G.funMark("repairs", L.rid);
+      const s = document.createElement("span"); s.className = "golf"; s.textContent = edits <= 1 ? "Clean fix: one rewire." : `Fixed in ${edits} edits (a clean fix takes 1).`; row.appendChild(s);
+    } else if (L.kind === "puzzle" && puzzle) {
+      G.funMark("races");
+      const s = document.createElement("span"); s.className = "race"; s.textContent = used < puzzle.par ? `Beat your friend: ${used} vs ${puzzle.par} gates.` : used === puzzle.par ? `Tied your friend at ${used} gates.` : `Solved in ${used}. Your friend needed only ${puzzle.par}.`; row.appendChild(s);
+    }
+    msg.appendChild(row);
+  }
+
+  // ---------- map extras + sandbox "Share puzzle" ----------
+  function node(label, sub, cls, onclick) { const b = document.createElement("button"); b.className = "node" + (cls ? " " + cls : ""); b.innerHTML = "<b></b><span class=\"nt\"></span><span class=\"ns\"></span>"; b.querySelector("b").textContent = label; b.querySelector(".nt").textContent = sub[0]; b.querySelector(".ns").textContent = sub[1]; b.onclick = onclick; return b; }
+  function mapExtras(m) {
+    const p = G.load(), fun = p.fun || {}, mach = fun.machines || {}, rep = fun.repairs || {};
+    // gate golf scoreboard
+    let strokes = 0, played = 0; (window.LEVELS || []).forEach(L => { const b = p.best[L.id]; if (b && L.maxGates) { strokes += b.gates - L.maxGates; played++; } });
+    const gs = document.createElement("section"); gs.className = "world";
+    gs.innerHTML = `<h3>Gate golf</h3><p class="sub2"></p>`;
+    gs.querySelector(".sub2").textContent = played ? `Your score against par across ${played} cleared level${played === 1 ? "" : "s"}: ${strokes > 0 ? "+" : ""}${strokes}. Lower is better; replay any level with fewer gates.` : "Clear a level and your gate count is scored against par. Fewer gates is a birdie.";
+    m.appendChild(gs);
+    const ws = document.createElement("section"); ws.className = "world";
+    ws.innerHTML = `<h3>Workshop · ${Object.keys(mach).length}/${MACHINES.length}</h3><p class="sub2">Build machines that move. Flip the inputs and watch them respond. Free play, no XP.</p><div class="nodes"></div>`;
+    MACHINES.forEach((M, i) => ws.querySelector(".nodes").appendChild(node(["🔒", "🛗", "⚖", "🔢"][i], [M.title, mach[M.mid] ? "WORKS" : "NEW"], mach[M.mid] ? "cleared" : "", () => { APP().closeMap(); race = null; puzzle = null; APP().loadCustom(machineLevel(M, i)); })));
+    m.appendChild(ws);
+    const rs = document.createElement("section"); rs.className = "world";
+    rs.innerHTML = `<h3>Repair shop · ${Object.keys(rep).length}/${REPAIRS.length}</h3><p class="sub2">A circuit is broken. Find the wrong wire and fix it with as few edits as you can.</p><div class="nodes"></div>`;
+    REPAIRS.forEach((R, i) => rs.querySelector(".nodes").appendChild(node("🔧", [R.title, rep[R.rid] ? "FIXED" : "BROKEN"], rep[R.rid] ? "cleared" : "", () => { APP().closeMap(); race = null; puzzle = null; APP().loadCustom(repairLevel(R, i), faulty(R)); note("", "This circuit is broken. Flip the inputs, compare with the truth table, then rewire the wrong input."); })));
+    m.appendChild(rs);
+  }
+
+  const shareBtn = document.createElement("button"); shareBtn.id = "sharePuzzle"; shareBtn.className = "btn ghost"; shareBtn.hidden = true; shareBtn.textContent = "Share puzzle";
+  shareBtn.title = "Turns your sandbox circuit's truth table into a puzzle link a friend can try to solve";
+  $("actions").appendChild(shareBtn);
+  shareBtn.onclick = async () => {
+    const s = APP().snapshot(), L = s.level, net = window.encodeNetlist(L, s.nodes, s.wires);
+    if (net.error) { note("bad", net.error); return; }
+    const nIn = net.nIn, nOut = net.nOut;
+    if (nIn < 2 || nIn > 4 || nOut > 4) { note("bad", "Puzzles need 2 to 4 inputs and up to 4 outputs."); return; }
+    const d = window.decodeNetlist(net.hex, nIn, nOut); if (d.error) { note("bad", d.error); return; }
+    const o = window.optimizeNetlist(d.gates, nIn, nOut), ev = window.evalGates(o.gates, nIn, nOut);
+    const table = Array.from({length: 1 << nIn}, (_, i) => { let mm = 0; for (let k = 0; k < nIn; k++) mm |= ((i >> (nIn - 1 - k)) & 1) << k; return ev[mm]; });
+    const par = Math.min(60, o.gates.length), link = `${base()}#puzzle=${encodePuzzle(nIn, nOut, table, par)}`;
+    const ok = await copy(link); G.funMark("makes");
+    note("ok", ok ? `Puzzle link copied (par ${par} gate${par === 1 ? "" : "s"}). Send it to a friend.` : `Copy this puzzle link: ${link}`);
+  };
+
+  window.FT_FUN = {
+    MACHINES, REPAIRS, machineLevel, repairLevel, faulty, golfName, encodePuzzle, decodePuzzle, dailyText, chipCard, afterClear, onCustomSolved, mapExtras, route,
+    onRender(L, outs, probe) {
+      shareBtn.hidden = !L.sandbox;
+      if (L.machine) { mHost.hidden = false; renderMachine(L, outs, probe); } else { mHost.hidden = true; mBuilt = ""; }
+    }
+  };
 })();
 </script>
 <script>
@@ -2787,7 +3093,8 @@ window.FT_CARD = {
     const h = location.hash;
     // #learners = the on-chain learner lookup (old FirstTape verify page); #verify = certificate + passport check
     const target = h.length > 1 ? document.getElementById(h.slice(1)) : null, inCourse = !!(target && $("landing") && $("landing").contains(target));   // section anchors of the course page
-    const view = h === "#play" ? "game" : h === "#learners" ? "verify" : h === "#judges" ? "judges" : (h === "#circuits" || inCourse) ? "landing" : "cc";   // everything else (home, #issue, #verify, #manage, #wallet, #c=, #ch=) is the certificate site
+    const isGame = h === "#play" || h === "#daily" || h.startsWith("#race=") || h.startsWith("#puzzle=");
+    const view = isGame ? "game" : h === "#learners" ? "verify" : h === "#judges" ? "judges" : (h === "#circuits" || inCourse) ? "landing" : "cc";   // everything else (home, #issue, #verify, #manage, #wallet, #c=, #ch=) is the certificate site
     ["landing", "game", "verify", "judges", "cc"].forEach(v => { const e = $(v); if (e) e.hidden = v !== view; });
     if (view !== "landing") window.scrollTo(0, 0);
     window.dispatchEvent(new CustomEvent("ft-route", {detail: view}));

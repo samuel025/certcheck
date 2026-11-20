@@ -69,10 +69,10 @@ await p.close();
 // ---- map, daily, sandbox, sound ----
 p = await fresh({ft_done: "[1,2,3]"}); c = click(p);
 await p.click("#mapBtn");
-ok("map opens with 16 level nodes", (await p.$$eval("#map .node:not(#sandboxNode)", n => n.length)) === 16);
+ok("map opens with 16 level nodes", (await p.$$eval("#map .node:not(#sandboxNode)", n => n.filter(x => /^\d+$/.test(x.querySelector("b").textContent)).length)) === 16);
 ok("later levels are locked", (await p.$$eval("#map .node.lock", n => n.length)) >= 12);
 ok("daily challenge card shown", await p.$eval("#map .daily .dtitle", e => e.textContent.length > 0));
-ok("13 badges listed", (await p.$$eval("#map .badge2", n => n.length)) === 13);
+ok("20 badges listed", (await p.$$eval("#map .badge2", n => n.length)) === 20);
 await p.keyboard.press("Escape"); ok("Escape closes the map", await p.$eval("#map", e => e.hidden));
 await p.click("#mapBtn"); await p.click("#sandboxNode");
 ok("sandbox loads (no check button, 8-row live table)", (await p.$eval("#lvlTitle", e => e.textContent)) === "Sandbox" && (await p.$eval("#checkBtn", e => e.hidden)) && (await p.$$eval("#truth tr", r => r.length)) === 9);
@@ -90,7 +90,7 @@ await p.goto(BASE + "/index.html#circuits"); await p.evaluate(() => { localStora
 ok("landing: 16 level rows in 4 worlds", (await p.$$eval("#lvlTable tbody tr:not(.whead)", r => r.length)) === 16 && (await p.$$eval("#lvlTable tr.whead", r => r.length)) === 4);
 ok("landing: best stars shown for cleared level", (await p.$eval("#lvlTable .starcell.got", e => e.textContent)) === "★★★");
 ok("landing: rank ladder highlights current rank", (await p.$eval("#rankLadder .rung.now b", e => e.textContent)) === "Wirer");
-ok("landing: badge grid shows 13, one unlocked", (await p.$$eval("#badgeGrid .badge2", n => n.length)) === 13 && (await p.$$eval("#badgeGrid .badge2.got", n => n.length)) === 1);
+ok("landing: badge grid shows 20, one unlocked", (await p.$$eval("#badgeGrid .badge2", n => n.length)) === 20 && (await p.$$eval("#badgeGrid .badge2.got", n => n.length)) === 1);
 ok("landing: rack readout shows progress + rank", (await p.$eval("#rackNum", e => e.textContent)).includes("1/16") && (await p.$eval("#rackNum", e => e.textContent)).includes("WIRER"));
 await p.close();
 console.log("errors:", errs.length ? errs : "none"); await b.close(); process.exit(fails || errs.length ? 1 : 0);

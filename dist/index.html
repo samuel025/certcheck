@@ -768,6 +768,42 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 .spaddr{display:block;word-break:break-all;font:12px var(--mono);color:var(--green)}
 @media (max-width:760px){.spgrid,.sprow{grid-template-columns:1fr}}
 @media (max-width:900px){.gbar #levelNav{display:none}}   /* the Map button reaches every level; the strip only crowds narrow headers */
+
+/* ===== course hero: the live schematic ===== */
+.h4top{position:relative}
+.hv{display:none;margin:0}
+@media (min-width:1320px){
+  .hv{display:block;position:absolute;right:0;top:34px;width:clamp(430px,31vw,560px);border:1px solid #262c33;background:linear-gradient(180deg,#12161b,#0a0d11);padding:12px 14px 12px;box-shadow:0 40px 90px rgba(0,0,0,.55),0 0 90px rgba(0,216,146,.08);animation:rise .9s .25s both}
+  .hv::before,.hv::after{content:"";position:absolute;width:7px;height:7px;border-radius:50%;background:#252c34;top:8px}.hv::before{left:8px}.hv::after{right:8px}
+  .hvhead{display:flex;justify-content:space-between;align-items:center;padding:0 14px 8px;font:600 10.5px var(--mono);letter-spacing:.14em;color:var(--silver);border-bottom:1px solid #1d2329;margin-bottom:6px}
+  .hvled{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);margin-right:9px;animation:hvpulse 1.6s ease-in-out infinite}
+  .hvr{color:var(--green)}
+  #hvSvg{display:block;width:100%;height:auto}
+  .hvfoot{margin:10px 6px 2px;font-size:12.5px;line-height:1.45;color:var(--fog)}
+}
+@keyframes hvpulse{50%{opacity:.35}}
+.hvgrid{stroke:rgba(255,255,255,.035);stroke-width:1}
+.hvw{fill:none;stroke:#2b333b;stroke-width:3;stroke-linecap:round;transition:stroke .25s}
+.hvw.on{stroke:var(--green);stroke-dasharray:9 8;animation:hvflow .8s linear infinite;filter:drop-shadow(0 0 4px rgba(0,216,146,.7))}
+.hvw.on.surge{animation:hvflow .8s linear infinite,hvsurge .8s ease-out both}
+@keyframes hvflow{to{stroke-dashoffset:-34}}
+@keyframes hvsurge{0%{stroke:#fff;stroke-width:6;filter:drop-shadow(0 0 10px #fff)}100%{}}
+.hvgb{fill:#12171d;stroke:#4a535c;stroke-width:2.5;transition:all .3s}.hvbub{fill:#0a0d11;stroke:#4a535c;stroke-width:2.5;transition:all .3s}
+.hvg.hot .hvgb{fill:#0d2a22;stroke:var(--green);filter:drop-shadow(0 0 8px rgba(0,216,146,.45))}.hvg.hot .hvbub{stroke:var(--green)}
+.hvgt{font:700 11px var(--mono);letter-spacing:.1em;fill:#6b747d;text-anchor:start}.hvg.hot .hvgt{fill:#8ff0cf}
+.hvin rect{fill:#11151a;stroke:#3a434c;stroke-width:2;transition:all .25s}.hvin text{font:700 13px var(--mono);fill:#8a929a}
+.hvin.on rect{stroke:var(--green);fill:#0d2a22}.hvin.on text{fill:var(--green)}
+.hvl0{fill:none;stroke:#3a434c;stroke-width:2.5}.hvl1{fill:#1a2026;transition:all .25s}
+.hvlamp.on .hvl0{stroke:var(--green);filter:drop-shadow(0 0 10px rgba(0,216,146,.8))}.hvlamp.on .hvl1{fill:var(--green)}
+.hvyt{font:700 14px var(--mono);fill:var(--silver)}
+.hvtab{display:flex;gap:8px;margin:8px 6px 0}
+.hvc{flex:1;display:flex;flex-direction:column;gap:3px;padding:8px 10px;border:1px solid #232a32;font:11px var(--mono);color:var(--fog);transition:all .25s}
+.hvc b{font-size:13px;color:var(--silver)}.hvc.cur{border-color:var(--green);background:rgba(0,216,146,.09);color:var(--bone)}.hvc.cur b{color:var(--green)}.hvc.seen:not(.cur){border-color:#1f4a3b}
+.hvstamp{position:absolute;right:30px;top:62px;border:3px solid var(--green);color:var(--green);padding:6px 14px;font:800 18px var(--mono);letter-spacing:.16em;display:flex;flex-direction:column;align-items:center;background:rgba(5,22,17,.82);transform:rotate(-9deg) scale(1.6);opacity:0;pointer-events:none;box-shadow:0 0 30px rgba(0,216,146,.35)}
+.hvstamp span{font-size:10px;letter-spacing:.2em;font-weight:600}
+.hvstamp.go{animation:hvstamp 1.9s cubic-bezier(.2,.8,.2,1) both}
+@keyframes hvstamp{0%{opacity:0;transform:rotate(-9deg) scale(1.9)}14%{opacity:1;transform:rotate(-9deg) scale(1)}75%{opacity:1}100%{opacity:0;transform:rotate(-9deg) scale(1)}}
+@media (prefers-reduced-motion:reduce){.hvw.on,.hvw.on.surge,.hvled,.hvstamp.go{animation:none!important}}
 </style>
 <style>
 .cc{--void:#0b0e12;--carbon:#181a1d;--slate:#303235;--fog:#5d5e61;--steel:#818284;--silver:#bababb;--bone:#dedede;--green:#00d892;--teal:#002923;--amber:#e8b64a;--coral:#ff6b6b;
@@ -1166,6 +1202,13 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
   <main>
     <section class="hero4">
     <div class="wrap h4top">
+      <figure class="hv" id="hv" aria-label="A live XOR circuit built from four NAND gates, cycling through all four inputs">
+        <div class="hvhead"><span class="hvt"><i class="hvled"></i>LIVE · LEVEL 05 · XOR FROM 4 NAND</span><span class="hvr" id="hvRow">A=0 B=0</span></div>
+        <svg id="hvSvg" viewBox="0 70 600 280" role="img" aria-hidden="true"></svg>
+        <div class="hvtab" id="hvTab"></div>
+        <div class="hvstamp" id="hvStamp" aria-hidden="true"><b>PASSED</b><span>4 / 4 ROWS</span></div>
+        <figcaption class="hvfoot">Every gate is a NAND. This is the circuit you build in level 5, and the one an X Layer processor checks.</figcaption>
+      </figure>
       <span class="badge" id="demoBadge">Levels 1–5 · no wallet</span>
       <h1>Learn lean circuits.<br>Then mine on FabX.</h1>
       <p class="lede">Build every logic gate from one gate. Sixteen levels, four worlds, and a real FabX task at the end: prove your design here, then build it on FabX to mine $FAB. The first five need no wallet.</p>
@@ -3169,6 +3212,68 @@ window.FT_CARD = {
       if (L.machine) { mHost.hidden = false; renderMachine(L, outs, probe); } else { mHost.hidden = true; mBuilt = ""; }
     }
   };
+})();
+</script>
+<script>
+// Course hero: a big live schematic. XOR built from four NANDs; the inputs cycle through every row, signals flow along the live wires,
+// each gate lights when its output is 1, and a PASSED stamp lands after all four rows. Pure SVG + CSS, no network.
+(() => {
+  const host = document.getElementById("hv"); if (!host) return;
+  const svg = document.getElementById("hvSvg"), tab = document.getElementById("hvTab"), stamp = document.getElementById("hvStamp"), rowLbl = document.getElementById("hvRow");
+  const NS = "http://www.w3.org/2000/svg", REDUCE = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const el = (t, a = {}, p = svg) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); p.appendChild(e); return e; };
+  // wires: [id, path, source signal, depth]
+  const W = [
+    ["a1", "M64,100 C110,100 110,201 150,201", "A", 0], ["b1", "M64,300 C110,300 110,229 150,229", "B", 0],
+    ["a2", "M64,100 H330", "A", 0], ["b3", "M64,300 H330", "B", 0],
+    ["g12", "M232,215 C282,215 282,128 330,128", "g1", 1], ["g13", "M232,215 C282,215 282,272 330,272", "g1", 1],
+    ["g24", "M412,114 C442,114 442,201 470,201", "g2", 2], ["g34", "M412,286 C442,286 442,229 470,229", "g3", 2],
+    ["y", "M552,215 H574", "y", 3]
+  ];
+  const GATES = [["G1", 150, 185, "g1"], ["G2", 330, 84, "g2"], ["G3", 330, 256, "g3"], ["G4", 470, 185, "y"]];
+  // backdrop grid + faint rails
+  for (let x = 0; x <= 600; x += 40) el("line", {x1: x, y1: 0, x2: x, y2: 400, class: "hvgrid"});
+  for (let y = 0; y <= 400; y += 40) el("line", {x1: 0, y1: y, x2: 600, y2: y, class: "hvgrid"});
+  const wires = {};
+  W.forEach(([id, d, sig, depth]) => { wires[id] = {p: el("path", {d, class: "hvw"}), sig, depth}; });
+  const gates = {};
+  GATES.forEach(([name, x, y, sig]) => {
+    const g = el("g", {transform: `translate(${x},${y})`, class: "hvg"});
+    el("path", {d: "M0,0 H40 A30,30 0 0 1 40,60 H0 Z", class: "hvgb"}, g); el("circle", {cx: 76, cy: 30, r: 6, class: "hvbub"}, g);
+    const t = el("text", {x: 18, y: 35, class: "hvgt"}, g); t.textContent = "NAND";
+    gates[sig] = g;
+  });
+  const chip = (x, y, name) => { const g = el("g", {class: "hvin"}); el("rect", {x, y: y - 14, width: 56, height: 28, rx: 2}, g); const t = el("text", {x: x + 28, y: y + 5, "text-anchor": "middle"}, g); return {g, t, name}; };
+  const inA = chip(8, 100, "A"), inB = chip(8, 300, "B");
+  const lamp = el("g", {class: "hvlamp"}); el("circle", {cx: 580, cy: 215, r: 18, class: "hvl0"}, lamp); el("circle", {cx: 580, cy: 215, r: 9, class: "hvl1"}, lamp);
+  const yt = el("text", {x: 580, y: 252, "text-anchor": "middle", class: "hvyt"}, svg);
+  // truth table
+  const ROWS = [[0, 0], [0, 1], [1, 1], [1, 0]]; let cells = [];
+  ROWS.forEach(([a, b]) => { const c = document.createElement("div"); c.className = "hvc"; c.innerHTML = `<span>A${a} B${b}</span><b>Y=${a ^ b}</b>`; tab.appendChild(c); cells.push(c); });
+  // state
+  let step = -1, seen = 0, prev = {};
+  const sigs = (a, b) => { const g1 = 1 - (a & b), g2 = 1 - (a & g1), g3 = 1 - (b & g1), y = 1 - (g2 & g3); return {A: a, B: b, g1, g2, g3, y}; };
+  function show(i, animate) {
+    const [a, b] = ROWS[i], v = sigs(a, b);
+    for (const id in wires) {
+      const w = wires[id], on = v[w.sig] === 1, was = prev[id] === 1;
+      w.p.classList.toggle("on", on);
+      w.p.classList.remove("surge"); if (on && !was && animate && !REDUCE) { void w.p.getBoundingClientRect(); w.p.style.animationDelay = `0s,${w.depth * 170}ms`; w.p.classList.add("surge"); }
+      prev[id] = on ? 1 : 0;
+    }
+    for (const s in gates) gates[s].classList.toggle("hot", v[s] === 1);
+    inA.g.classList.toggle("on", !!a); inB.g.classList.toggle("on", !!b); inA.t.textContent = "A = " + a; inB.t.textContent = "B = " + b;
+    lamp.classList.toggle("on", v.y === 1); yt.textContent = "Y = " + v.y; rowLbl.textContent = `A=${a} B=${b} → Y=${v.y}`;
+    cells.forEach((c, k) => c.classList.toggle("cur", k === i));
+  }
+  function tick() {
+    if (document.hidden || host.offsetParent === null) return;           // not on screen: do nothing
+    step = (step + 1) % ROWS.length; show(step, true);
+    cells[step].classList.add("seen");
+    if (++seen % ROWS.length === 0) { stamp.classList.remove("go"); void stamp.offsetWidth; stamp.classList.add("go"); setTimeout(() => cells.forEach(c => c.classList.remove("seen")), 1700); }
+  }
+  show(2, false); step = 2;
+  if (!REDUCE) { setTimeout(tick, 700); setInterval(tick, 2300); }
 })();
 </script>
 <script>

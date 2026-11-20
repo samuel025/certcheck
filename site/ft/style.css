@@ -759,3 +759,39 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 .spaddr{display:block;word-break:break-all;font:12px var(--mono);color:var(--green)}
 @media (max-width:760px){.spgrid,.sprow{grid-template-columns:1fr}}
 @media (max-width:900px){.gbar #levelNav{display:none}}   /* the Map button reaches every level; the strip only crowds narrow headers */
+
+/* ===== course hero: the live schematic ===== */
+.h4top{position:relative}
+.hv{display:none;margin:0}
+@media (min-width:1320px){
+  .hv{display:block;position:absolute;right:0;top:34px;width:clamp(430px,31vw,560px);border:1px solid #262c33;background:linear-gradient(180deg,#12161b,#0a0d11);padding:12px 14px 12px;box-shadow:0 40px 90px rgba(0,0,0,.55),0 0 90px rgba(0,216,146,.08);animation:rise .9s .25s both}
+  .hv::before,.hv::after{content:"";position:absolute;width:7px;height:7px;border-radius:50%;background:#252c34;top:8px}.hv::before{left:8px}.hv::after{right:8px}
+  .hvhead{display:flex;justify-content:space-between;align-items:center;padding:0 14px 8px;font:600 10.5px var(--mono);letter-spacing:.14em;color:var(--silver);border-bottom:1px solid #1d2329;margin-bottom:6px}
+  .hvled{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);margin-right:9px;animation:hvpulse 1.6s ease-in-out infinite}
+  .hvr{color:var(--green)}
+  #hvSvg{display:block;width:100%;height:auto}
+  .hvfoot{margin:10px 6px 2px;font-size:12.5px;line-height:1.45;color:var(--fog)}
+}
+@keyframes hvpulse{50%{opacity:.35}}
+.hvgrid{stroke:rgba(255,255,255,.035);stroke-width:1}
+.hvw{fill:none;stroke:#2b333b;stroke-width:3;stroke-linecap:round;transition:stroke .25s}
+.hvw.on{stroke:var(--green);stroke-dasharray:9 8;animation:hvflow .8s linear infinite;filter:drop-shadow(0 0 4px rgba(0,216,146,.7))}
+.hvw.on.surge{animation:hvflow .8s linear infinite,hvsurge .8s ease-out both}
+@keyframes hvflow{to{stroke-dashoffset:-34}}
+@keyframes hvsurge{0%{stroke:#fff;stroke-width:6;filter:drop-shadow(0 0 10px #fff)}100%{}}
+.hvgb{fill:#12171d;stroke:#4a535c;stroke-width:2.5;transition:all .3s}.hvbub{fill:#0a0d11;stroke:#4a535c;stroke-width:2.5;transition:all .3s}
+.hvg.hot .hvgb{fill:#0d2a22;stroke:var(--green);filter:drop-shadow(0 0 8px rgba(0,216,146,.45))}.hvg.hot .hvbub{stroke:var(--green)}
+.hvgt{font:700 11px var(--mono);letter-spacing:.1em;fill:#6b747d;text-anchor:start}.hvg.hot .hvgt{fill:#8ff0cf}
+.hvin rect{fill:#11151a;stroke:#3a434c;stroke-width:2;transition:all .25s}.hvin text{font:700 13px var(--mono);fill:#8a929a}
+.hvin.on rect{stroke:var(--green);fill:#0d2a22}.hvin.on text{fill:var(--green)}
+.hvl0{fill:none;stroke:#3a434c;stroke-width:2.5}.hvl1{fill:#1a2026;transition:all .25s}
+.hvlamp.on .hvl0{stroke:var(--green);filter:drop-shadow(0 0 10px rgba(0,216,146,.8))}.hvlamp.on .hvl1{fill:var(--green)}
+.hvyt{font:700 14px var(--mono);fill:var(--silver)}
+.hvtab{display:flex;gap:8px;margin:8px 6px 0}
+.hvc{flex:1;display:flex;flex-direction:column;gap:3px;padding:8px 10px;border:1px solid #232a32;font:11px var(--mono);color:var(--fog);transition:all .25s}
+.hvc b{font-size:13px;color:var(--silver)}.hvc.cur{border-color:var(--green);background:rgba(0,216,146,.09);color:var(--bone)}.hvc.cur b{color:var(--green)}.hvc.seen:not(.cur){border-color:#1f4a3b}
+.hvstamp{position:absolute;right:30px;top:62px;border:3px solid var(--green);color:var(--green);padding:6px 14px;font:800 18px var(--mono);letter-spacing:.16em;display:flex;flex-direction:column;align-items:center;background:rgba(5,22,17,.82);transform:rotate(-9deg) scale(1.6);opacity:0;pointer-events:none;box-shadow:0 0 30px rgba(0,216,146,.35)}
+.hvstamp span{font-size:10px;letter-spacing:.2em;font-weight:600}
+.hvstamp.go{animation:hvstamp 1.9s cubic-bezier(.2,.8,.2,1) both}
+@keyframes hvstamp{0%{opacity:0;transform:rotate(-9deg) scale(1.9)}14%{opacity:1;transform:rotate(-9deg) scale(1)}75%{opacity:1}100%{opacity:0;transform:rotate(-9deg) scale(1)}}
+@media (prefers-reduced-motion:reduce){.hvw.on,.hvw.on.surge,.hvled,.hvstamp.go{animation:none!important}}

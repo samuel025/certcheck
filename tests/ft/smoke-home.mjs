@@ -14,7 +14,7 @@ async function open(opts = {}) {
 const T = (p, s) => p.$eval(s, e => e.textContent);
 // ===== the live demo =====
 let p = await open();
-ok("the home page opens with the headline and the live demo", (await T(p, "#homeView h1")).startsWith("Credentials that prove") && await p.$eval("#forge", e => e.getBoundingClientRect().height > 200));
+ok("the home page opens with the headline and the live demo", (await T(p, "#homeView h1")).startsWith("Prove your event") && await p.$eval("#forge", e => e.getBoundingClientRect().height > 200));
 ok("before you press anything the demo is idle", (await T(p, "#fStep")) === "Ready" && (await p.$eval("#fResult", e => e.dataset.state)) === "idle" && await p.$eval("#fTamper", e => e.disabled));
 await p.click("#fRun"); await p.waitForFunction(() => !document.getElementById("fTamper").disabled, {timeout: 20000}); await sleep(200);
 const d1 = await p.evaluate(() => ({leaf: document.getElementById("fLeaf").textContent, root: document.getElementById("fRoot").textContent, st: document.getElementById("fResult").dataset.state, title: document.getElementById("fResTitle").textContent, qr: !!document.querySelector("#fQr svg path"), nodes: document.querySelectorAll("#fTree .tn").length, mine: document.querySelectorAll("#fTree .tn.me").length, path: document.querySelectorAll("#fTree .te.path").length, lit: document.querySelectorAll("#forge .fsteps li.on").length, name: document.getElementById("fCardName").textContent}));

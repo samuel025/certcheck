@@ -1,8 +1,8 @@
 # CertCheck
 
-**Certificates for what people attended. Passports for what people can prove.**
+**Prove your event worked.**
 
-CertCheck is one product with three rungs of trust. Anyone can issue tamper-proof certificates in minutes, anyone can verify them forever, and learners can earn a **skill passport** that a TapeOut processor on X Layer checks, with no issuer to trust. Nothing personal goes on-chain, and nothing depends on us staying online.
+Anyone can say people attended. CertCheck lets an event prove it, and prove who learned something. The **certificate** is the receipt: tamper-proof, private, and checkable by anyone forever. The **circuit lab** is the measurement: a graded exercise on a TapeOut processor on X Layer that earns a **skill passport** with no teacher's say-so in the middle. The **registry** is the tamper-proof report: an event can say "120 attended, 64 cleared the lab, 22 passed the exam" and each number is checkable on-chain. Nothing personal goes on-chain, and nothing depends on us staying online.
 
 Built on X Layer for the TapeOut Accelerate hackathon.
 
@@ -28,14 +28,16 @@ Built on X Layer for the TapeOut Accelerate hackathon.
 ---
 
 ## Why this exists
-A PDF certificate can be faked in a minute. A credential platform's database can vanish in a day, and it knows your name. A fingerprint on a public chain can be checked by anyone for as long as the chain lives, and it need not contain a single personal detail.
+Events report vanity numbers: sign-ups and attendance. Sponsors and communities pay for events to produce builders, and almost no event can show how many learned anything. CertCheck is one product that covers both halves: who showed up, and who can do it. The certificate alone is a commodity, and the game alone is a toy. Together they make verifiable outcomes.
+
+The trust side of the same idea: a PDF certificate can be faked in a minute. A credential platform's database can vanish in a day, and it knows your name. A fingerprint on a public chain can be checked by anyone for as long as the chain lives, and it need not contain a single personal detail.
 
 CertCheck publishes only a fingerprint of a whole batch (a Merkle root). Each person holds their own proof. Change one letter of a name and the check fails.
 
 The second idea is the passport. A certificate asks you to trust whoever issued it. A circuit that a processor has run needs no such trust, so the course makes a credential that proves itself.
 
 ## The three rungs of trust
-The question that decides what a credential is worth is *who you have to trust*.
+An event can prove three different things, and each needs a different amount of trust. This is *how* the product works; the point of it is above.
 
 | Rung | What it is | Trust needed | Where |
 |---|---|---|---|
@@ -130,7 +132,7 @@ All on X Layer mainnet (chain 196).
 | Per-certificate fee (after the free allowance) | Live on the contract, tested | 0.00024 OKB, about $0.02 at $83/OKB |
 | Prepaid credits (a sponsor can pay for others) | Live, tested | same rate |
 | Verified-issuer badge (escrowed, refundable if rejected) | Live; the owner approves each request by hand with `cast` (`docs/OWNER.md`) | 0.12 OKB, about $10 |
-| Sponsored course levels, sponsor-funded faucet | A pitch plus live on-chain numbers on `#circuits`; no payment mechanism | none |
+| Sponsored course levels, sponsor-funded faucet, and outcome proof for event sponsors ("how many builders did this event make?") | A pitch plus live on-chain numbers on `#circuits`; no payment mechanism and no outcome report page yet | none |
 | Public revenue totals | Live: `stats()` on-chain, shown on `#pricing` and `#judges` | none |
 
 **What the numbers mean.** A 200-certificate batch costs an organizer 175 paid certificates x 0.00024 = 0.042 OKB, about $3.50. Fifty organizers doing that twice a year, plus ten verified badges, is roughly $450 a year. That shows the model works at small scale. It is not income, and it is not a business yet.

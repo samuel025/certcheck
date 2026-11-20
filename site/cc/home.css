@@ -188,3 +188,27 @@
 
 .cc .home .hterm,.cc .home .hl,.cc .home .hr,.cc .home .panels>*{min-width:0}
 .cc .home .termin .pr{white-space:normal}
+
+/* ===== hero v5: the certificate cage (upright blades, like the FirstTape card cage) ===== */
+.cc .home .blades{position:relative;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:7px;height:262px;align-items:stretch;overflow:hidden;padding-top:8px}
+.cc .home .blade{display:flex;flex-direction:column;align-items:center;justify-content:space-between;height:100%;margin:0;padding:12px 0 10px;gap:8px;background:linear-gradient(180deg,#181d23,#0d1116);border:1px solid #232a32;border-radius:2px;transition:transform .3s cubic-bezier(.2,.7,.2,1),border-color .25s,box-shadow .3s}
+.cc .home .blade::before{content:"";width:3px;height:3px;border-radius:50%;background:#2a323b;box-shadow:7px 0 #2a323b,-7px 0 #2a323b;order:-1}
+.cc .home .blade::after{content:"";width:46%;height:3px;background:#1d242c;border-radius:2px}
+.cc .home .blade .led{width:62%;height:6px}
+.cc .home .blade .nm{flex:1;min-height:0;writing-mode:vertical-rl;transform:rotate(180deg);font-size:10px;letter-spacing:.16em;text-align:end;display:flex;align-items:flex-start}
+.cc .home .blade .hx{width:100%;text-align:center;font-size:8.5px;overflow:hidden;white-space:nowrap;text-overflow:clip;letter-spacing:0}
+.cc .home .blade[data-state=hash]{animation:hdrop .55s cubic-bezier(.2,.7,.2,1)}
+.cc .home .blade[data-state=ok],.cc .home .blade[data-state=sealed]{transform:translateY(-6px)}
+.cc .home .blade[data-state=ok]{box-shadow:0 0 22px rgba(0,216,146,.16),inset 0 0 0 1px rgba(0,216,146,.12)}
+.cc .home .blade[data-state=bad]{transform:translateY(-6px)}
+.cc .home .blade.me{outline-offset:2px}
+@keyframes hdrop{from{transform:translateY(-30px);opacity:.2}to{transform:translateY(0);opacity:1}}
+/* an idle scan beam sweeps the cage, like a verifier reading each blade in turn */
+.cc .home .blades::after{content:"";position:absolute;top:0;bottom:0;width:34px;left:-40px;background:linear-gradient(90deg,transparent,rgba(0,216,146,.16),rgba(0,216,146,.34),rgba(0,216,146,.16),transparent);pointer-events:none;opacity:0}
+.cc .home .chassis[data-state=idle] .blades::after{animation:hbeam 7s ease-in-out infinite 1.2s}
+@keyframes hbeam{0%{left:-40px;opacity:0}8%{opacity:1}55%{left:calc(100% + 6px);opacity:1}60%,100%{left:calc(100% + 6px);opacity:0}}
+.cc .home .chassis[data-state=idle] .blade[data-state=idle]{animation:hbreathe 5s ease-in-out infinite;animation-delay:calc(var(--i)*.25s)}
+@keyframes hbreathe{0%,100%{border-color:#232a32}50%{border-color:#2d4a40}}
+@media (hover:hover){.cc .home .blade:not([data-state=idle]):hover{transform:translateY(-12px);border-color:var(--green)}}
+@media (max-width:640px){.cc .home .blades{height:210px;gap:4px}.cc .home .blade .hx{display:none}.cc .home .blade .nm{font-size:9px}}
+@media (prefers-reduced-motion:reduce){.cc .home .blades::after,.cc .home .blade{animation:none!important}}

@@ -152,3 +152,4 @@
 .cc .calcout{border:1px solid var(--slate);background:#0a0d11;padding:10px 12px;min-height:44px;color:var(--bone);font:13px/1.5 var(--mono)}
 .cc .quote{margin:0 0 12px;color:var(--silver);font-size:14px}
 @media (max-width:900px){.cc .pricegrid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (max-width:520px){.cc .pricegrid{grid-template-columns:minmax(0,1fr)}}
+.cc .foot .footlinks a{color:var(--green);text-decoration:underline;text-underline-offset:3px}

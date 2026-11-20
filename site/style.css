@@ -37,3 +37,19 @@ td .btn{padding:5px 10px;font-size:11px}
 .foot{border-top:1px solid #1b1e22;padding:22px clamp(16px,4vw,56px);color:var(--fog);font-size:13px}.foot p{max-width:880px;margin:0 auto}
 @media (max-width:700px){.tabs{margin:0}.bar{flex-wrap:wrap;gap:12px}.grid3{grid-template-columns:1fr}.facts div{grid-template-columns:1fr;gap:2px}.step{gap:14px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* QR dialog + print sheet */
+dialog{background:var(--carbon);color:var(--silver);border:1px solid var(--slate);padding:0;max-width:min(92vw,460px);width:100%}
+dialog::backdrop{background:rgba(5,7,9,.75)}
+.card{padding:22px}.cardhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.card h2{font-size:26px;overflow-wrap:anywhere}
+.qrbox{background:#fff;padding:8px;margin:14px 0;max-width:340px}.qrbox svg{display:block;width:100%;height:auto}
+.cap{font:11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--steel)}
+#printArea{display:none}
+@media print{
+  body{background:#fff;color:#000}
+  body>*:not(#printArea){display:none!important}
+  #printArea{display:block}
+  .pcert{page-break-after:always;break-after:page;text-align:center;padding:40px 24px;color:#000}
+  .pcert h2{font:600 34px system-ui,sans-serif;margin:0 0 6px;color:#000}.pcert p{color:#333;margin:0}
+  .pcert .qrbox{max-width:260px;margin:24px auto;padding:0}.pfoot{font:11px ui-monospace,monospace;overflow-wrap:anywhere}
+}

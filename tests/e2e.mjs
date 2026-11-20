@@ -66,6 +66,19 @@ const blobs = await p.evaluate(() => window.__blobs), linksCsv = blobs[0], proof
 ok("links CSV has a header and 3 rows", /^name,link\r\n/.test(linksCsv) && linksCsv.trim().split("\r\n").length === 4);
 ok("proofs JSON has 3 portable proofs with no email or extra fields", proofs.length === 3 && proofs.every(x => Object.keys(x).sort().join() === "course,date,issuer,name,proof,root,salt,v"));
 const links = linksCsv.trim().split("\r\n").slice(1).map(l => l.slice(l.indexOf(",") + 1));
+// ----- QR + print -----
+await p.$eval("#rows tbody tr:nth-child(2) td:nth-child(2) button:nth-of-type(2)", b => b.click()); await sleep(200);
+ok("QR button opens the certificate dialog with the name and course", await p.$eval("#qrDlg", d => d.open) && (await T(p, "#qrName")) === "Alan Turing" && /Digital Logic/.test(await T(p, "#qrCourse")));
+const qrCells = await p.$eval("#qrSvg svg path", el => { const d = el.getAttribute("d"), out = []; for (const m of d.matchAll(/M(\d+),(\d+)h1v1h-1z/g)) out.push((+m[1] - 4) + "," + (+m[2] - 4)); return out; });
+const expected = await p.evaluate(l => { const q = CertQR.encode(l, "M"), out = []; q.modules.forEach((row, y) => row.forEach((v, x) => v && out.push(x + "," + y))); return out; }, links[1]);
+ok("the QR on screen encodes exactly this certificate's link (module-for-module)", qrCells.length === expected.length && qrCells.every((c, i) => c === expected[i]), qrCells.length + " vs " + expected.length);
+await p.click("#qrDownload"); await sleep(200); ok("Download QR gives an SVG file", /^<svg /.test((await p.evaluate(() => window.__blobs)).pop()));
+await p.click("#qrClose"); ok("the dialog closes", await p.$eval("#qrDlg", d => !d.open));
+await p.evaluate(() => { window.__printed = 0; window.print = () => { window.__printed++; }; });
+await p.click("#printAll"); await sleep(200);
+ok("Print certificates builds one card per person, each with a QR, and calls print", (await p.$$eval("#printArea .pcert", c => c.length)) === 3 && (await p.$$eval("#printArea .pcert svg", c => c.length)) === 3 && (await p.evaluate(() => window.__printed)) === 1);
+ok("printed cards show names as text", (await p.$$eval("#printArea .pcert h2", h => h.map(x => x.textContent).join("|"))) === "Ada Lovelace|Alan Turing|Grace Hopper");
+ok("on-screen content is hidden when printing (print stylesheet present)", await p.evaluate(() => [...document.styleSheets].some(s => [...s.cssRules].some(r => r.type === CSSRule.MEDIA_RULE && /print/.test(r.conditionText || r.media.mediaText)))));
 // not yet published: verifier says so
 let v = await open("/#verify"); ok("before publishing the verifier says 'Not registered'", (await verify(v, links[0])) === "unregistered"); await v.close();
 // wrong wallet refuses
@@ -142,6 +155,10 @@ await v.close();
 for (const [w, h, tag] of [[390, 844, "phone"], [1280, 800, "desktop"]]) {
   for (const hash of ["#issue", "#verify", "#manage"]) { const q = await open("/" + hash, w, h); ok(`${tag} ${hash}: no horizontal scroll`, await q.evaluate(() => document.documentElement.scrollWidth <= innerWidth), await q.evaluate(() => document.documentElement.scrollWidth + ">" + innerWidth)); await q.close(); }
 }
+// a name so long that the link cannot fit in a QR code
+p = await open("/"); await setv(p, "#issuerAddr", ACCT); await setv(p, "#course", "C"); await setv(p, "#csvText", "name\n" + "N".repeat(3200)); await p.click("#genBtn"); await sleep(500);
+await p.$eval("#rows tbody tr:nth-child(1) td:nth-child(2) button:nth-of-type(2)", b => b.click()); await sleep(200);
+ok("a link too long for a QR code says so and disables the download", /too long for a QR/.test(await T(p, "#qrSvg")) && await p.$eval("#qrDownload", b => b.disabled)); await p.close();
 // big batch performance
 p = await open("/"); await setv(p, "#issuerAddr", ACCT); await setv(p, "#course", "Mass");
 const t0 = Date.now(); await setv(p, "#csvText", "name\n" + Array.from({length: 2000}, (_, i) => "Person " + i).join("\n")); await p.click("#genBtn"); await p.waitForFunction(() => !document.getElementById("results").hidden, {timeout: 30000});

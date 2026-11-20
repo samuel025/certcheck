@@ -83,15 +83,39 @@
     links = batch.credentials.map(c => ({name: c.name, link: base + "#c=" + C.encodeLink(C.toProof(batch, c))}));
     $("rootOut").textContent = batch.root; $("countOut").textContent = String(batch.count);
     const tb = $("rows").tBodies[0]; tb.replaceChildren();
-    links.slice(0, MAXROWS).forEach(l => {
+    links.slice(0, MAXROWS).forEach((l, i) => {
       const tr = tb.insertRow(), n = tr.insertCell(), k = tr.insertCell(); n.textContent = l.name;
       const cp = document.createElement("button"); cp.className = "btn ghost"; cp.type = "button"; cp.textContent = "Copy link";
       cp.addEventListener("click", async () => { try { await navigator.clipboard.writeText(l.link); cp.textContent = "Copied"; } catch { cp.textContent = "Select manually"; } setTimeout(() => cp.textContent = "Copy link", 1500); });
-      k.append(cp, " ", mkLink({href: l.link, text: "Open"}));
+      const qb = document.createElement("button"); qb.className = "btn ghost"; qb.type = "button"; qb.textContent = "QR"; qb.addEventListener("click", () => openQR(i));
+      k.append(cp, " ", qb, " ", mkLink({href: l.link, text: "Open"}));
     });
     $("moreRows").textContent = links.length > MAXROWS ? `Showing ${MAXROWS} of ${links.length}. Download the file for everyone.` : "";
     $("results").hidden = false; say(h, "Done. Nothing has been sent anywhere yet.", "ok"); say($("pubMsg"), "", "");
   });
+  // ---------- QR + printable certificates ----------
+  function qrFor(link) { try { return CertQR.encode(link, "M"); } catch { try { return CertQR.encode(link, "L"); } catch { return null; } } }
+  const card = i => { const c = batch.credentials[i]; return {name: c.name, course: c.course, date: c.date, issuer: c.issuer, link: links[i].link}; };
+  function openQR(i) {
+    const c = card(i), q = qrFor(c.link), dlg = $("qrDlg"); $("qrMsg").textContent = "";
+    $("qrName").textContent = c.name; $("qrCourse").textContent = [c.course, c.date].filter(Boolean).join(" · "); $("qrIssuer").textContent = "Issuer " + c.issuer;
+    if (!q) { $("qrSvg").textContent = "This certificate's link is too long for a QR code. Share the link instead."; $("qrDownload").disabled = true; }
+    else { $("qrSvg").innerHTML = CertQR.toSVG(q); $("qrDownload").disabled = false; $("qrDownload").onclick = () => download(`certificate-${c.name.replace(/[^\w-]+/g, "_")}.svg`, CertQR.toSVG(q), "image/svg+xml"); }
+    $("qrPrint").onclick = () => { fillPrint([i]); window.print(); };
+    if (typeof dlg.showModal === "function") dlg.showModal(); else dlg.setAttribute("open", "");
+  }
+  $("qrClose").addEventListener("click", () => $("qrDlg").close ? $("qrDlg").close() : $("qrDlg").removeAttribute("open"));
+  function fillPrint(idx) {
+    const pa = $("printArea"); pa.replaceChildren();
+    idx.forEach(i => {
+      const c = card(i), q = qrFor(c.link), d = document.createElement("section"); d.className = "pcert";
+      const h = document.createElement("h2"); h.textContent = c.name; const s = document.createElement("p"); s.textContent = [c.course, c.date].filter(Boolean).join(" · ");
+      const b = document.createElement("div"); b.className = "qrbox"; if (q) b.innerHTML = CertQR.toSVG(q); else b.textContent = "Link too long for a QR code.";
+      const f = document.createElement("p"); f.className = "pfoot"; f.textContent = "Scan to verify on X Layer · issuer " + c.issuer;
+      d.append(h, s, b, f); pa.appendChild(d);
+    });
+  }
+  $("printAll").addEventListener("click", () => { if (!batch) return; if (batch.count > 200 && !confirm(`Print ${batch.count} certificates?`)) return; fillPrint(batch.credentials.map((_, i) => i)); window.print(); });
   $("dlLinks").addEventListener("click", () => download("certcheck-links.csv", "name,link\r\n" + links.map(l => csvEsc(l.name) + "," + csvEsc(l.link)).join("\r\n") + "\r\n", "text/csv"));
   $("dlProofs").addEventListener("click", () => download("certcheck-proofs.json", JSON.stringify(batch.credentials.map(c => C.toProof(batch, c)), null, 1), "application/json"));
   $("publishBtn").addEventListener("click", async () => {

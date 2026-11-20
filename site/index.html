@@ -61,7 +61,7 @@
     <div class="row"><button id="genBtn" class="btn primary" type="button">Generate certificates</button><span class="hint" id="genHint"></span></div>
     <div id="results" hidden>
       <dl class="facts"><div><dt>Batch fingerprint (Merkle root)</dt><dd class="mono" id="rootOut"></dd></div><div><dt>Certificates</dt><dd id="countOut"></dd></div></dl>
-      <div class="row"><button id="dlLinks" class="btn ghost" type="button">Download links (CSV)</button><button id="dlProofs" class="btn ghost" type="button">Download proofs (JSON)</button></div>
+      <div class="row"><button id="dlLinks" class="btn ghost" type="button">Download links (CSV)</button><button id="dlProofs" class="btn ghost" type="button">Download proofs (JSON)</button><button id="printAll" class="btn ghost" type="button">Print certificates</button></div>
       <div class="tablewrap"><table id="rows"><thead><tr><th>Name</th><th>Link</th></tr></thead><tbody></tbody></table></div>
       <p class="hint" id="moreRows"></p>
       <div class="publish"><h2>4 · Publish the fingerprint</h2>
@@ -88,11 +88,22 @@
 </section>
 </main>
 
+<dialog id="qrDlg" aria-label="Certificate">
+  <div class="card" id="qrCard">
+    <div class="cardhead"><span class="cap">Certificate</span><button id="qrClose" class="btn ghost sm" type="button" aria-label="Close">Close</button></div>
+    <h2 id="qrName"></h2><p id="qrCourse" class="sub"></p>
+    <div id="qrSvg" class="qrbox" role="img" aria-label="QR code that opens this certificate's verification"></div>
+    <p class="note" id="qrIssuer"></p><p class="note">Scan to verify. Anyone can check this certificate against the public record on X Layer.</p>
+    <div class="row"><button id="qrDownload" class="btn ghost" type="button">Download QR (SVG)</button><button id="qrPrint" class="btn ghost" type="button">Print</button><span class="hint" id="qrMsg"></span></div>
+  </div>
+</dialog>
+<div id="printArea" aria-hidden="true"></div>
 <footer class="foot">
   <p>No personal data is stored on-chain: only a batch fingerprint, a count and a label. The format is public (<code>docs/FORMAT.md</code>), so anyone can write their own verifier. Hackathon MVP, contracts unaudited.</p>
 </footer>
 
 <script src="core.js"></script>
+<script src="qr.js"></script>
 <script src="config.js"></script>
 <script src="chain.js"></script>
 <script src="app.js"></script>

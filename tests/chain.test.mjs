@@ -13,6 +13,14 @@ ok("revokeBatch", E.revokeBatch(R) === cast("calldata", "revokeBatch(bytes32)", 
 ok("revokeLeaf", E.revokeLeaf(R, L) === cast("calldata", "revokeLeaf(bytes32,bytes32)", R, L));
 ok("batch(address,bytes32)", E.batch(A, R) === cast("calldata", "batch(address,bytes32)", A, R));
 ok("isLeafRevoked", E.isLeafRevoked(A, R, L) === cast("calldata", "isLeafRevoked(address,bytes32,bytes32)", A, R, L));
+const PROC = "0x9e2849c04a513fe64db07521cbe52d078d905c0e";
+ok("eval(uint256,bytes) encoding", E.eval(9, "05") === cast("calldata", "eval(uint256,bytes)", "9", "0x05"));
+ok("eval encoding for a large circuit id", E.eval(123456789012345n, "00") === cast("calldata", "eval(uint256,bytes)", "123456789012345", "0x00"));
+ok("ownerOf and circuitInfo encodings", E.ownerOf(9) === cast("calldata", "ownerOf(uint256)", "9") && E.circuitInfo(9) === cast("calldata", "circuitInfo(uint256)", "9"));
+ok("decodeBytes reads an ABI-encoded bytes return", globalThis.CertChain.decodeBytes(cast("abi-encode", "f(bytes)", "0x01")) === "01");
+ok("tapeout(bytes,uint32,uint32) encoding (21 bytes)", E.tapeout("0x" + "00".repeat(21), 3, 1) === cast("calldata", "tapeout(bytes,uint32,uint32)", "0x" + "00".repeat(21), "3", "1"));
+ok("tapeout encoding for a 140-byte netlist (5 words)", E.tapeout("0x" + "ab".repeat(140), 3, 1) === cast("calldata", "tapeout(bytes,uint32,uint32)", "0x" + "ab".repeat(140), "3", "1"));
+ok("faucet and transistor balance encodings", E.claimed(A) === cast("calldata", "claimed(address)", A) && E.balanceOf(A, 0) === cast("calldata", "balanceOf(address,uint256)", A, "0"));
 // decoding: use cast to produce a real return blob for a known tuple
 const blob = cast("abi-encode", "f(address,uint64,uint32,bool,string)", A, "1700000000", "25", "false", "Cohort 7");
 const d = globalThis.CertChain.decodeBatch(blob);

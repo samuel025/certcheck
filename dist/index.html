@@ -61,6 +61,22 @@ dialog::backdrop{background:rgba(5,7,9,.75)}
   .pcert h2{font:600 34px system-ui,sans-serif;margin:0 0 6px;color:#000}.pcert p{color:#333;margin:0}
   .pcert .qrbox{max-width:260px;margin:24px auto;padding:0}.pfoot{font:11px ui-monospace,monospace;overflow-wrap:anywhere}
 }
+
+/* skill challenge + board */
+.check{display:flex;gap:10px;align-items:flex-start;font:14px var(--sans);letter-spacing:0;text-transform:none;color:var(--silver);cursor:pointer}.check input{margin-top:4px}
+.chgrid{display:grid;grid-template-columns:200px 1fr;gap:24px;margin:18px 0;align-items:start}
+#chTable{border-collapse:collapse;font:15px var(--mono)}#chTable th,#chTable td{padding:7px 14px;text-align:center;border:1px solid var(--slate)}#chTable tr.ok td{background:rgba(0,216,146,.14);color:var(--green)}#chTable tr.bad td{background:rgba(255,107,107,.10);color:var(--coral)}
+.boardbox{border:1px solid var(--slate);background:#0a0d11;background-image:radial-gradient(rgba(93,94,97,.35) 1px,transparent 1.2px);background-size:26px 26px}
+#chBoard{display:block;width:100%;height:auto;touch-action:none}
+#chBoard .wire{fill:none;stroke:#4a4d52;stroke-width:3}#chBoard .wire.on{stroke:var(--green);stroke-dasharray:9 7;animation:flow .8s linear infinite}#chBoard .wirehit{fill:none;stroke:transparent;stroke-width:14;cursor:pointer}
+@keyframes flow{to{stroke-dashoffset:-16}}
+#chBoard .gate .body{fill:#14171b;stroke:#4a4d52;stroke-width:2;cursor:grab}#chBoard .gate.used .body{stroke:#6b6e73}#chBoard .gate.hot .body{stroke:var(--green);fill:rgba(0,41,35,.6)}
+#chBoard .gate .bub{fill:#14171b;stroke:#4a4d52;stroke-width:2}#chBoard .gate text{font:11px var(--mono);letter-spacing:.12em;fill:#7a7c80;pointer-events:none}
+#chBoard .port{fill:#0b0e12;stroke:#818284;stroke-width:2;cursor:pointer}#chBoard .port:hover{stroke:var(--green)}#chBoard .port.sel{fill:var(--green)}#chBoard .port.cand{stroke:var(--green);stroke-dasharray:3 2}
+#chBoard .tog rect{fill:var(--carbon);stroke:var(--slate);stroke-width:1.5;cursor:pointer}#chBoard .tog text{fill:var(--silver);font:14px var(--mono);pointer-events:none}#chBoard .tog.on rect{fill:var(--teal);stroke:var(--green)}#chBoard .tog.on text{fill:var(--green)}
+#chBoard .yo{font:16px var(--mono);fill:var(--steel)}#chBoard .yo.on{fill:var(--green)}
+#subRows td.ok{color:var(--green)}#subRows td.bad{color:var(--coral)}
+@media (max-width:700px){.chgrid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -112,6 +128,19 @@ dialog::backdrop{background:rgba(5,7,9,.75)}
     <p class="note">The label is public and permanent. Don't put personal data in it.</p>
   </div></div>
 
+  <div class="step"><span class="num">+</span><div class="body">
+    <h2>Skill challenge <span class="cap">optional, uses TapeOut</span></h2>
+    <label class="check"><input type="checkbox" id="skillOn"> Require a skill challenge. Each person builds their own logic circuit and tapes it out on X Layer; the certificate then carries a proof the TapeOut processor re-checks.</label>
+    <div id="skillPanel" hidden>
+      <p class="sub">Everyone gets a different 3-input function, so a circuit cannot be copied from a classmate. It does not stop someone else building it for them.</p>
+      <div class="row"><button id="chGen" class="btn ghost" type="button">Create challenges for the list</button><button id="chDl" class="btn ghost" type="button" disabled>Download challenge links (CSV)</button><span class="hint" id="chGenHint"></span></div>
+      <div class="tablewrap" id="chRowsWrap" hidden><table id="chRows"><thead><tr><th>Name</th><th>Student link</th></tr></thead><tbody></tbody></table></div>
+      <div class="field"><label for="subText">Submission codes from students (one per line)</label><textarea id="subText" rows="4" spellcheck="false" placeholder="CCSUB1.…"></textarea></div>
+      <div class="row"><button id="subCheck" class="btn ghost" type="button">Check submissions on TapeOut</button><span class="hint" id="subHint"></span></div>
+      <div class="tablewrap" id="subWrap" hidden><table id="subRows"><thead><tr><th>Name</th><th>Circuit</th><th>Result</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </div></div>
+
   <div class="step"><span class="num">3</span><div class="body">
     <h2>Generate</h2>
     <div class="row"><button id="genBtn" class="btn primary" type="button">Generate certificates</button><span class="hint" id="genHint"></span></div>
@@ -125,6 +154,24 @@ dialog::backdrop{background:rgba(5,7,9,.75)}
         <div class="row"><button id="publishBtn" class="btn primary" type="button">Publish on X Layer</button><span class="hint" id="pubMsg" role="status"></span></div></div>
     </div>
   </div></div>
+</section>
+
+<!-- ===== STUDENT CHALLENGE ===== -->
+<section id="challengeView" class="view" hidden>
+  <h1>Your skill challenge</h1>
+  <p class="lede">Build a circuit from NAND gates that produces the table below. This table is unique to you. Click an output dot, then an input dot, to wire. Double-click a gate or a wire to remove it.</p>
+  <p class="hint bad" id="chError" hidden></p>
+  <div class="chgrid" id="chGrid">
+    <table id="chTable" aria-label="Your required truth table"><thead><tr><th>A</th><th>B</th><th>C</th><th>Y</th></tr></thead><tbody></tbody></table>
+    <div class="boardbox"><svg id="chBoard"></svg></div>
+  </div>
+  <div class="row"><button id="chAdd" class="btn ghost" type="button">+ Gate</button><button id="chDel" class="btn ghost" type="button">− Gate</button><button id="chReset" class="btn ghost" type="button">Reset</button><span class="hint" id="chStatus" role="status"></span></div>
+  <div id="chDone" class="publish" hidden>
+    <h2>Your circuit matches. Put it on TapeOut.</h2>
+    <p class="sub">This mints your circuit on X Layer. NAND transistors are free from the faucet (once per wallet). The network fee is about <b id="chFee">0.0013 OKB</b>.</p>
+    <div class="row"><button id="chTape" class="btn primary" type="button">Tape out on X Layer</button><span class="hint" id="chMsg" role="status"></span></div>
+    <div id="chCodeBox" hidden><label for="chCode">Your submission code. Send it to your organizer.</label><textarea id="chCode" rows="2" readonly></textarea><div class="row"><button id="chCopy" class="btn ghost" type="button">Copy code</button></div></div>
+  </div>
 </section>
 
 <!-- ===== MANAGE ===== -->
@@ -160,9 +207,9 @@ dialog::backdrop{background:rgba(5,7,9,.75)}
 
 <script>
 // CertCheck core: salted credential leaves, a Merkle tree and portable proofs. No dependencies; uses the built-in SHA-256 (WebCrypto).
-// Format v1 (also documented in docs/FORMAT.md):
+// Format v2 (also documented in docs/FORMAT.md):
 //   canon(fields)  = for each field: 4-byte big-endian length + UTF-8 bytes          (no ambiguity between fields)
-//   leaf           = SHA-256( 0x00 || canon([issuer, name, course, date, salt]) )
+//   leaf           = SHA-256( 0x00 || canon([issuer, name, course, date, salt, skill]) )   skill is "" or "fn3:<seed>:<circuitId>:<processor>"
 //   node           = SHA-256( 0x01 || left || right )
 //   An unpaired node is promoted unchanged to the next level (never duplicated), so [a,b,c] and [a,b,c,c] have different roots.
 //   proof          = list of {s:"L"|"R", h:hex}: the sibling's side and hash, from the leaf upward.
@@ -178,11 +225,13 @@ dialog::backdrop{background:rgba(5,7,9,.75)}
   function canon(fields) {
     return cat(...fields.map(f => { const b = enc.encode(f), l = new Uint8Array(4); new DataView(l.buffer).setUint32(0, b.length); return cat(l, b); }));
   }
-  const fieldsOf = c => [String(c.issuer).toLowerCase(), norm(c.name), norm(c.course), norm(c.date), String(c.salt).toLowerCase()];
+  const SKILL = /^fn3:[0-9a-f]{32}:\d{1,18}:0x[0-9a-f]{40}$/;
+  const fieldsOf = c => [String(c.issuer).toLowerCase(), norm(c.name), norm(c.course), norm(c.date), String(c.salt).toLowerCase(), String(c.skill || "").toLowerCase()];
   async function leafHash(c) {
     if (!ADDR.test(c.issuer)) throw new Error("issuer must be an 0x address");
     if (!norm(c.name)) throw new Error("name is empty");
     if (!/^[0-9a-f]{32}$/i.test(c.salt)) throw new Error("salt must be 16 bytes of hex");
+    if (c.skill && !SKILL.test(String(c.skill).toLowerCase())) throw new Error("malformed skill field");
     return sha(cat(new Uint8Array([0]), canon(fieldsOf(c))));
   }
   const nodeHash = (l, r) => sha(cat(new Uint8Array([1]), l, r));
@@ -212,7 +261,7 @@ dialog::backdrop{background:rgba(5,7,9,.75)}
   // Recompute from the credential's own fields; never trusts the stored leaf. -> {ok, root, leaf, error?}
   async function verifyCredential(p) {
     try {
-      if (!p || p.v !== 1) return {ok: false, error: "Unsupported proof version."};
+      if (!p || p.v !== 2) return {ok: false, error: "Unsupported proof version."};
       let h = await leafHash(p); const leaf = "0x" + hex(h);
       for (const step of p.proof || []) {
         const s = unhex(step.h); if (s.length !== 32) throw new Error("bad proof step");
@@ -226,7 +275,7 @@ dialog::backdrop{background:rgba(5,7,9,.75)}
   const b64u = u8 => btoa(String.fromCharCode(...u8)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   const unb64u = s => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/")), ch => ch.charCodeAt(0));
   // Portable proof: the fields a verifier needs, nothing else. Short keys keep links small.
-  const toProof = (batch, c) => ({v: 1, root: batch.root, issuer: c.issuer.toLowerCase(), name: norm(c.name), course: norm(c.course), date: norm(c.date), salt: c.salt.toLowerCase(), proof: c.proof});
+  const toProof = (batch, c) => { const o = {v: 2, root: batch.root, issuer: c.issuer.toLowerCase(), name: norm(c.name), course: norm(c.course), date: norm(c.date), salt: c.salt.toLowerCase()}; if (c.skill) o.skill = String(c.skill).toLowerCase(); o.proof = c.proof; return o; };
   const encodeLink = p => b64u(enc.encode(JSON.stringify(p)));
   const decodeLink = s => JSON.parse(new TextDecoder().decode(unb64u(String(s).trim().replace(/^#?c=/, ""))));
 
@@ -251,7 +300,26 @@ dialog::backdrop{background:rgba(5,7,9,.75)}
     return {rows: out};
   }
 
-  root.CertCore = {canon, leafHash, buildBatch, verifyCredential, toProof, encodeLink, decodeLink, parseCSV, newSalt, norm, hex};
+  // ---- skill challenge (format fn3): a unique 3-input boolean function per seed ----
+  // table bit m (m = input vector, input k = bit k of m) is the required output. Matches TapeOut's eval bit order (input 0 = LSB).
+  const dependsOnAll = t => [0, 1, 2].every(k => { for (let m = 0; m < 8; m++) if (!(m & (1 << k)) && (((t >> m) & 1) !== ((t >> (m | (1 << k))) & 1))) return true; return false; });
+  async function challengeTable(seedHex) {
+    const seed = unhex(seedHex); if (seed.length !== 16) throw new Error("seed must be 16 bytes");
+    for (let ctr = 0; ctr < 255; ctr++) { const t = (await sha(cat(enc.encode("certcheck-challenge-v1"), seed, new Uint8Array([ctr]))))[0]; if (dependsOnAll(t)) return t; }
+    throw new Error("no challenge found");
+  }
+  const skillString = (seed, circuitId, processor) => `fn3:${String(seed).toLowerCase()}:${BigInt(circuitId).toString()}:${String(processor).toLowerCase()}`;
+  function parseSkill(s) { const t = String(s || "").toLowerCase(); if (!SKILL.test(t)) return null; const [, seed, id, proc] = t.split(":"); return {seed, circuitId: id, processor: proc}; }
+  // n seeds whose functions are all different (while n <= the 218 valid functions); beyond that, repeats are unavoidable.
+  async function uniqueSeeds(n) {
+    const out = [], used = new Set();
+    for (let guard = 0; out.length < n && guard < n * 60 + 500; guard++) { const seed = newSalt(), t = await challengeTable(seed); if (n <= CHALLENGE_FUNCTIONS && used.has(t)) continue; used.add(t); out.push({seed, table: t}); }
+    if (out.length < n) throw new Error("could not generate enough distinct challenges");
+    return out;
+  }
+  let CHALLENGE_FUNCTIONS = 0; for (let t = 0; t < 256; t++) if (dependsOnAll(t)) CHALLENGE_FUNCTIONS++;
+
+  root.CertCore = {CHALLENGE_FUNCTIONS, challengeTable, skillString, parseSkill, uniqueSeeds, canon, leafHash, buildBatch, verifyCredential, toProof, encodeLink, decodeLink, parseCSV, newSalt, norm, hex};
 })(typeof window !== "undefined" ? window : globalThis);
 </script>
 <script>
@@ -342,7 +410,10 @@ dialog::backdrop{background:rgba(5,7,9,.75)}
 window.CC_CONFIG = {
   registry: "0xF965f9Fd3A6F36E000abE1288aE1363B9F920670",   // CertRegistry on X Layer mainnet (tx 0x6184…c19d). All zeros = demo mode.
   chainId: 196, chainName: "X Layer", rpc: "https://rpc.xlayer.tech", explorer: "https://www.oklink.com/xlayer",
-  currency: {name: "OKB", symbol: "OKB", decimals: 18}
+  currency: {name: "OKB", symbol: "OKB", decimals: 18},
+  // TapeOut processor (the circuits ERC-721 + eval). Skill proofs are checked ONLY against processors listed here.
+  processors: ["0x9e2849c04a513fe64db07521cbe52d078d905c0e"],
+  tapeout: {processor: "0x9e2849c04a513fe64db07521cbe52d078d905c0e", transistors: "0xd0faafc5b9149cae7bd9af64070fee33c46ed619", faucet: "0xBC58802002307fD80048e93A6475335eC65a4f39", feeWei: "1300000000000000"}
 };
 </script>
 <script>
@@ -359,13 +430,40 @@ window.CC_CONFIG = {
     batch: (issuer, r) => SEL.batch + addr(issuer) + b32(r),
     isLeafRevoked: (issuer, r, l) => SEL.isLeafRevoked + addr(issuer) + b32(r) + b32(l)
   };
+  // ---- TapeOut processor (read-only) ----
+  const TSEL = {eval: "0x934d06ea", ownerOf: "0x6352211e", circuitInfo: "0x084d60f1"};
+  enc.eval = (id, byteHex) => { const d = byteHex.replace("0x", ""), len = d.length / 2; return TSEL.eval + w(id) + w(64) + w(len) + d.padEnd(Math.ceil(len / 32) * 64, "0"); };
+  enc.ownerOf = id => TSEL.ownerOf + w(id); enc.circuitInfo = id => TSEL.circuitInfo + w(id);
+  function decodeBytes(hex) { const h = hex.replace("0x", ""), off = Number(BigInt("0x" + h.slice(0, 64))) * 2, len = Number(BigInt("0x" + h.slice(off, off + 64))); return h.slice(off + 64, off + 64 + len * 2); }
+  const evalCircuit = async (proc, id, inputByte) => parseInt(decodeBytes(await callAt(proc, enc.eval(id, inputByte.toString(16).padStart(2, "0")))).slice(0, 2) || "0", 16);
+  const circuitOwner = async (proc, id) => "0x" + (await callAt(proc, enc.ownerOf(id))).slice(-40);
+  const circuitInfo = async (proc, id) => { const h = (await callAt(proc, enc.circuitInfo(id))).replace("0x", ""); return {nIn: Number(BigInt("0x" + h.slice(0, 64))), nOut: Number(BigInt("0x" + h.slice(64, 128)))}; };
+  // ---- student tape-out flow (faucet claim + tape-out on the TapeOut processor) ----
+  const TOSEL = {claim: "0x4e71d92d", claimed: "0xc884ef83", tapeout: "0x7bd3ac1d", balanceOf: "0x00fdd58e"};
+  const TRANSFER = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
+  enc.tapeout = (hex, nIn, nOut) => { const d = hex.replace("0x", ""), len = d.length / 2; return TOSEL.tapeout + w(96) + w(nIn) + w(nOut) + w(len) + d.padEnd(Math.ceil(len / 32) * 64, "0"); };
+  enc.claimed = a => TOSEL.claimed + addr(a); enc.balanceOf = (a, id) => TOSEL.balanceOf + addr(a) + w(id);
+  async function tapeoutCircuit(hex, nIn, nOut, gates, account, say) {
+    const T = C().tapeout, tokens = !!T.transistors;
+    if (tokens) {
+      let have = BigInt(await callAt(T.transistors, enc.balanceOf(account, 0)));
+      if (have < BigInt(gates) && BigInt(await callAt(T.faucet, enc.claimed(account))) === 0n) { say("Claiming free NAND transistors…"); await sendTo(T.faucet, account, TOSEL.claim); have = BigInt(await callAt(T.transistors, enc.balanceOf(account, 0))); }
+      if (have < BigInt(gates)) throw new Error(`You need ${gates} NAND transistors but hold ${have}. Use fewer gates, or get more NAND (each wallet can claim from the free faucet once).`);
+    }
+    say("Taping out your circuit: confirm in your wallet…");
+    const r = await sendTo(T.processor, account, enc.tapeout(hex, nIn, nOut), T.feeWei);
+    const log = r.logs.find(l => l.address.toLowerCase() === T.processor.toLowerCase() && l.topics[0] === TRANSFER && l.topics.length === 4);
+    if (!log) throw new Error("The tape-out went through but no circuit id was found in the logs.");
+    return {circuitId: BigInt(log.topics[3]).toString(), tx: r.transactionHash};
+  }
   const configured = () => !ZERO.test(C().registry);
   async function rpc(method, params) {
     const res = await fetch(C().rpc, {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({jsonrpc: "2.0", id: 1, method, params})});
     if (!res.ok) throw new Error("RPC " + res.status);
-    const j = await res.json(); if (j.error) throw new Error(j.error.message || "RPC error"); return j.result;
+    const j = await res.json(); if (j.error) { const e = new Error(j.error.message || "RPC error"); e.rpc = true; throw e; } return j.result;
   }
-  const call = data => rpc("eth_call", [{to: C().registry, data}, "latest"]);
+  const callAt = (to, data) => rpc("eth_call", [{to, data}, "latest"]);
+  const call = data => callAt(C().registry, data);
   function decodeBatch(hex) {
     const h = hex.replace("0x", ""), word = i => h.slice(i * 64, i * 64 + 64);
     const issuer = "0x" + word(0).slice(24);
@@ -392,14 +490,301 @@ window.CC_CONFIG = {
     for (let i = 0; i < 90; i++) { const r = await eth().request({method: "eth_getTransactionReceipt", params: [hash]}); if (r) { if (r.status !== "0x1") throw new Error("Transaction failed: " + hash); return r; } await new Promise(r => setTimeout(r, 2000)); }
     throw new Error("Timed out waiting for " + hash);
   }
+  async function sendTo(to, from, data, value) { const hash = await eth().request({method: "eth_sendTransaction", params: [{from, to, data, value: value ? "0x" + BigInt(value).toString(16) : "0x0"}]}); return waitReceipt(hash); }
   async function send(from, data) {
     if (!configured()) throw new Error("The registry contract is not deployed yet (demo mode).");
-    const hash = await eth().request({method: "eth_sendTransaction", params: [{from, to: C().registry, data}]});
-    await waitReceipt(hash); return hash;
+    return (await sendTo(C().registry, from, data)).transactionHash;
   }
   const explorerTx = h => C().explorer + "/tx/" + h, explorerAddr = a => C().explorer + "/address/" + a;
-  root.CertChain = {enc, decodeBatch, configured, readBatch, readLeafRevoked, connect, send, explorerTx, explorerAddr};
+  root.CertChain = {tapeoutCircuit, evalCircuit, circuitOwner, circuitInfo, decodeBytes, callAt, enc, decodeBatch, configured, readBatch, readLeafRevoked, connect, send, explorerTx, explorerAddr};
 })(typeof window !== "undefined" ? window : globalThis);
+</script>
+<script>
+// Skill proof check: does the TapeOut circuit named in a credential really compute the student's challenge function?
+// Read-only. Uses the TapeOut processor's free `eval`. Only processors listed in CC_CONFIG.processors are trusted.
+(function (root) {
+  const C = root.CertCore, X = root.CertChain;
+  const trusted = () => (root.CC_CONFIG.processors || []).map(a => a.toLowerCase());
+  // -> {state, rows?, owner?, circuitId?, processor?, reason?}   state: "ok" | "bad" | "untrusted" | "offline"
+  async function check(skillStr) {
+    const sk = C.parseSkill(skillStr); if (!sk) return {state: "bad", reason: "The skill proof is malformed."};
+    if (!trusted().includes(sk.processor)) return {state: "untrusted", processor: sk.processor, reason: "This credential's skill proof points at a contract that is not a recognised TapeOut processor, so it was not checked."};
+    const id = BigInt(sk.circuitId), table = await C.challengeTable(sk.seed);
+    try {
+      let info; try { info = await X.circuitInfo(sk.processor, id); } catch (e) { if (e.rpc) return {state: "bad", reason: "That circuit does not exist on TapeOut."}; throw e; }
+      if (info.nIn !== 3 || info.nOut !== 1) return {state: "bad", circuitId: sk.circuitId, reason: `The circuit has ${info.nIn} inputs and ${info.nOut} outputs; the challenge needs 3 inputs and 1 output.`};
+      const got = await Promise.all([0, 1, 2, 3, 4, 5, 6, 7].map(m => X.evalCircuit(sk.processor, id, m)));
+      const rows = got.map((g, m) => ({m, expected: (table >> m) & 1, got: g & 1}));
+      const owner = await X.circuitOwner(sk.processor, id).catch(() => null);
+      return {state: rows.every(r => r.expected === r.got) ? "ok" : "bad", rows, owner, circuitId: sk.circuitId, processor: sk.processor, table, reason: "The circuit does not compute the challenge function."};
+    } catch (e) { return {state: "offline", reason: String(e.message || e)}; }
+  }
+  root.CertSkill = {check};
+})(typeof window !== "undefined" ? window : globalThis);
+</script>
+<script>
+// Encodes the board's NAND graph into a TapeOut netlist (verified on X Layer fork).
+// board: {inputs:[names], outputs:[names], nodes:[{id,kind:'in'|'out'|'nand'}], wires:[{from,to,toPort}]}
+// Returns {hex, nIn, nOut, gates} or {error}.
+window.encodeNetlist = function (L, nodes, wires) {
+  const nIn = L.inputs.length, nOut = L.outputs.length;
+  const nands = nodes.filter(n => n.kind === "nand");
+  const ref = new Map(); // node id -> ref number
+  nodes.filter(n => n.kind === "in").forEach((n, i) => ref.set(n.id, 2 + i));
+  const src = (id, port) => wires.find(w => w.to === id && w.toPort === port);
+  // topological order (gates only reference earlier refs)
+  const order = [], seen = new Set(), visiting = new Set();
+  const visit = n => {
+    if (seen.has(n.id)) return true; if (visiting.has(n.id)) return false;
+    visiting.add(n.id);
+    for (const p of ["in0", "in1"]) {
+      const w = src(n.id, p); if (!w) return null;
+      const f = nodes.find(x => x.id === w.from);
+      if (f.kind === "nand") { const r = visit(f); if (r !== true) return r; }
+    }
+    visiting.delete(n.id); seen.add(n.id); order.push(n); return true;
+  };
+  // outputs must be the LAST nOut gates, in output order
+  const outs = nodes.filter(n => n.kind === "out"), drivers = [];
+  for (const o of outs) {
+    const w = src(o.id, "in0"); if (!w) return {error: "Output " + o.name + " is not wired."};
+    const d = nodes.find(x => x.id === w.from);
+    if (d.kind !== "nand") return {error: "Output " + o.name + " must come from a gate."};
+    drivers.push(d);
+  }
+  for (const d of drivers) { const r = visit(d); if (r === null) return {error: "A gate input is unwired."}; if (r === false) return {error: "Loop detected."}; }
+  const rest = order.filter(g => !drivers.includes(g)), final = [...rest, ...drivers];
+  if (new Set(drivers).size !== drivers.length) return {error: "Each output needs its own gate."};
+  final.forEach((g, i) => ref.set(g.id, 2 + nIn + i));
+  const b3 = n => n.toString(16).padStart(6, "0");
+  let hex = "0x";
+  for (const g of final) {
+    const a = ref.get(src(g.id, "in0").from), b = ref.get(src(g.id, "in1").from);
+    hex += "00" + b3(a) + b3(b);
+  }
+  return {hex, nIn, nOut, gates: final.length};
+};
+
+// ---- Import / lint / optimize (pure functions; ref numbering as in encodeNetlist: 0/1 constants, 2.. inputs, then gates) ----
+// decodeNetlist("0x00...", nIn, nOut) -> {gates:[{a,b}]} or {error}
+window.decodeNetlist = function (text, nIn, nOut) {
+  let h = String(text || "").trim().replace(/^0x/i, "").replace(/\s+/g, "");
+  if (!h) return {error: "Paste a hex netlist first."};
+  if (!/^[0-9a-f]+$/i.test(h)) return {error: "That is not hex. Paste only the netlist bytes (0x00…)."};
+  if (h.length % 14) return {error: `Netlist length must be a multiple of 7 bytes (one NAND = 7 bytes); got ${h.length / 2} bytes. LATCH circuits are not supported here.`};
+  const gates = [];
+  for (let i = 0; i < h.length; i += 14) {
+    if (h.slice(i, i + 2) !== "00") return {error: `Gate ${i / 14 + 1} is not a plain NAND (opcode ${h.slice(i, i + 2)}). Only NAND netlists load here.`};
+    const a = parseInt(h.slice(i + 2, i + 8), 16), b = parseInt(h.slice(i + 8, i + 14), 16), k = i / 14, lim = 2 + nIn + k;
+    if (a < 2 || b < 2) return {error: `Gate ${k + 1} uses a constant input. The board has no constants; tie it to an input instead.`};
+    if (a >= lim || b >= lim) return {error: `Gate ${k + 1} points at a signal that does not exist yet (inputs: ${nIn}).`};
+    gates.push({a, b});
+  }
+  if (!gates.length) return {error: "Empty netlist."};
+  if (nOut > gates.length) return {error: `${nOut} outputs need at least ${nOut} gates.`};
+  return {gates};
+};
+window.encodeGates = function (gates) {
+  const b3 = n => n.toString(16).padStart(6, "0");
+  return "0x" + gates.map(g => "00" + b3(g.a) + b3(g.b)).join("");
+};
+// optimizeNetlist(gates, nIn, nOut) -> {gates, hex, removed, steps}. Never changes behaviour:
+//  1) drop gates that feed no output, 2) NAND(NAND(y,y),NAND(y,y)) -> y, 3) merge gates with identical inputs.
+window.optimizeNetlist = function (gates0, nIn, nOut) {
+  const base = 2 + nIn, n0 = gates0.length;
+  let G = gates0.map(g => ({a: g.a, b: g.b})), steps = [];
+  const outIdx = new Set(); for (let i = n0 - nOut; i < n0; i++) outIdx.add(i);
+  const alias = new Map(); // ref -> ref
+  const res = r => { while (alias.has(r)) r = alias.get(r); return r; };
+  const gi = r => r - base; // gate index of a ref (>=0 means gate)
+  let changed = true, guard = 0;
+  while (changed && guard++ < 200) {
+    changed = false;
+    for (let i = 0; i < G.length; i++) {
+      if (outIdx.has(i) || alias.has(base + i)) continue;
+      const a = res(G[i].a), b = res(G[i].b);
+      if (a === b && gi(a) >= 0 && !alias.has(a)) {
+        const h = G[gi(a)], ha = res(h.a), hb = res(h.b);
+        if (ha === hb) { alias.set(base + i, ha); steps.push(`Gate ${i + 1} is a double inverter (NOT of NOT): replaced by its source.`); changed = true; continue; }
+      }
+      for (let j = 0; j < i; j++) {
+        if (alias.has(base + j)) continue;
+        const c = res(G[j].a), d = res(G[j].b);
+        if ((a === c && b === d) || (a === d && b === c)) { alias.set(base + i, base + j); steps.push(`Gate ${i + 1} duplicates gate ${j + 1}: merged.`); changed = true; break; }
+      }
+    }
+  }
+  // reachability from outputs after aliasing
+  const live = new Set(), walk = r => { r = res(r); const k = gi(r); if (k < 0 || live.has(k)) return; live.add(k); walk(G[k].a); walk(G[k].b); };
+  outIdx.forEach(i => { live.add(i); walk(G[i].a); walk(G[i].b); });
+  for (let i = 0; i < G.length; i++) if (!live.has(i) && !alias.has(base + i)) steps.push(`Gate ${i + 1} feeds no output: removed.`);
+  const keep = [...live].sort((x, y) => x - y), newIdx = new Map(keep.map((k, n) => [k, n]));
+  const remap = r => { r = res(r); const k = gi(r); return k < 0 ? r : base + newIdx.get(k); };
+  const out = keep.map(k => ({a: remap(G[k].a), b: remap(G[k].b)}));
+  return {gates: out, hex: window.encodeGates(out), removed: n0 - out.length, steps};
+};
+// Evaluate a gate list for all input rows -> array of output-bit arrays (used to prove optimize() keeps behaviour)
+window.evalGates = function (gates, nIn, nOut) {
+  const rows = [];
+  for (let m = 0; m < (1 << nIn); m++) {
+    const v = {0: 0, 1: 1}; for (let k = 0; k < nIn; k++) v[2 + k] = (m >> k) & 1;
+    gates.forEach((g, i) => { v[2 + nIn + i] = 1 - (v[g.a] & v[g.b]); });
+    rows.push(Array.from({length: nOut}, (_, o) => v[2 + nIn + gates.length - nOut + o]));
+  }
+  return rows;
+};
+</script>
+<script>
+// Compact NAND canvas for the student challenge. Click an output dot, then an input dot, to wire. Drag gates. Double-click a wire or gate to remove it.
+// Inputs A,B,C (3) and one output Y. Live-checks against the challenge truth table. Uses encodeNetlist() from netlist.js to export.
+(function (root) {
+  const NS = "http://www.w3.org/2000/svg", W = 800, H = 480, GW = 74, GH = 52, PR = 7;
+  const el = (name, attrs, parent) => { const e = document.createElementNS(NS, name); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+  const NAMES = ["A", "B", "C"];
+
+  function mount(svg, opts) {
+    const table = opts.table, L = {inputs: NAMES, outputs: ["Y"]}, onChange = opts.onChange || (() => {});
+    let nodes = [], wires = [], pending = null, nextId = 1, probe = [0, 0, 0], drag = null;
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.setAttribute("role", "group"); svg.setAttribute("aria-label", "Circuit board. Click an output dot, then an input dot, to wire gates.");
+
+    const reset = (gateCount = 6) => {
+      nodes = []; wires = []; pending = null; nextId = 1;
+      NAMES.forEach((n, i) => nodes.push({id: nextId++, kind: "in", name: n, i, x: 50, y: 90 + i * 150}));
+      nodes.push({id: nextId++, kind: "out", name: "Y", x: W - 50, y: H / 2});
+      for (let g = 0; g < gateCount; g++) nodes.push({id: nextId++, kind: "nand", x: 190 + Math.floor(g / 3) * 170, y: 70 + (g % 3) * 130});
+      render();
+    };
+    const gatesOf = () => nodes.filter(n => n.kind === "nand");
+    const srcOf = (id, port) => wires.find(w => w.to === id && w.toPort === port);
+    const byId = id => nodes.find(n => n.id === id);
+    const portPos = (n, port) => n.kind === "in" ? [n.x + 22, n.y] : n.kind === "out" ? [n.x - 22, n.y] : port === "out" ? [n.x + GW + 14, n.y + GH / 2] : [n.x - 2, n.y + (port === "in0" ? 14 : 38)];
+
+    // evaluation: undefined means "not wired yet"
+    function evalAt(vec) {
+      const memo = new Map(), seen = new Set();
+      const val = n => {
+        if (n.kind === "in") return vec[n.i];
+        if (memo.has(n.id)) return memo.get(n.id);
+        if (seen.has(n.id)) return undefined; seen.add(n.id);
+        let r;
+        if (n.kind === "out") { const w = srcOf(n.id, "in0"); r = w ? val(byId(w.from)) : undefined; }
+        else { const a = srcOf(n.id, "in0"), b = srcOf(n.id, "in1"), x = a ? val(byId(a.from)) : undefined, y = b ? val(byId(b.from)) : undefined; r = x === undefined || y === undefined ? undefined : 1 - (x & y); }
+        seen.delete(n.id); memo.set(n.id, r); return r;
+      };
+      return {val, out: val(nodes.find(n => n.kind === "out"))};
+    }
+    const rows = () => Array.from({length: 8}, (_, m) => { const got = evalAt([m & 1, (m >> 1) & 1, (m >> 2) & 1]).out, exp = (table >> m) & 1; return {m, exp, got, ok: got === exp}; });
+    const used = () => { const u = new Set(), walk = n => { for (const p of ["in0", "in1"]) { const w = srcOf(n.id, p); if (!w) continue; const f = byId(w.from); if (f.kind === "nand" && !u.has(f.id)) { u.add(f.id); walk(f); } } }; nodes.filter(n => n.kind === "out").forEach(walk); return u; };
+
+    function render() {
+      svg.replaceChildren();
+      const cur = evalAt(probe), pt = svg.createSVGPoint ? null : null;
+      // wires first
+      wires.forEach(w => {
+        const a = byId(w.from), b = byId(w.to), [x1, y1] = portPos(a, "out"), [x2, y2] = portPos(b, w.toPort), mx = (x1 + x2) / 2, on = cur.val(a) === 1;
+        const p = el("path", {d: `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`, class: "wire" + (on ? " on" : "")}, svg);
+        const hit = el("path", {d: p.getAttribute("d"), class: "wirehit"}, svg); hit.addEventListener("dblclick", () => { wires = wires.filter(x => x !== w); render(); });
+      });
+      const u = used();
+      nodes.forEach(n => {
+        if (n.kind === "nand") {
+          const hot = cur.val(n) === 1, g = el("g", {class: "gate" + (u.has(n.id) ? " used" : "") + (hot ? " hot" : ""), transform: `translate(${n.x},${n.y})`}, svg);
+          const body = el("path", {d: `M0,0 H${GW * 0.5} A${GW * 0.5},${GH / 2} 0 0 1 ${GW * 0.5},${GH} H0 Z`, class: "body"}, g); el("circle", {cx: GW * 0.5 + GW * 0.5 * 0.0 + 38, cy: GH / 2, r: 5, class: "bub"}, g);
+          const t = el("text", {x: 16, y: GH / 2 + 4}, g); t.textContent = "NAND";
+          body.addEventListener("pointerdown", e => startDrag(e, n)); body.addEventListener("dblclick", () => removeGate(n.id)); body.addEventListener("contextmenu", e => { e.preventDefault(); removeGate(n.id); });
+          port(n, "in0"); port(n, "in1"); port(n, "out");
+        } else if (n.kind === "in") {
+          const on = probe[n.i] === 1, g = el("g", {class: "tog" + (on ? " on" : ""), tabindex: "0", role: "button", "aria-label": `Toggle input ${n.name}`}, svg);
+          el("rect", {x: n.x - 38, y: n.y - 14, width: 56, height: 28}, g); const t = el("text", {x: n.x - 10, y: n.y + 5}, g); t.textContent = `${n.name}=${probe[n.i]}`;
+          const flip = () => { probe[n.i] ^= 1; render(); }; g.addEventListener("click", flip); g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); } });
+          port(n, "out");
+        } else {
+          const v = cur.out, t = el("text", {x: n.x - 28, y: n.y + 5, class: "yo" + (v === 1 ? " on" : ""), "text-anchor": "end"}, svg); t.textContent = `Y=${v === undefined ? "?" : v}`; port(n, "in0");
+        }
+      });
+      onChange(state());
+    }
+    function port(n, p) {
+      const [x, y] = portPos(n, p), isOut = p === "out", cand = pending && !isOut && !srcOf(n.id, p) && n.id !== pending.id;
+      const c = el("circle", {cx: x, cy: y, r: PR, class: "port" + (pending && pending.id === n.id && pending.port === p ? " sel" : "") + (cand ? " cand" : "")}, svg);
+      c.addEventListener("click", e => { e.stopPropagation(); clickPort(n, p); });
+    }
+    function clickPort(n, p) {
+      const isOut = p === "out";
+      if (!pending) { if (isOut) { pending = {id: n.id, port: p}; render(); } return; }
+      if (isOut) { pending = {id: n.id, port: p}; render(); return; }
+      if (pending.id === n.id) { pending = null; render(); return; }
+      wires = wires.filter(w => !(w.to === n.id && w.toPort === p)); wires.push({from: pending.id, to: n.id, toPort: p}); pending = null; render();
+    }
+    function removeGate(id) { nodes = nodes.filter(n => n.id !== id); wires = wires.filter(w => w.from !== id && w.to !== id); if (pending && pending.id === id) pending = null; render(); }
+    function startDrag(e, n) {
+      const r = svg.getBoundingClientRect(), k = W / r.width; drag = {n, ox: n.x, oy: n.y, sx: e.clientX, sy: e.clientY, k, moved: false};
+      const move = ev => { drag.moved = true; n.x = Math.max(110, Math.min(W - GW - 90, drag.ox + (ev.clientX - drag.sx) * k)); n.y = Math.max(10, Math.min(H - GH - 10, drag.oy + (ev.clientY - drag.sy) * k)); render(); };
+      const up = () => { window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); drag = null; };
+      window.addEventListener("pointermove", move); window.addEventListener("pointerup", up);
+    }
+    svg.addEventListener("click", () => { if (pending) { pending = null; render(); } });
+
+    function state() { const r = rows(); return {rows: r, solved: r.every(x => x.ok), matched: r.filter(x => x.ok).length, gates: used().size}; }
+    function netlist() { return encodeNetlist(L, nodes, wires); }
+    // place a gate list (refs 2..4 inputs, 5.. gates, last gate = output) on the board, layered left to right
+    function loadGates(gates) {
+      reset(0); const base = 5, ins = nodes.filter(n => n.kind === "in"), depth = gates.map(() => 1);
+      gates.forEach((g, k) => { depth[k] = 1 + Math.max(0, ...[g.a, g.b].map(r => r >= base ? depth[r - base] : 0)); });
+      const D = Math.max(...depth), cnt = {}, seen = {}; depth.forEach(d => cnt[d] = (cnt[d] || 0) + 1);
+      const made = gates.map((g, k) => { const d = depth[k], i = seen[d] = (seen[d] || 0) + 1, c = cnt[d]; const n = {id: nextId++, kind: "nand", x: D === 1 ? (W - GW) / 2 : 130 + (d - 1) * ((W - 330) / Math.max(D - 1, 1)), y: c === 1 ? (H - GH) / 2 : 20 + (i - 1) * ((H - GH - 40) / (c - 1))}; nodes.push(n); return n; });
+      const src = r => r >= base ? made[r - base] : ins[r - 2];
+      gates.forEach((g, k) => wires.push({from: src(g.a).id, to: made[k].id, toPort: "in0"}, {from: src(g.b).id, to: made[k].id, toPort: "in1"}));
+      wires.push({from: made[gates.length - 1].id, to: nodes.find(n => n.kind === "out").id, toPort: "in0"}); render();
+    }
+    reset();
+    return {addGate: () => { const c = gatesOf().length; nodes.push({id: nextId++, kind: "nand", x: 190 + (c % 4) * 120, y: 40 + (c % 3) * 130}); render(); }, removeLast: () => { const g = gatesOf(); if (g.length) removeGate(g[g.length - 1].id); }, reset, netlist, state, loadGates, gateCount: () => gatesOf().length, wireCount: () => wires.length};
+  }
+  root.CertBoard = {mount};
+})(window);
+</script>
+<script>
+// Student challenge page: show the unique truth table, let the student build it on the board, tape it out, and produce a submission code.
+(function (root) {
+  const $ = id => document.getElementById(id), C = root.CertCore, X = root.CertChain;
+  const say = (el, t, cls = "") => { el.textContent = t; el.className = "hint " + cls; };
+  let board = null, seed = null, table = 0;
+  const code = (s, id, proc) => `CCSUB1.${s}.${id}.${proc.toLowerCase()}`;
+
+  async function open(s) {
+    seed = String(s || "").toLowerCase(); $("chError").hidden = true; $("chDone").hidden = true; $("chCodeBox").hidden = true; say($("chMsg"), "");
+    if (!/^[0-9a-f]{32}$/.test(seed)) { $("chError").textContent = "This challenge link is not valid."; $("chError").hidden = false; $("chGrid").hidden = true; return; }
+    $("chGrid").hidden = false; table = await C.challengeTable(seed);
+    const tb = $("chTable").tBodies[0]; tb.replaceChildren();
+    for (let m = 0; m < 8; m++) { const tr = tb.insertRow(); tr.dataset.m = m; [m & 1, (m >> 1) & 1, (m >> 2) & 1, (table >> m) & 1].forEach(v => { tr.insertCell().textContent = String(v); }); }
+    $("chFee").textContent = (Number(BigInt(root.CC_CONFIG.tapeout.feeWei)) / 1e18).toString() + " OKB";
+    board = root.CertBoard.mount($("chBoard"), {table, onChange: st => {
+      [...tb.rows].forEach(r => { const row = st.rows[+r.dataset.m]; r.className = row.ok ? "ok" : row.got === undefined ? "" : "bad"; });
+      say($("chStatus"), `${st.matched}/8 rows match · ${st.gates} gate${st.gates === 1 ? "" : "s"} used`, st.solved ? "ok" : "");
+      $("chDone").hidden = !st.solved;
+    }});
+  }
+  $("chAdd").addEventListener("click", () => board && board.addGate());
+  $("chDel").addEventListener("click", () => board && board.removeLast());
+  $("chReset").addEventListener("click", () => board && board.reset());
+  $("chTape").addEventListener("click", async () => {
+    const m = $("chMsg"); $("chTape").disabled = true;
+    try {
+      const net = board.netlist(); if (net.error) throw new Error(net.error);
+      if (!board.state().solved) throw new Error("The circuit does not match your table yet.");
+      const account = await X.connect(), T = root.CC_CONFIG.tapeout;
+      const {circuitId} = await X.tapeoutCircuit(net.hex, 3, 1, net.gates, account, t => say(m, t));
+      say(m, "Checking your circuit on TapeOut…");
+      const res = await root.CertSkill.check(C.skillString(seed, circuitId, T.processor));
+      if (res.state !== "ok") throw new Error("Taped out as circuit #" + circuitId + ", but the TapeOut check did not pass: " + (res.reason || res.state));
+      say(m, `Done. Circuit #${circuitId} is yours and passed the TapeOut check.`, "ok");
+      $("chCode").value = code(seed, circuitId, T.processor); $("chCodeBox").hidden = false;
+    } catch (e) { say(m, e.message || String(e), "bad"); }
+    $("chTape").disabled = false;
+  });
+  $("chCopy").addEventListener("click", async () => { try { await navigator.clipboard.writeText($("chCode").value); say($("chMsg"), "Code copied. Send it to your organizer.", "ok"); } catch { $("chCode").select(); say($("chMsg"), "Select the code and copy it.", ""); } });
+  root.CertChallenge = {open, code, parse: line => { const m = String(line).trim().match(/^CCSUB1\.([0-9a-f]{32})\.(\d{1,18})\.(0x[0-9a-f]{40})$/i); return m ? {seed: m[1].toLowerCase(), circuitId: m[2], processor: m[3].toLowerCase()} : null; }};
+})(window);
 </script>
 <script>
 (() => {
@@ -412,13 +797,14 @@ window.CC_CONFIG = {
   const mkLink = a => { const x = document.createElement("a"); x.href = a.href; x.textContent = a.text; x.target = "_blank"; x.rel = "noopener"; return x; };
 
   // ---------- routing ----------
-  const VIEWS = ["verify", "issue", "manage"];
+  const VIEWS = ["verify", "issue", "manage", "challenge"];
   function route() {
     const h = location.hash;
-    let v = h.startsWith("#c=") ? "verify" : VIEWS.includes(h.slice(1)) ? h.slice(1) : "issue";
+    let v = h.startsWith("#c=") ? "verify" : h.startsWith("#ch=") ? "challenge" : VIEWS.includes(h.slice(1)) ? h.slice(1) : "issue";
     VIEWS.forEach(n => { $(n + "View").hidden = n !== v; });
     document.querySelectorAll(".tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === v));
     if (h.startsWith("#c=")) { $("vInput").value = h; runVerify(); }
+    if (h.startsWith("#ch=")) CertChallenge.open(h.slice(4));
   }
   window.addEventListener("hashchange", route);
 
@@ -442,6 +828,18 @@ window.CC_CONFIG = {
     $("vTitle").textContent = title; $("vWhy").textContent = why; $("vNote").textContent = note || "";
     const f = $("vFacts"); f.replaceChildren(...facts);
   }
+  function skillFactsOf(sk) {
+    const f = [];
+    if (sk.state === "ok" || sk.state === "bad") {
+      const txt = sk.state === "ok" ? `Circuit #${sk.circuitId} on the TapeOut processor computes the student's own challenge: ${sk.rows.length}/${sk.rows.length} input rows match.` : (sk.rows ? `Circuit #${sk.circuitId}: only ${sk.rows.filter(r => r.expected === r.got).length}/${sk.rows.length} rows match the challenge.` : sk.reason);
+      f.push(FACT("Skill proof", txt));
+      if (sk.owner) f.push(FACT("Circuit owner", mkLink({href: X.explorerAddr(sk.owner), text: sk.owner}), true));
+      if (sk.rows) { const d = document.createElement("details"), s = document.createElement("summary"); s.textContent = "Show the 8 rows"; const pre = document.createElement("pre"); pre.className = "mono";
+        pre.textContent = "A B C -> required / circuit\n" + sk.rows.map(r => `${r.m & 1} ${(r.m >> 1) & 1} ${(r.m >> 2) & 1} ->     ${r.expected}     /    ${r.got}${r.expected === r.got ? "" : "   <- mismatch"}`).join("\n"); d.append(s, pre); f.push(FACT("Challenge", d)); }
+    } else if (sk.state === "untrusted") f.push(FACT("Skill proof", "Not checked: unrecognised contract."));
+    else f.push(FACT("Skill proof", "Not checked: network unreachable."));
+    return f;
+  }
   let vSeq = 0;
   async function runVerify() {
     const seq = ++vSeq; $("vHint").textContent = ""; $("vResult").hidden = true;
@@ -451,7 +849,9 @@ window.CC_CONFIG = {
     if (!res.ok) { show("invalid", "Not valid", res.error ? "This is not a valid CertCheck proof." : "The details or the proof were changed, or this certificate was not issued as shown. Do not trust it.", [], ""); return; }
     const facts = [FACT("Name", p.name), FACT("Course", p.course || "—"), FACT("Date", p.date || "—"), FACT("Issuer", mkLink({href: X.explorerAddr(p.issuer), text: p.issuer}), true)];
     const issuerNote = "A valid check proves this issuer address recorded this certificate. Make sure that address really belongs to the organization you expect, for example by comparing it with the address on their website.";
-    if (!X.configured()) { show("demo", "Proof is correct (registry not checked)", "The mathematics checks out, but the on-chain registry isn't deployed in this build, so registration and revocation were not checked.", facts, issuerNote); return; }
+    const sk = p.skill ? await CertSkill.check(p.skill) : null; if (seq !== vSeq) return;
+    const skillFacts = sk ? skillFactsOf(sk) : [];
+    if (!X.configured()) { show("demo", "Proof is correct (registry not checked)", "The mathematics checks out, but the on-chain registry isn't deployed in this build, so registration and revocation were not checked.", facts.concat(skillFacts), issuerNote); return; }
     let b, leafRev;
     try { b = await X.readBatch(p.issuer, p.root); leafRev = b.found ? await X.readLeafRevoked(p.issuer, p.root, res.leaf) : false; }
     catch (e) { if (seq !== vSeq) return; show("offline", "Proof is correct, but the network is unreachable", "The proof itself checks out, but we couldn't reach X Layer to confirm the issuer registered it. Try again in a moment.", facts, ""); return; }
@@ -459,7 +859,11 @@ window.CC_CONFIG = {
     if (!b.found) { show("unregistered", "Not registered", "The proof is mathematically correct, but this issuer has not registered the batch on-chain. Until they do, it can't be trusted.", facts, issuerNote); return; }
     facts.push(FACT("Registered", fmtDate(b.publishedAt)), FACT("Batch", `${b.label || "(no label)"} · ${b.count} certificate${b.count === 1 ? "" : "s"}`), FACT("Fingerprint", short(p.root), true));
     if (b.revoked || leafRev) { show("revoked", "Revoked", b.revoked ? "The issuer revoked this whole batch." : "The issuer revoked this certificate.", facts, ""); return; }
-    show("valid", "Valid", `This certificate is part of a batch the issuer registered on ${cfg.chainName} on ${fmtDate(b.publishedAt)}.`, facts, issuerNote);
+    facts.push(...skillFacts);
+    if (sk && sk.state === "bad") { show("invalid", "Skill proof failed", "The certificate is genuine and registered, but the TapeOut circuit it names does not compute this student's challenge. Do not accept it as proof of skill.", facts, issuerNote); return; }
+    if (sk && sk.state === "untrusted") { show("unregistered", "Registered, but the skill proof was not checked", sk.reason, facts, issuerNote); return; }
+    if (sk && sk.state === "offline") { show("offline", "Registered, but the skill proof could not be checked", "We couldn't reach X Layer to run the TapeOut check. Try again in a moment.", facts, issuerNote); return; }
+    show("valid", sk ? "Valid · skill verified on TapeOut" : "Valid", `This certificate is part of a batch the issuer registered on ${cfg.chainName} on ${fmtDate(b.publishedAt)}.` + (sk ? " The student's circuit was checked by the TapeOut processor." : ""), facts, issuerNote);
   }
   $("vBtn").addEventListener("click", runVerify);
   $("vInput").addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) runVerify(); });
@@ -479,7 +883,12 @@ window.CC_CONFIG = {
     const issuer = $("issuerAddr").value.trim(); if (!ADDR.test(issuer)) return say(h, "Enter the issuer address (or connect a wallet).", "bad");
     const p = C.parseCSV($("csvText").value); if (p.error) return say(h, p.error, "bad");
     const course = C.norm($("course").value), date = C.norm($("date").value) || today();
-    const creds = p.rows.map(r => ({issuer, name: r.name, course: r.course || course, date: r.date || date}));
+    let creds;
+    if ($("skillOn").checked) {
+      const okRows = roster.filter(r => passed.has(r.seed));
+      if (!okRows.length) return say(h, "No student has passed the skill check yet. Create challenges, collect submissions, then check them.", "bad");
+      creds = okRows.map(r => ({issuer, name: r.name, course: r.course || course, date: r.date || date, skill: passed.get(r.seed)}));
+    } else creds = p.rows.map(r => ({issuer, name: r.name, course: r.course || course, date: r.date || date}));
     if (creds.some(c => !c.course)) return say(h, "Add a default course, or a course column.", "bad");
     say(h, "Working…");
     try { batch = await C.buildBatch(creds); } catch (e) { return say(h, e.message, "bad"); }
@@ -497,6 +906,49 @@ window.CC_CONFIG = {
     $("moreRows").textContent = links.length > MAXROWS ? `Showing ${MAXROWS} of ${links.length}. Download the file for everyone.` : "";
     $("results").hidden = false; say(h, "Done. Nothing has been sent anywhere yet.", "ok"); say($("pubMsg"), "", "");
   });
+  // ---------- skill challenge (organizer) ----------
+  let roster = [], passed = new Map();
+  try { const sv = JSON.parse(localStorage.getItem("cc_roster") || "null"); if (sv && Array.isArray(sv) && sv.every(r => r.name && /^[0-9a-f]{32}$/.test(r.seed))) roster = sv; } catch {}
+  const chLink = seed => location.href.split("#")[0] + "#ch=" + seed;
+  function renderRoster() {
+    const tb = $("chRows").tBodies[0]; tb.replaceChildren(); $("chRowsWrap").hidden = !roster.length; $("chDl").disabled = !roster.length;
+    roster.slice(0, MAXROWS).forEach(r => { const tr = tb.insertRow(), n = tr.insertCell(), k = tr.insertCell(); n.textContent = r.name;
+      const cp = document.createElement("button"); cp.className = "btn ghost"; cp.type = "button"; cp.textContent = "Copy link";
+      cp.addEventListener("click", async () => { try { await navigator.clipboard.writeText(chLink(r.seed)); cp.textContent = "Copied"; } catch { cp.textContent = "Select manually"; } setTimeout(() => cp.textContent = "Copy link", 1500); });
+      k.append(cp, " ", mkLink({href: chLink(r.seed), text: "Open"})); });
+    if (roster.length > MAXROWS) { const tr = tb.insertRow(), c = tr.insertCell(); c.colSpan = 2; c.textContent = `Showing ${MAXROWS} of ${roster.length}. Download the file for everyone.`; }
+  }
+  $("skillOn").addEventListener("change", () => { $("skillPanel").hidden = !$("skillOn").checked; if (!$("skillPanel").hidden) renderRoster(); });
+  $("chGen").addEventListener("click", async () => {
+    const h = $("chGenHint"), p = C.parseCSV($("csvText").value); if (p.error) return say(h, p.error, "bad");
+    say(h, "Working…");
+    try { const seeds = await C.uniqueSeeds(p.rows.length); roster = p.rows.map((r, i) => ({name: r.name, course: r.course, date: r.date, seed: seeds[i].seed})); passed = new Map();
+      try { localStorage.setItem("cc_roster", JSON.stringify(roster)); } catch {}
+      renderRoster(); $("subWrap").hidden = true;
+      say(h, `${roster.length} challenge${roster.length === 1 ? "" : "s"} created.` + (roster.length > C.CHALLENGE_FUNCTIONS ? ` Only ${C.CHALLENGE_FUNCTIONS} different functions exist, so some students share one.` : " Every student has a different function."), "ok");
+    } catch (e) { say(h, e.message, "bad"); }
+  });
+  $("chDl").addEventListener("click", () => download("certcheck-challenges.csv", "name,challenge_link\r\n" + roster.map(r => csvEsc(r.name) + "," + csvEsc(chLink(r.seed))).join("\r\n") + "\r\n", "text/csv"));
+  $("subCheck").addEventListener("click", async () => {
+    const h = $("subHint"), lines = $("subText").value.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    if (!roster.length) return say(h, "Create challenges first.", "bad"); if (!lines.length) return say(h, "Paste at least one submission code.", "bad");
+    say(h, "Checking on TapeOut…"); const tb = $("subRows").tBodies[0]; tb.replaceChildren(); $("subWrap").hidden = false; passed = new Map();
+    // Every distinct line is checked. A student passes if ANY of their submissions passes the TapeOut check:
+    // a later bad or junk line must never cancel a valid earlier one, and a resubmission after a failure still counts.
+    const seen = new Set(), seeds = new Set(); let n = 0;
+    for (const l of lines) {
+      const s = CertChallenge.parse(l); if (!s) { addSubRow("(unreadable)", "", "Not a submission code.", false); continue; }
+      const key = `${s.seed}.${s.circuitId}.${s.processor}`; if (seen.has(key)) continue; seen.add(key); seeds.add(s.seed);
+      const who = roster.find(r => r.seed === s.seed); if (!who) { addSubRow("(unknown)", "#" + s.circuitId, "Not from this list of challenges.", false); continue; }
+      const sk = C.skillString(s.seed, s.circuitId, s.processor), r = await CertSkill.check(sk);
+      if (r.state === "ok") { if (!passed.has(s.seed)) { passed.set(s.seed, sk); n++; } addSubRow(who.name, "#" + s.circuitId, `Passed (${r.rows.length}/${r.rows.length} rows)`, true); }
+      else addSubRow(who.name, "#" + s.circuitId, r.state === "bad" ? r.reason : r.state === "untrusted" ? "Not a recognised TapeOut processor." : "Network unreachable; try again.", false);
+    }
+    say(h, `${n} of ${seeds.size} student${seeds.size === 1 ? "" : "s"} passed. Passed students can now be issued certificates.`, n ? "ok" : "bad");
+  });
+  function addSubRow(name, circuit, result, good) { const tr = $("subRows").tBodies[0].insertRow(); tr.insertCell().textContent = name; tr.insertCell().textContent = circuit; const c = tr.insertCell(); c.textContent = result; c.className = good ? "ok" : "bad"; }
+  window.__ccSkillState = () => ({roster, passed: [...passed.keys()]});   // for tests
+
   // ---------- QR + printable certificates ----------
   function qrFor(link) { try { return CertQR.encode(link, "M"); } catch { try { return CertQR.encode(link, "L"); } catch { return null; } } }
   const card = i => { const c = batch.credentials[i]; return {name: c.name, course: c.course, date: c.date, issuer: c.issuer, link: links[i].link}; };

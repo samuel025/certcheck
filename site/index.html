@@ -56,6 +56,19 @@
     <p class="note">The label is public and permanent. Don't put personal data in it.</p>
   </div></div>
 
+  <div class="step"><span class="num">+</span><div class="body">
+    <h2>Skill challenge <span class="cap">optional, uses TapeOut</span></h2>
+    <label class="check"><input type="checkbox" id="skillOn"> Require a skill challenge. Each person builds their own logic circuit and tapes it out on X Layer; the certificate then carries a proof the TapeOut processor re-checks.</label>
+    <div id="skillPanel" hidden>
+      <p class="sub">Everyone gets a different 3-input function, so a circuit cannot be copied from a classmate. It does not stop someone else building it for them.</p>
+      <div class="row"><button id="chGen" class="btn ghost" type="button">Create challenges for the list</button><button id="chDl" class="btn ghost" type="button" disabled>Download challenge links (CSV)</button><span class="hint" id="chGenHint"></span></div>
+      <div class="tablewrap" id="chRowsWrap" hidden><table id="chRows"><thead><tr><th>Name</th><th>Student link</th></tr></thead><tbody></tbody></table></div>
+      <div class="field"><label for="subText">Submission codes from students (one per line)</label><textarea id="subText" rows="4" spellcheck="false" placeholder="CCSUB1.…"></textarea></div>
+      <div class="row"><button id="subCheck" class="btn ghost" type="button">Check submissions on TapeOut</button><span class="hint" id="subHint"></span></div>
+      <div class="tablewrap" id="subWrap" hidden><table id="subRows"><thead><tr><th>Name</th><th>Circuit</th><th>Result</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </div></div>
+
   <div class="step"><span class="num">3</span><div class="body">
     <h2>Generate</h2>
     <div class="row"><button id="genBtn" class="btn primary" type="button">Generate certificates</button><span class="hint" id="genHint"></span></div>
@@ -69,6 +82,24 @@
         <div class="row"><button id="publishBtn" class="btn primary" type="button">Publish on X Layer</button><span class="hint" id="pubMsg" role="status"></span></div></div>
     </div>
   </div></div>
+</section>
+
+<!-- ===== STUDENT CHALLENGE ===== -->
+<section id="challengeView" class="view" hidden>
+  <h1>Your skill challenge</h1>
+  <p class="lede">Build a circuit from NAND gates that produces the table below. This table is unique to you. Click an output dot, then an input dot, to wire. Double-click a gate or a wire to remove it.</p>
+  <p class="hint bad" id="chError" hidden></p>
+  <div class="chgrid" id="chGrid">
+    <table id="chTable" aria-label="Your required truth table"><thead><tr><th>A</th><th>B</th><th>C</th><th>Y</th></tr></thead><tbody></tbody></table>
+    <div class="boardbox"><svg id="chBoard"></svg></div>
+  </div>
+  <div class="row"><button id="chAdd" class="btn ghost" type="button">+ Gate</button><button id="chDel" class="btn ghost" type="button">− Gate</button><button id="chReset" class="btn ghost" type="button">Reset</button><span class="hint" id="chStatus" role="status"></span></div>
+  <div id="chDone" class="publish" hidden>
+    <h2>Your circuit matches. Put it on TapeOut.</h2>
+    <p class="sub">This mints your circuit on X Layer. NAND transistors are free from the faucet (once per wallet). The network fee is about <b id="chFee">0.0013 OKB</b>.</p>
+    <div class="row"><button id="chTape" class="btn primary" type="button">Tape out on X Layer</button><span class="hint" id="chMsg" role="status"></span></div>
+    <div id="chCodeBox" hidden><label for="chCode">Your submission code. Send it to your organizer.</label><textarea id="chCode" rows="2" readonly></textarea><div class="row"><button id="chCopy" class="btn ghost" type="button">Copy code</button></div></div>
+  </div>
 </section>
 
 <!-- ===== MANAGE ===== -->
@@ -106,6 +137,10 @@
 <script src="qr.js"></script>
 <script src="config.js"></script>
 <script src="chain.js"></script>
+<script src="skill.js"></script>
+<script src="netlist.js"></script>
+<script src="board.js"></script>
+<script src="challenge.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

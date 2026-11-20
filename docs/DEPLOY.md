@@ -20,4 +20,4 @@ Notes from the event FAQ (read 2026-11-19, from FirstTape's notes): projects mus
 Ways to be safe (cheapest first):
 1. Ask the organizers (docs/organizer-questions.md): "Does a project with its own registry contract on X Layer, hosted elsewhere, count?"
 2. Host on DeWEB (~$7).
-3. Build the skill-proof credential: the challenge circuit is verified with the TapeOut processor's `eval`, which is real TapeOut usage.
+3. (DONE) The skill-proof credential: the challenge circuit is taped out on the TapeOut processor and verified with its `eval`, which is real TapeOut usage.

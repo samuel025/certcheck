@@ -1,7 +1,7 @@
 // CertCheck core: salted credential leaves, a Merkle tree and portable proofs. No dependencies; uses the built-in SHA-256 (WebCrypto).
-// Format v1 (also documented in docs/FORMAT.md):
+// Format v2 (also documented in docs/FORMAT.md):
 //   canon(fields)  = for each field: 4-byte big-endian length + UTF-8 bytes          (no ambiguity between fields)
-//   leaf           = SHA-256( 0x00 || canon([issuer, name, course, date, salt]) )
+//   leaf           = SHA-256( 0x00 || canon([issuer, name, course, date, salt, skill]) )   skill is "" or "fn3:<seed>:<circuitId>:<processor>"
 //   node           = SHA-256( 0x01 || left || right )
 //   An unpaired node is promoted unchanged to the next level (never duplicated), so [a,b,c] and [a,b,c,c] have different roots.
 //   proof          = list of {s:"L"|"R", h:hex}: the sibling's side and hash, from the leaf upward.
@@ -17,11 +17,13 @@
   function canon(fields) {
     return cat(...fields.map(f => { const b = enc.encode(f), l = new Uint8Array(4); new DataView(l.buffer).setUint32(0, b.length); return cat(l, b); }));
   }
-  const fieldsOf = c => [String(c.issuer).toLowerCase(), norm(c.name), norm(c.course), norm(c.date), String(c.salt).toLowerCase()];
+  const SKILL = /^fn3:[0-9a-f]{32}:\d{1,18}:0x[0-9a-f]{40}$/;
+  const fieldsOf = c => [String(c.issuer).toLowerCase(), norm(c.name), norm(c.course), norm(c.date), String(c.salt).toLowerCase(), String(c.skill || "").toLowerCase()];
   async function leafHash(c) {
     if (!ADDR.test(c.issuer)) throw new Error("issuer must be an 0x address");
     if (!norm(c.name)) throw new Error("name is empty");
     if (!/^[0-9a-f]{32}$/i.test(c.salt)) throw new Error("salt must be 16 bytes of hex");
+    if (c.skill && !SKILL.test(String(c.skill).toLowerCase())) throw new Error("malformed skill field");
     return sha(cat(new Uint8Array([0]), canon(fieldsOf(c))));
   }
   const nodeHash = (l, r) => sha(cat(new Uint8Array([1]), l, r));
@@ -51,7 +53,7 @@
   // Recompute from the credential's own fields; never trusts the stored leaf. -> {ok, root, leaf, error?}
   async function verifyCredential(p) {
     try {
-      if (!p || p.v !== 1) return {ok: false, error: "Unsupported proof version."};
+      if (!p || p.v !== 2) return {ok: false, error: "Unsupported proof version."};
       let h = await leafHash(p); const leaf = "0x" + hex(h);
       for (const step of p.proof || []) {
         const s = unhex(step.h); if (s.length !== 32) throw new Error("bad proof step");
@@ -65,7 +67,7 @@
   const b64u = u8 => btoa(String.fromCharCode(...u8)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   const unb64u = s => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/")), ch => ch.charCodeAt(0));
   // Portable proof: the fields a verifier needs, nothing else. Short keys keep links small.
-  const toProof = (batch, c) => ({v: 1, root: batch.root, issuer: c.issuer.toLowerCase(), name: norm(c.name), course: norm(c.course), date: norm(c.date), salt: c.salt.toLowerCase(), proof: c.proof});
+  const toProof = (batch, c) => { const o = {v: 2, root: batch.root, issuer: c.issuer.toLowerCase(), name: norm(c.name), course: norm(c.course), date: norm(c.date), salt: c.salt.toLowerCase()}; if (c.skill) o.skill = String(c.skill).toLowerCase(); o.proof = c.proof; return o; };
   const encodeLink = p => b64u(enc.encode(JSON.stringify(p)));
   const decodeLink = s => JSON.parse(new TextDecoder().decode(unb64u(String(s).trim().replace(/^#?c=/, ""))));
 
@@ -90,5 +92,24 @@
     return {rows: out};
   }
 
-  root.CertCore = {canon, leafHash, buildBatch, verifyCredential, toProof, encodeLink, decodeLink, parseCSV, newSalt, norm, hex};
+  // ---- skill challenge (format fn3): a unique 3-input boolean function per seed ----
+  // table bit m (m = input vector, input k = bit k of m) is the required output. Matches TapeOut's eval bit order (input 0 = LSB).
+  const dependsOnAll = t => [0, 1, 2].every(k => { for (let m = 0; m < 8; m++) if (!(m & (1 << k)) && (((t >> m) & 1) !== ((t >> (m | (1 << k))) & 1))) return true; return false; });
+  async function challengeTable(seedHex) {
+    const seed = unhex(seedHex); if (seed.length !== 16) throw new Error("seed must be 16 bytes");
+    for (let ctr = 0; ctr < 255; ctr++) { const t = (await sha(cat(enc.encode("certcheck-challenge-v1"), seed, new Uint8Array([ctr]))))[0]; if (dependsOnAll(t)) return t; }
+    throw new Error("no challenge found");
+  }
+  const skillString = (seed, circuitId, processor) => `fn3:${String(seed).toLowerCase()}:${BigInt(circuitId).toString()}:${String(processor).toLowerCase()}`;
+  function parseSkill(s) { const t = String(s || "").toLowerCase(); if (!SKILL.test(t)) return null; const [, seed, id, proc] = t.split(":"); return {seed, circuitId: id, processor: proc}; }
+  // n seeds whose functions are all different (while n <= the 218 valid functions); beyond that, repeats are unavoidable.
+  async function uniqueSeeds(n) {
+    const out = [], used = new Set();
+    for (let guard = 0; out.length < n && guard < n * 60 + 500; guard++) { const seed = newSalt(), t = await challengeTable(seed); if (n <= CHALLENGE_FUNCTIONS && used.has(t)) continue; used.add(t); out.push({seed, table: t}); }
+    if (out.length < n) throw new Error("could not generate enough distinct challenges");
+    return out;
+  }
+  let CHALLENGE_FUNCTIONS = 0; for (let t = 0; t < 256; t++) if (dependsOnAll(t)) CHALLENGE_FUNCTIONS++;
+
+  root.CertCore = {CHALLENGE_FUNCTIONS, challengeTable, skillString, parseSkill, uniqueSeeds, canon, leafHash, buildBatch, verifyCredential, toProof, encodeLink, decodeLink, parseCSV, newSalt, norm, hex};
 })(typeof window !== "undefined" ? window : globalThis);

@@ -18,7 +18,10 @@ It proves *this issuer address* recorded *this certificate*. It does not prove t
 ## Layout
 - `site/` single-page app, vanilla JS, no external assets. `node scripts/bundle.js` writes one self-contained `dist/index.html`.
 - `contracts/` Foundry: `CertRegistry.sol` + tests (`forge test`; run `forge install foundry-rs/forge-std` first).
-- `tests/core.test.mjs` (node), `tests/chain.test.mjs` (ABI vs `cast`), `tests/e2e.mjs` (anvil + real contract + Chrome + stand-in wallet).
+- `tests/core.test.mjs`, `tests/chain.test.mjs` (ABI vs `cast`), `tests/qr.test.mjs` (vs `qrencode`), `tests/e2e.mjs` (anvil + real contract + Chrome + stand-in wallet), `tests/fork-skill.mjs` and `tests/e2e-skill.mjs` (fork of X Layer mainnet, real TapeOut processor).
+
+## Skill proof on TapeOut (optional)
+The organizer can require a skill challenge. Each student gets a different 3-input logic function, builds it from NAND gates on the challenge page, and tapes it out on X Layer. The credential then carries the circuit id, and anyone verifying it has the TapeOut processor re-run the circuit with `eval` on all 8 inputs. Only the real TapeOut processor address is trusted. See `docs/FORMAT.md`.
 
 ## Not done yet
-QR codes, an issuer directory, real-network deployment (registry address goes in `site/config.js`), DeWEB hosting.
+An issuer directory, a public hosting URL, a real-wallet run on mainnet.

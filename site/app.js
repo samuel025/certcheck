@@ -8,13 +8,14 @@
   const mkLink = a => { const x = document.createElement("a"); x.href = a.href; x.textContent = a.text; x.target = "_blank"; x.rel = "noopener"; return x; };
 
   // ---------- routing ----------
-  const VIEWS = ["verify", "issue", "manage"];
+  const VIEWS = ["verify", "issue", "manage", "challenge"];
   function route() {
     const h = location.hash;
-    let v = h.startsWith("#c=") ? "verify" : VIEWS.includes(h.slice(1)) ? h.slice(1) : "issue";
+    let v = h.startsWith("#c=") ? "verify" : h.startsWith("#ch=") ? "challenge" : VIEWS.includes(h.slice(1)) ? h.slice(1) : "issue";
     VIEWS.forEach(n => { $(n + "View").hidden = n !== v; });
     document.querySelectorAll(".tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === v));
     if (h.startsWith("#c=")) { $("vInput").value = h; runVerify(); }
+    if (h.startsWith("#ch=")) CertChallenge.open(h.slice(4));
   }
   window.addEventListener("hashchange", route);
 
@@ -38,6 +39,18 @@
     $("vTitle").textContent = title; $("vWhy").textContent = why; $("vNote").textContent = note || "";
     const f = $("vFacts"); f.replaceChildren(...facts);
   }
+  function skillFactsOf(sk) {
+    const f = [];
+    if (sk.state === "ok" || sk.state === "bad") {
+      const txt = sk.state === "ok" ? `Circuit #${sk.circuitId} on the TapeOut processor computes the student's own challenge: ${sk.rows.length}/${sk.rows.length} input rows match.` : (sk.rows ? `Circuit #${sk.circuitId}: only ${sk.rows.filter(r => r.expected === r.got).length}/${sk.rows.length} rows match the challenge.` : sk.reason);
+      f.push(FACT("Skill proof", txt));
+      if (sk.owner) f.push(FACT("Circuit owner", mkLink({href: X.explorerAddr(sk.owner), text: sk.owner}), true));
+      if (sk.rows) { const d = document.createElement("details"), s = document.createElement("summary"); s.textContent = "Show the 8 rows"; const pre = document.createElement("pre"); pre.className = "mono";
+        pre.textContent = "A B C -> required / circuit\n" + sk.rows.map(r => `${r.m & 1} ${(r.m >> 1) & 1} ${(r.m >> 2) & 1} ->     ${r.expected}     /    ${r.got}${r.expected === r.got ? "" : "   <- mismatch"}`).join("\n"); d.append(s, pre); f.push(FACT("Challenge", d)); }
+    } else if (sk.state === "untrusted") f.push(FACT("Skill proof", "Not checked: unrecognised contract."));
+    else f.push(FACT("Skill proof", "Not checked: network unreachable."));
+    return f;
+  }
   let vSeq = 0;
   async function runVerify() {
     const seq = ++vSeq; $("vHint").textContent = ""; $("vResult").hidden = true;
@@ -47,7 +60,9 @@
     if (!res.ok) { show("invalid", "Not valid", res.error ? "This is not a valid CertCheck proof." : "The details or the proof were changed, or this certificate was not issued as shown. Do not trust it.", [], ""); return; }
     const facts = [FACT("Name", p.name), FACT("Course", p.course || "—"), FACT("Date", p.date || "—"), FACT("Issuer", mkLink({href: X.explorerAddr(p.issuer), text: p.issuer}), true)];
     const issuerNote = "A valid check proves this issuer address recorded this certificate. Make sure that address really belongs to the organization you expect, for example by comparing it with the address on their website.";
-    if (!X.configured()) { show("demo", "Proof is correct (registry not checked)", "The mathematics checks out, but the on-chain registry isn't deployed in this build, so registration and revocation were not checked.", facts, issuerNote); return; }
+    const sk = p.skill ? await CertSkill.check(p.skill) : null; if (seq !== vSeq) return;
+    const skillFacts = sk ? skillFactsOf(sk) : [];
+    if (!X.configured()) { show("demo", "Proof is correct (registry not checked)", "The mathematics checks out, but the on-chain registry isn't deployed in this build, so registration and revocation were not checked.", facts.concat(skillFacts), issuerNote); return; }
     let b, leafRev;
     try { b = await X.readBatch(p.issuer, p.root); leafRev = b.found ? await X.readLeafRevoked(p.issuer, p.root, res.leaf) : false; }
     catch (e) { if (seq !== vSeq) return; show("offline", "Proof is correct, but the network is unreachable", "The proof itself checks out, but we couldn't reach X Layer to confirm the issuer registered it. Try again in a moment.", facts, ""); return; }
@@ -55,7 +70,11 @@
     if (!b.found) { show("unregistered", "Not registered", "The proof is mathematically correct, but this issuer has not registered the batch on-chain. Until they do, it can't be trusted.", facts, issuerNote); return; }
     facts.push(FACT("Registered", fmtDate(b.publishedAt)), FACT("Batch", `${b.label || "(no label)"} · ${b.count} certificate${b.count === 1 ? "" : "s"}`), FACT("Fingerprint", short(p.root), true));
     if (b.revoked || leafRev) { show("revoked", "Revoked", b.revoked ? "The issuer revoked this whole batch." : "The issuer revoked this certificate.", facts, ""); return; }
-    show("valid", "Valid", `This certificate is part of a batch the issuer registered on ${cfg.chainName} on ${fmtDate(b.publishedAt)}.`, facts, issuerNote);
+    facts.push(...skillFacts);
+    if (sk && sk.state === "bad") { show("invalid", "Skill proof failed", "The certificate is genuine and registered, but the TapeOut circuit it names does not compute this student's challenge. Do not accept it as proof of skill.", facts, issuerNote); return; }
+    if (sk && sk.state === "untrusted") { show("unregistered", "Registered, but the skill proof was not checked", sk.reason, facts, issuerNote); return; }
+    if (sk && sk.state === "offline") { show("offline", "Registered, but the skill proof could not be checked", "We couldn't reach X Layer to run the TapeOut check. Try again in a moment.", facts, issuerNote); return; }
+    show("valid", sk ? "Valid · skill verified on TapeOut" : "Valid", `This certificate is part of a batch the issuer registered on ${cfg.chainName} on ${fmtDate(b.publishedAt)}.` + (sk ? " The student's circuit was checked by the TapeOut processor." : ""), facts, issuerNote);
   }
   $("vBtn").addEventListener("click", runVerify);
   $("vInput").addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) runVerify(); });
@@ -75,7 +94,12 @@
     const issuer = $("issuerAddr").value.trim(); if (!ADDR.test(issuer)) return say(h, "Enter the issuer address (or connect a wallet).", "bad");
     const p = C.parseCSV($("csvText").value); if (p.error) return say(h, p.error, "bad");
     const course = C.norm($("course").value), date = C.norm($("date").value) || today();
-    const creds = p.rows.map(r => ({issuer, name: r.name, course: r.course || course, date: r.date || date}));
+    let creds;
+    if ($("skillOn").checked) {
+      const okRows = roster.filter(r => passed.has(r.seed));
+      if (!okRows.length) return say(h, "No student has passed the skill check yet. Create challenges, collect submissions, then check them.", "bad");
+      creds = okRows.map(r => ({issuer, name: r.name, course: r.course || course, date: r.date || date, skill: passed.get(r.seed)}));
+    } else creds = p.rows.map(r => ({issuer, name: r.name, course: r.course || course, date: r.date || date}));
     if (creds.some(c => !c.course)) return say(h, "Add a default course, or a course column.", "bad");
     say(h, "Working…");
     try { batch = await C.buildBatch(creds); } catch (e) { return say(h, e.message, "bad"); }
@@ -93,6 +117,49 @@
     $("moreRows").textContent = links.length > MAXROWS ? `Showing ${MAXROWS} of ${links.length}. Download the file for everyone.` : "";
     $("results").hidden = false; say(h, "Done. Nothing has been sent anywhere yet.", "ok"); say($("pubMsg"), "", "");
   });
+  // ---------- skill challenge (organizer) ----------
+  let roster = [], passed = new Map();
+  try { const sv = JSON.parse(localStorage.getItem("cc_roster") || "null"); if (sv && Array.isArray(sv) && sv.every(r => r.name && /^[0-9a-f]{32}$/.test(r.seed))) roster = sv; } catch {}
+  const chLink = seed => location.href.split("#")[0] + "#ch=" + seed;
+  function renderRoster() {
+    const tb = $("chRows").tBodies[0]; tb.replaceChildren(); $("chRowsWrap").hidden = !roster.length; $("chDl").disabled = !roster.length;
+    roster.slice(0, MAXROWS).forEach(r => { const tr = tb.insertRow(), n = tr.insertCell(), k = tr.insertCell(); n.textContent = r.name;
+      const cp = document.createElement("button"); cp.className = "btn ghost"; cp.type = "button"; cp.textContent = "Copy link";
+      cp.addEventListener("click", async () => { try { await navigator.clipboard.writeText(chLink(r.seed)); cp.textContent = "Copied"; } catch { cp.textContent = "Select manually"; } setTimeout(() => cp.textContent = "Copy link", 1500); });
+      k.append(cp, " ", mkLink({href: chLink(r.seed), text: "Open"})); });
+    if (roster.length > MAXROWS) { const tr = tb.insertRow(), c = tr.insertCell(); c.colSpan = 2; c.textContent = `Showing ${MAXROWS} of ${roster.length}. Download the file for everyone.`; }
+  }
+  $("skillOn").addEventListener("change", () => { $("skillPanel").hidden = !$("skillOn").checked; if (!$("skillPanel").hidden) renderRoster(); });
+  $("chGen").addEventListener("click", async () => {
+    const h = $("chGenHint"), p = C.parseCSV($("csvText").value); if (p.error) return say(h, p.error, "bad");
+    say(h, "Working…");
+    try { const seeds = await C.uniqueSeeds(p.rows.length); roster = p.rows.map((r, i) => ({name: r.name, course: r.course, date: r.date, seed: seeds[i].seed})); passed = new Map();
+      try { localStorage.setItem("cc_roster", JSON.stringify(roster)); } catch {}
+      renderRoster(); $("subWrap").hidden = true;
+      say(h, `${roster.length} challenge${roster.length === 1 ? "" : "s"} created.` + (roster.length > C.CHALLENGE_FUNCTIONS ? ` Only ${C.CHALLENGE_FUNCTIONS} different functions exist, so some students share one.` : " Every student has a different function."), "ok");
+    } catch (e) { say(h, e.message, "bad"); }
+  });
+  $("chDl").addEventListener("click", () => download("certcheck-challenges.csv", "name,challenge_link\r\n" + roster.map(r => csvEsc(r.name) + "," + csvEsc(chLink(r.seed))).join("\r\n") + "\r\n", "text/csv"));
+  $("subCheck").addEventListener("click", async () => {
+    const h = $("subHint"), lines = $("subText").value.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    if (!roster.length) return say(h, "Create challenges first.", "bad"); if (!lines.length) return say(h, "Paste at least one submission code.", "bad");
+    say(h, "Checking on TapeOut…"); const tb = $("subRows").tBodies[0]; tb.replaceChildren(); $("subWrap").hidden = false; passed = new Map();
+    // Every distinct line is checked. A student passes if ANY of their submissions passes the TapeOut check:
+    // a later bad or junk line must never cancel a valid earlier one, and a resubmission after a failure still counts.
+    const seen = new Set(), seeds = new Set(); let n = 0;
+    for (const l of lines) {
+      const s = CertChallenge.parse(l); if (!s) { addSubRow("(unreadable)", "", "Not a submission code.", false); continue; }
+      const key = `${s.seed}.${s.circuitId}.${s.processor}`; if (seen.has(key)) continue; seen.add(key); seeds.add(s.seed);
+      const who = roster.find(r => r.seed === s.seed); if (!who) { addSubRow("(unknown)", "#" + s.circuitId, "Not from this list of challenges.", false); continue; }
+      const sk = C.skillString(s.seed, s.circuitId, s.processor), r = await CertSkill.check(sk);
+      if (r.state === "ok") { if (!passed.has(s.seed)) { passed.set(s.seed, sk); n++; } addSubRow(who.name, "#" + s.circuitId, `Passed (${r.rows.length}/${r.rows.length} rows)`, true); }
+      else addSubRow(who.name, "#" + s.circuitId, r.state === "bad" ? r.reason : r.state === "untrusted" ? "Not a recognised TapeOut processor." : "Network unreachable; try again.", false);
+    }
+    say(h, `${n} of ${seeds.size} student${seeds.size === 1 ? "" : "s"} passed. Passed students can now be issued certificates.`, n ? "ok" : "bad");
+  });
+  function addSubRow(name, circuit, result, good) { const tr = $("subRows").tBodies[0].insertRow(); tr.insertCell().textContent = name; tr.insertCell().textContent = circuit; const c = tr.insertCell(); c.textContent = result; c.className = good ? "ok" : "bad"; }
+  window.__ccSkillState = () => ({roster, passed: [...passed.keys()]});   // for tests
+
   // ---------- QR + printable certificates ----------
   function qrFor(link) { try { return CertQR.encode(link, "M"); } catch { try { return CertQR.encode(link, "L"); } catch { return null; } } }
   const card = i => { const c = batch.credentials[i]; return {name: c.name, course: c.course, date: c.date, issuer: c.issuer, link: links[i].link}; };

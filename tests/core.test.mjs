@@ -22,7 +22,7 @@ for (const f of ["name", "course", "date", "issuer", "salt"]) {
 }
 for (let i = 0; i < good.proof.length; i++) { const t = clone(good); t.proof[i].h = "00".repeat(32); ok(`altering proof step ${i} is rejected`, !(await C.verifyCredential(t)).ok); const u = clone(good); u.proof[i].s = u.proof[i].s === "L" ? "R" : "L"; ok(`flipping proof side ${i} is rejected`, !(await C.verifyCredential(u)).ok); }
 { const t = clone(good); t.root = "0x" + "11".repeat(32); ok("wrong root is rejected", !(await C.verifyCredential(t)).ok); }
-{ const t = clone(good); t.v = 2; ok("unknown version is rejected", !(await C.verifyCredential(t)).ok); }
+{ for (const v of [1, 3, "2", undefined]) { const t = clone(good); t.v = v; ok(`version ${String(v)} is rejected`, !(await C.verifyCredential(t)).ok); } }
 { const t = clone(good); t.proof = t.proof.slice(1); ok("truncated proof is rejected", !(await C.verifyCredential(t)).ok); }
 { const t = clone(good); t.proof.push({s: "L", h: "00".repeat(32)}); ok("extended proof is rejected", !(await C.verifyCredential(t)).ok); }
 ok("a credential cannot be moved into another batch", !(await C.verifyCredential({...good, root: (await C.buildBatch(mk(8))).root})).ok);
@@ -46,7 +46,7 @@ ok("invalid issuer, empty name and bad salt are refused", threw === 3);
 // known-answer vector: pins format v1 so future changes cannot silently break old certificates
 const kat = await C.buildBatch([{issuer: ISS, name: "Ada Lovelace", course: "Digital Logic", date: "2026-11-20", salt: "00112233445566778899aabbccddeeff"}, {issuer: ISS, name: "Alan Turing", course: "Digital Logic", date: "2026-11-20", salt: "ffeeddccbbaa99887766554433221100"}]);
 console.log("KAT root:", kat.root);
-ok("known-answer vector for format v1 (root also reproduced by an independent Python implementation)", kat.root === "0x94e8b873480bc231a78a9b2c60813eb314fbb556fdf2586a8b6e4f0798776ce3", kat.root);
+ok("known-answer vector for format v2 (root also reproduced by an independent Python implementation)", kat.root === "0x997bb6bd113ec45a52a6bdbbc746edccce088a9b5b25de691cf0186f20406f18", kat.root);
 
 // links
 ok("link round-trips (including non-Latin names)", await (async () => { const b = await C.buildBatch([{issuer: ISS, name: "Chukwuemeka Ókéké 王明", course: "C", date: "D"}]), p = C.toProof(b, b.credentials[0]); const d = C.decodeLink("#c=" + C.encodeLink(p)); return JSON.stringify(d) === JSON.stringify(p) && (await C.verifyCredential(d)).ok; })());
@@ -60,4 +60,29 @@ ok("CSV: email column is ignored (never enters a credential)", p.rows.every(r =>
 ok("CSV: missing name column gives a clear error", /name/.test(C.parseCSV("a,b\n1,2").error));
 ok("CSV: empty file and header-only give clear errors", !!C.parseCSV("").error && !!C.parseCSV("name\n").error);
 ok("CSV: accepts a 'student' header", C.parseCSV("Student\nBob").rows[0].name === "Bob");
+
+// ---- skill field + challenge derivation (values checked against an independent Python implementation) ----
+const PROC = "0x" + "9e".repeat(20), SEED_A = "00112233445566778899aabbccddeeff", SEED_B = "cd".repeat(16);
+ok("there are exactly 218 challenge functions that depend on all 3 inputs", C.CHALLENGE_FUNCTIONS === 218, C.CHALLENGE_FUNCTIONS);
+ok("challenge table for seed A is 133 and for seed B is 169 (matches the Python implementation)", (await C.challengeTable(SEED_A)) === 133 && (await C.challengeTable(SEED_B)) === 169);
+const dep = t => [0, 1, 2].every(k => { for (let m = 0; m < 8; m++) if (!(m & (1 << k)) && (((t >> m) & 1) !== ((t >> (m | (1 << k))) & 1))) return true; return false; });
+let allDep = true; for (let i = 0; i < 300; i++) if (!dep(await C.challengeTable(C.newSalt()))) allDep = false;
+ok("300 random seeds always give a function that depends on all 3 inputs (no trivial challenge)", allDep);
+ok("the same seed always gives the same challenge", (await C.challengeTable(SEED_A)) === (await C.challengeTable(SEED_A)));
+const skill = C.skillString(SEED_B, 9n, PROC);
+ok("skill string format", skill === `fn3:${SEED_B}:9:${PROC}` && JSON.stringify(C.parseSkill(skill)) === JSON.stringify({seed: SEED_B, circuitId: "9", processor: PROC}));
+ok("malformed skill strings are refused", [null, "", "fn3:xx:1:0x00", `fn3:${SEED_B}:-1:${PROC}`, `fn3:${SEED_B}:1:0x12`, `fn4:${SEED_B}:1:${PROC}`].every(x => C.parseSkill(x) === null));
+const katS = await C.buildBatch([{issuer: ISS, name: "Ada Lovelace", course: "Digital Logic", date: "2026-11-20", salt: "00112233445566778899aabbccddeeff", skill: C.skillString(SEED_B, 9n, "0x" + "9e".repeat(20))}, {issuer: ISS, name: "Alan Turing", course: "Digital Logic", date: "2026-11-20", salt: "ffeeddccbbaa99887766554433221100"}]);
+ok("known-answer vector with a skill field (matches Python)", katS.root === "0x37583c9385b31f3c32d316569d83c7b184121f407c3c6b76595c157e469eef08", katS.root);
+const sb = await C.buildBatch([0, 1, 2].map(i => ({issuer: ISS, name: "S" + i, course: "C", date: "D", skill: C.skillString(C.newSalt(), 100 + i, PROC)}))), sp = C.toProof(sb, sb.credentials[1]);
+ok("a credential with a skill proof verifies and carries the skill", (await C.verifyCredential(sp)).ok && sp.skill === sb.credentials[1].skill);
+ok("changing the circuit id inside the skill is rejected", !(await C.verifyCredential({...sp, skill: C.skillString(sp.skill.split(":")[1], 101n + 1n, PROC)})).ok);
+ok("changing the seed inside the skill is rejected", !(await C.verifyCredential({...sp, skill: C.skillString(C.newSalt(), 101n, PROC)})).ok);
+ok("changing the processor inside the skill is rejected", !(await C.verifyCredential({...sp, skill: C.skillString(sp.skill.split(":")[1], 101n, "0x" + "11".repeat(20))})).ok);
+{ const t = clone(sp); delete t.skill; ok("removing the skill from a skilled credential is rejected", !(await C.verifyCredential(t)).ok); }
+{ const t = clone(good); t.skill = C.skillString(SEED_A, 1n, PROC); ok("adding a skill to a credential that had none is rejected", !(await C.verifyCredential(t)).ok); }
+const us = await C.uniqueSeeds(200), tabs = new Set(us.map(x => x.table));
+ok("200 students get 200 different challenge functions", us.length === 200 && tabs.size === 200);
+ok("the full set of 218 functions can be handed out without repeats", new Set((await C.uniqueSeeds(218)).map(x => x.table)).size === 218);
+ok("more students than functions still works (repeats allowed)", (await C.uniqueSeeds(300)).length === 300);
 console.log(fails ? `\n${fails} FAILED` : "\nall passed"); process.exit(fails ? 1 : 0);

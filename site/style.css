@@ -53,3 +53,19 @@ dialog::backdrop{background:rgba(5,7,9,.75)}
   .pcert h2{font:600 34px system-ui,sans-serif;margin:0 0 6px;color:#000}.pcert p{color:#333;margin:0}
   .pcert .qrbox{max-width:260px;margin:24px auto;padding:0}.pfoot{font:11px ui-monospace,monospace;overflow-wrap:anywhere}
 }
+
+/* skill challenge + board */
+.check{display:flex;gap:10px;align-items:flex-start;font:14px var(--sans);letter-spacing:0;text-transform:none;color:var(--silver);cursor:pointer}.check input{margin-top:4px}
+.chgrid{display:grid;grid-template-columns:200px 1fr;gap:24px;margin:18px 0;align-items:start}
+#chTable{border-collapse:collapse;font:15px var(--mono)}#chTable th,#chTable td{padding:7px 14px;text-align:center;border:1px solid var(--slate)}#chTable tr.ok td{background:rgba(0,216,146,.14);color:var(--green)}#chTable tr.bad td{background:rgba(255,107,107,.10);color:var(--coral)}
+.boardbox{border:1px solid var(--slate);background:#0a0d11;background-image:radial-gradient(rgba(93,94,97,.35) 1px,transparent 1.2px);background-size:26px 26px}
+#chBoard{display:block;width:100%;height:auto;touch-action:none}
+#chBoard .wire{fill:none;stroke:#4a4d52;stroke-width:3}#chBoard .wire.on{stroke:var(--green);stroke-dasharray:9 7;animation:flow .8s linear infinite}#chBoard .wirehit{fill:none;stroke:transparent;stroke-width:14;cursor:pointer}
+@keyframes flow{to{stroke-dashoffset:-16}}
+#chBoard .gate .body{fill:#14171b;stroke:#4a4d52;stroke-width:2;cursor:grab}#chBoard .gate.used .body{stroke:#6b6e73}#chBoard .gate.hot .body{stroke:var(--green);fill:rgba(0,41,35,.6)}
+#chBoard .gate .bub{fill:#14171b;stroke:#4a4d52;stroke-width:2}#chBoard .gate text{font:11px var(--mono);letter-spacing:.12em;fill:#7a7c80;pointer-events:none}
+#chBoard .port{fill:#0b0e12;stroke:#818284;stroke-width:2;cursor:pointer}#chBoard .port:hover{stroke:var(--green)}#chBoard .port.sel{fill:var(--green)}#chBoard .port.cand{stroke:var(--green);stroke-dasharray:3 2}
+#chBoard .tog rect{fill:var(--carbon);stroke:var(--slate);stroke-width:1.5;cursor:pointer}#chBoard .tog text{fill:var(--silver);font:14px var(--mono);pointer-events:none}#chBoard .tog.on rect{fill:var(--teal);stroke:var(--green)}#chBoard .tog.on text{fill:var(--green)}
+#chBoard .yo{font:16px var(--mono);fill:var(--steel)}#chBoard .yo.on{fill:var(--green)}
+#subRows td.ok{color:var(--green)}#subRows td.bad{color:var(--coral)}
+@media (max-width:700px){.chgrid{grid-template-columns:1fr}}

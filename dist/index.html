@@ -1836,8 +1836,9 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 <section id="verifyView" class="view" hidden>
   <h1>Verify a certificate</h1>
   <p class="lede">Open the link or QR code from the certificate, or paste it here. The check runs in your browser against a public record on X Layer. No account, no server.</p>
-  <div class="field"><label for="vInput">Certificate link or proof</label>
-    <textarea id="vInput" rows="3" spellcheck="false" placeholder="Paste a certificate link (#c=…), a passport link (#p=…) or the proof JSON"></textarea></div>
+  <div class="field"><label for="vInput">Certificate link, passport link, wallet address or proof</label>
+    <textarea id="vInput" rows="3" spellcheck="false" placeholder="Paste a certificate link (#c=…), a passport link (#p=…), a wallet address (0x…) to find its passport, or the proof JSON"></textarea></div>
+  <p id="vSaved" class="hint" hidden></p>
   <div class="row"><button id="vBtn" class="btn primary" type="button">Verify</button><span class="hint" id="vHint"></span></div>
   <article id="cvResult" class="result" data-state="idle" hidden aria-live="polite">
     <div class="rhead"><span class="badge" id="cvBadge"></span><h2 id="vTitle"></h2></div>
@@ -4055,7 +4056,28 @@ window.CC_CONFIG = {
     if (lv.cleared.length < min) return {...out, state: "incomplete", reason: `Only ${lv.cleared.length} of the ${min} required on-chain course levels are cleared.`};
     return {...out, state: "ok"};
   }
-  root.CertPassport = {LEVELS, link, parse, levelsOf, check};
+  // Find a wallet's passport from the address alone. The processor is not enumerable and the public RPC caps log scans at 100 blocks,
+  // so we read the highest circuit id and ask ownerOf for each id, newest first (small batches, capped).
+  async function find(wallet) {
+    wallet = String(wallet).toLowerCase(); if (!ADDR.test(wallet)) return {state: "bad", reason: "That is not a wallet address."};
+    const proc = cfg().tapeout.processor, X_ = root.CertChain;
+    let top; try { top = Number(BigInt(await X_.callAt(proc, "0x61b8ce8c"))); } catch (e) { return {state: "offline", reason: String(e.message || e)}; }
+    const owned = []; let failed = 0, scanned = 0; const LIMIT = 400;
+    for (let id = top + 3; id >= 1 && scanned < LIMIT; id -= 20) {
+      const ids = []; for (let k = id; k > id - 20 && k >= 1; k--) ids.push(k);
+      scanned += ids.length;
+      const owners = await Promise.all(ids.map(k => X_.circuitOwner(proc, k).then(o => o.toLowerCase(), () => null)));
+      owners.forEach((o, i) => { if (o === wallet) owned.push(ids[i]); else if (o === null) failed++; });
+    }
+    const seed = await C.walletSeed(wallet);
+    for (const id of owned) {
+      const sk = await root.CertSkill.check(C.skillString(seed, id, proc));
+      if (sk.state === "offline") return {state: "offline", reason: sk.reason, owned};
+      if (sk.state === "ok") return {state: "found", wallet, circuitId: String(id), owned};
+    }
+    return {state: "none", wallet, owned, scanned};
+  }
+  root.CertPassport = {LEVELS, link, parse, levelsOf, check, find};
 })(typeof window !== "undefined" ? window : globalThis);
 </script>
 <script>
@@ -4313,9 +4335,27 @@ window.CC_CONFIG = {
     else show("invalid", "Passport not valid", r.reason, facts, note);
   }
   let vSeq = 0;
+  // a passport earned on this device is remembered, so it can be reopened or copied from the verify page
+  (function savedPassport() {
+    let sv = null; try { sv = JSON.parse(localStorage.getItem("cc_passport") || "null"); } catch {}
+    if (!sv || !ADDR.test(sv.wallet || "") || !/^\d{1,18}$/.test(String(sv.circuitId))) return;
+    const el = $("vSaved"), url = CertPassport.link(sv.wallet, sv.circuitId); el.hidden = false; el.textContent = "Your passport from this device: ";
+    const open = document.createElement("a"); open.href = url; open.textContent = "open it"; const cp = document.createElement("button"); cp.type = "button"; cp.className = "btn ghost"; cp.textContent = "Copy link"; cp.style.marginLeft = "8px";
+    cp.onclick = async () => { try { await navigator.clipboard.writeText(url); cp.textContent = "Copied"; } catch { cp.textContent = "Copy failed"; } };
+    el.append(open, cp);
+  })();
   async function runVerify() {
     const seq = ++vSeq; $("vHint").textContent = ""; $("cvResult").hidden = true;
     const pp = CertPassport.parse($("vInput").value); if (pp) return runPassport(pp, seq);
+    const bare = $("vInput").value.trim();
+    if (ADDR.test(bare)) {
+      say($("vHint"), "Looking for this wallet's passport on X Layer…", "");
+      const f = await CertPassport.find(bare); if (seq !== vSeq) return; $("vHint").textContent = "";
+      if (f.state === "found") return runPassport({wallet: f.wallet, circuitId: f.circuitId}, seq);
+      const lv = await CertPassport.levelsOf(bare).catch(() => ({cleared: []}));
+      if (f.state === "offline") return show("offline", "Could not search X Layer", "We couldn't reach X Layer to look for this wallet's circuits. Try again in a moment.", [], "");
+      return show("unregistered", "No passport found for this wallet", f.owned && f.owned.length ? `This wallet owns ${f.owned.length} circuit${f.owned.length === 1 ? "" : "s"}, but none computes its own exam.` : "This wallet does not own an exam circuit yet. A passport needs at least 3 on-chain course levels and a circuit that computes the wallet's own exam.", [FACT("Wallet", mkLink({href: X.explorerAddr(bare), text: bare}), true), FACT("Course", `${lv.cleared.length} on-chain level${lv.cleared.length === 1 ? "" : "s"} cleared${lv.cleared.length ? " (" + lv.cleared.join(", ") + ")" : ""}.`)], "");
+    }
     let p; try { p = parseInput($("vInput").value); } catch (e) { say($("vHint"), e.message, "bad"); return; }
     const res = await C.verifyCredential(p);
     if (seq !== vSeq) return;

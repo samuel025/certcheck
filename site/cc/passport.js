@@ -28,5 +28,26 @@
     if (lv.cleared.length < min) return {...out, state: "incomplete", reason: `Only ${lv.cleared.length} of the ${min} required on-chain course levels are cleared.`};
     return {...out, state: "ok"};
   }
-  root.CertPassport = {LEVELS, link, parse, levelsOf, check};
+  // Find a wallet's passport from the address alone. The processor is not enumerable and the public RPC caps log scans at 100 blocks,
+  // so we read the highest circuit id and ask ownerOf for each id, newest first (small batches, capped).
+  async function find(wallet) {
+    wallet = String(wallet).toLowerCase(); if (!ADDR.test(wallet)) return {state: "bad", reason: "That is not a wallet address."};
+    const proc = cfg().tapeout.processor, X_ = root.CertChain;
+    let top; try { top = Number(BigInt(await X_.callAt(proc, "0x61b8ce8c"))); } catch (e) { return {state: "offline", reason: String(e.message || e)}; }
+    const owned = []; let failed = 0, scanned = 0; const LIMIT = 400;
+    for (let id = top + 3; id >= 1 && scanned < LIMIT; id -= 20) {
+      const ids = []; for (let k = id; k > id - 20 && k >= 1; k--) ids.push(k);
+      scanned += ids.length;
+      const owners = await Promise.all(ids.map(k => X_.circuitOwner(proc, k).then(o => o.toLowerCase(), () => null)));
+      owners.forEach((o, i) => { if (o === wallet) owned.push(ids[i]); else if (o === null) failed++; });
+    }
+    const seed = await C.walletSeed(wallet);
+    for (const id of owned) {
+      const sk = await root.CertSkill.check(C.skillString(seed, id, proc));
+      if (sk.state === "offline") return {state: "offline", reason: sk.reason, owned};
+      if (sk.state === "ok") return {state: "found", wallet, circuitId: String(id), owned};
+    }
+    return {state: "none", wallet, owned, scanned};
+  }
+  root.CertPassport = {LEVELS, link, parse, levelsOf, check, find};
 })(typeof window !== "undefined" ? window : globalThis);

@@ -620,8 +620,9 @@
 <section id="verifyView" class="view" hidden>
   <h1>Verify a certificate</h1>
   <p class="lede">Open the link or QR code from the certificate, or paste it here. The check runs in your browser against a public record on X Layer. No account, no server.</p>
-  <div class="field"><label for="vInput">Certificate link or proof</label>
-    <textarea id="vInput" rows="3" spellcheck="false" placeholder="Paste a certificate link (#c=…), a passport link (#p=…) or the proof JSON"></textarea></div>
+  <div class="field"><label for="vInput">Certificate link, passport link, wallet address or proof</label>
+    <textarea id="vInput" rows="3" spellcheck="false" placeholder="Paste a certificate link (#c=…), a passport link (#p=…), a wallet address (0x…) to find its passport, or the proof JSON"></textarea></div>
+  <p id="vSaved" class="hint" hidden></p>
   <div class="row"><button id="vBtn" class="btn primary" type="button">Verify</button><span class="hint" id="vHint"></span></div>
   <article id="cvResult" class="result" data-state="idle" hidden aria-live="polite">
     <div class="rhead"><span class="badge" id="cvBadge"></span><h2 id="vTitle"></h2></div>

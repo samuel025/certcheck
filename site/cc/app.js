@@ -58,8 +58,8 @@
     const r = await CertPassport.check(pp.wallet, pp.circuitId); if (seq !== vSeq) return;
     const lv = r.cleared || [], facts = [FACT("Wallet", mkLink({href: X.explorerAddr(pp.wallet), text: pp.wallet}), true), FACT("Course", `${lv.length} on-chain level${lv.length === 1 ? "" : "s"} cleared${lv.length ? " (" + lv.join(", ") + ")" : ""}. ${r.min} required.`)];
     if (r.skill) facts.push(...skillFactsOf(r.skill));
-    const note = "A passport proves that this wallet cleared the course levels and built the circuit for its own exam. It does not say who owns the wallet.";
-    if (r.state === "ok") show("valid", "Passport verified", `This wallet cleared ${lv.length} on-chain levels of the Circuits course and built a TapeOut circuit that computes its own exam.`, facts, note);
+    const note = "A passport is evidence of recorded course progress and of a circuit, associated with this wallet, that the configured TapeOut processor evaluates correctly for the wallet's own exam. It does not prove who designed or built the circuit, who owns the wallet, or that the person is competent. Trusted: the blockchain, the deployed verification contract and the configured processor.";
+    if (r.state === "ok") show("valid", "Passport verified", `This wallet has ${lv.length} on-chain course levels recorded and owns a TapeOut circuit that computes its own exam.`, facts, note);
     else if (r.state === "incomplete") show("unregistered", "Exam passed, course not complete", r.reason, facts, note);
     else if (r.state === "offline") show("offline", "The passport could not be checked", "We couldn't reach X Layer to run the checks. Try again in a moment.", facts, "");
     else show("invalid", "Passport not valid", r.reason, facts, note);
@@ -105,7 +105,7 @@
     if (seq !== vSeq) return;
     if (!res.ok) { show("invalid", "Not valid", res.error ? "This is not a valid CertCheck proof." : "The details or the proof were changed, or this certificate was not issued as shown. Do not trust it.", [], ""); return; }
     const facts = [FACT("Name", p.name), FACT("Course", p.course || "—"), FACT("Date", p.date || "—"), FACT("Issuer", mkLink({href: X.explorerAddr(p.issuer), text: p.issuer}), true)];
-    let issuerNote = "A valid check proves this issuer address recorded this certificate. Make sure that address really belongs to the organization you expect, for example by comparing it with the address on their website.";
+    let issuerNote = "A valid check proves this issuer address registered this certificate and that it was not changed. The details, such as attendance, are the issuer's own statement; the chain cannot confirm they are true. The proof link contains the holder's personal details, so share it with care. Make sure that address really belongs to the organization you expect, for example by comparing it with the address on their website.";
     const sk = p.skill ? await CertSkill.check(p.skill) : null; if (seq !== vSeq) return;
     const skillFacts = sk ? skillFactsOf(sk) : [];
     if (!X.configured()) { show("demo", "Proof is correct (registry not checked)", "The mathematics checks out, but the on-chain registry isn't deployed in this build, so registration and revocation were not checked.", facts.concat(skillFacts), issuerNote); return; }

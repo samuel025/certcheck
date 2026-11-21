@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CertCheck — certificates anyone can verify</title>
-<meta name="description" content="Prove your event worked. Tamper-proof certificates for who attended, and a graded circuit lab on a TapeOut processor for who learned something. Checkable on X Layer, with no personal data on-chain.">
+<meta name="description" content="Prove what your event achieved. Verifiable certificates, a graded circuit lab checked by a TapeOut processor, and outcome reports that label where each number comes from. Registered on X Layer; no names are published on-chain.">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b1220'/%3E%3Cpath d='M32 9 50 16v14c0 12-8 20-18 25C22 50 14 42 14 30V16z' fill='none' stroke='%2334d399' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='M23 32l6 6 12-13' fill='none' stroke='%2334d399' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="ft/style.css">
 <link rel="stylesheet" href="cc/style.css">
@@ -267,7 +267,14 @@
   <main class="wrap pg">
     <span class="badge">Checkable claims</span>
     <h1 class="pgh">For judges</h1>
-    <p class="lede2">CertCheck: certificates anyone can verify, with no personal data on-chain, plus a skill passport for people who learn circuits in the Circuits course. Certificates are checked against a public record on X Layer. A passport is checked by the TapeOut processor, which re-runs the learner's own exam circuit. Everything below can be checked, and where something is not live, it says so.</p>
+    <p class="lede2">CertCheck: certificates anyone can verify, plus a skill passport for people who learn circuits in the Circuits course. Names are not published on-chain. Each claim below says what is checked, and by what.</p>
+    <div class="notice" id="jTrust"><b>Three kinds of evidence, never mixed up.</b>
+      <ul>
+        <li><b>Organizer-attested:</b> attendance and participation are the organizer's statement. The chain makes the registered batch tamper-evident; it does not confirm that people attended.</li>
+        <li><b>On-chain course record:</b> the LessonVerifier contract records which course levels a wallet cleared. Trusted: the chain and that deployed contract.</li>
+        <li><b>Processor-verified circuit:</b> a circuit's result is computed by the configured TapeOut processor. Trusted: the chain, the verification contract and that processor.</li>
+      </ul>
+      A passport shows recorded course progress and a correctly evaluated circuit associated with a wallet. It does not prove who built the circuit or that the holder is competent. Wallets are not unique people. Verified-issuer approval is decided by hand by the contract owner. <b>The contracts are unaudited and no real-wallet mainnet run is documented yet.</b></div>
 
     <div id="jNetWarn" class="notice warn" hidden>This deployment is <b>not on X Layer</b>. It is a rehearsal environment. The hackathon requires X Layer, so it does not count as the submission unless the organizers say so.</div>
 
@@ -352,9 +359,9 @@
     <div class="hwrap hstage">
       <div class="hl">
         <p class="live"><i class="pulse"></i>Live on X Layer · registry <a class="ulink" href="https://www.oklink.com/xlayer/address/0xF965f9Fd3A6F36E000abE1288aE1363B9F920670" target="_blank" rel="noopener">0xF965…0670</a></p>
-        <h1>Prove your <em>event worked.</em></h1>
-        <p class="lede"><b>Anyone can say people attended. CertCheck lets an event prove it, and prove who learned something.</b> Tamper-proof certificates for who showed up, and a graded circuit lab on a TapeOut processor for who can do it. Every number is checkable on X Layer, and no names go on-chain.</p>
-        <div class="row ctas"><a class="btn primary" href="#issue">Issue certificates</a><a class="btn ghost" href="#verify">Check a certificate</a></div>
+        <h1>Prove what your <em>event achieved.</em></h1>
+        <p class="lede"><b>Organizers attest to who attended. The lab and the chain show who learned something.</b> CertCheck issues verifiable certificates, teaches digital logic in a graded circuit course, and builds outcome reports where every number says where it came from: the organizer, an on-chain record, or a TapeOut processor. No names are published on-chain.</p>
+        <div class="row ctas"><a class="btn primary" href="#issue">Issue certificates</a><a class="btn ghost" href="#report">Create an outcome report</a><a class="btn ghost" href="#play">Earn a passport</a><a class="btn ghost" href="#verify">Verify a certificate or passport</a></div>
 
         <div class="hterm" id="fTerm">
           <div class="termbar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="httl">certcheck · live demo, runs in your browser</span><span class="cap" id="fStep" aria-live="polite">Ready</span></div>
@@ -419,34 +426,34 @@
 
   <!-- ============ TRUST LADDER ============ -->
   <div class="hwrap hreveal" id="hLadder">
-    <h2 class="sect">An event can prove three different things. Each needs a different amount of trust.</h2>
+    <h2 class="sect">An event can show three different kinds of evidence. Each needs trust in something different.</h2>
     <div class="tladder">
       <article class="tstep t1">
-        <span class="tsn">Rung 1 · Attended</span>
+        <span class="tsn">Rung 1 · Organizer-attested</span>
         <h3>Attendance certificate</h3>
-        <p>A bootcamp, a meetup or a workshop hands out names. You paste a list, we fingerprint it, and the batch goes on-chain.</p>
+        <p>A bootcamp, meetup or workshop hands out names. You paste a list and a fingerprint of the batch is registered on X Layer. That makes the batch tamper-evident. It cannot show that the people really attended.</p>
         <div class="tsbar" data-lv="1"><i></i><i></i><i></i></div>
         <p class="tswho">Trust needed: <b>the organizer</b></p>
         <a class="btn ghost" href="#issue">Issue certificates</a>
       </article>
       <article class="tstep t2">
-        <span class="tsn">Rung 2 · Completed</span>
+        <span class="tsn">Rung 2 · Attested, with a checkable skill claim</span>
         <h3>Certificate that carries a skill</h3>
-        <p>The same certificate, with a skill claim inside: a circuit and an exam seed that anyone can re-run against the chain.</p>
+        <p>The same certificate with a circuit and an exam seed inside. Anyone can re-run that circuit on the TapeOut processor and see whether it computes the exam.</p>
         <div class="tsbar" data-lv="2"><i></i><i></i><i></i></div>
-        <p class="tswho">Trust needed: <b>the organizer, plus the chain</b></p>
+        <p class="tswho">Trust needed: <b>the organizer for who the person is, plus the chain and the configured TapeOut processor for the circuit result</b></p>
         <a class="btn ghost" href="#verify">Check one</a>
       </article>
       <article class="tstep t3">
-        <span class="tsn">Rung 3 · Proven</span>
+        <span class="tsn">Rung 3 · Processor-verified</span>
         <h3>Skill passport</h3>
-        <p>You build circuits in the course, then take an exam only your wallet can pass. A TapeOut processor runs it. Nobody signs anything.</p>
+        <p>A wallet has on-chain course progress and owns a circuit that the configured TapeOut processor evaluates correctly for that wallet's own exam. No organizer signs it. It does not show who built the circuit.</p>
         <div class="tsbar" data-lv="3"><i></i><i></i><i></i></div>
-        <p class="tswho">Trust needed: <b>only the chain</b></p>
+        <p class="tswho">Trust needed: <b>the blockchain, the deployed verification contract and the configured TapeOut processor</b></p>
         <a class="btn primary" href="#play">Earn a passport</a>
       </article>
     </div>
-    <p class="tsnote">Most events stop at rung 1: "120 people came." With CertCheck an event can say "120 attended, 64 cleared the lab, 22 passed the exam", and each number is something a sponsor can check on-chain. The certificate is the receipt, the circuit lab is the measurement, and the registry is the tamper-proof report. Counting who passed needs attendees to give their wallet to the organizer, so that part is opt-in. Try the <a class="ulink" href="#report">outcome report</a>.</p>
+    <p class="tsnote">Most events stop at rung 1: "120 people came." An event can go further and report three kinds of number, each labelled: attendance the organizer attests, course levels recorded on-chain, and assessments evaluated by the processor. Counting the last two needs wallet addresses from attendees, and a wallet is not the same as a person. Try the <a class="ulink" href="#report">outcome report</a>.</p>
   </div>
 
   <!-- ============ COMPARE ============ -->
@@ -475,14 +482,14 @@
         <ul class="x"><li>Subscription forever</li><li>Gone if the vendor is</li><li>Your people's data on their side</li></ul>
       </article>
       <article class="cp hot">
-        <h3>CertCheck</h3><p class="sub">Anyone can check it. Nobody can fake it. Nothing to rent.</p>
+        <h3>CertCheck</h3><p class="sub">Anyone can check it. A forged or edited proof fails. Nothing to rent.</p>
 <pre class="art" aria-hidden="true">         <span class="g">root</span>   <span class="m">← the only thing public</span>
         <span class="d">╱    ╲</span>
       <span class="g">◆</span>        <span class="g">◆</span>
      <span class="d">╱ ╲      ╱ ╲</span>
    <span class="g">◇</span>   <span class="g">◆</span>    <span class="g">◇</span>   <span class="g">◇</span>
    <span class="m">each leaf is one person's proof</span></pre>
-        <ul class="hv"><li>A changed letter fails the check</li><li>Public format, anyone can verify</li><li>Names stay with the holder</li></ul>
+        <ul class="hv"><li>A changed field fails the check</li><li>Public format, anyone can verify</li><li>Names are not published on-chain</li></ul>
         <div class="row"><a class="btn primary" href="#issue">Issue certificates</a><a class="btn ghost" href="#play">Circuit passport</a></div>
       </article>
     </div>
@@ -559,8 +566,8 @@
   <div class="hwrap hreveal">
     <h2 class="sect">Why people can trust it</h2>
     <div class="trust">
-      <div class="tc"><i class="ic lock"></i><h3>It cannot be forged</h3><p>Change one letter and the check fails. You just saw that.</p></div>
-      <div class="tc"><i class="ic blur"></i><h3>It is private</h3><p>Only a fingerprint is public. Each person holds their own proof.</p></div>
+      <div class="tc"><i class="ic lock"></i><h3>It is tamper-evident</h3><p>Change a name, course, date or other field in the proof and the check fails, as you just saw. The check covers exactly the fields in the proof; it cannot tell whether the original information was true.</p></div>
+      <div class="tc"><i class="ic blur"></i><h3>It keeps names off the chain</h3><p>Only a fingerprint of the batch is public. A person's proof, which holds their name, is shared by them, so share it with care. Wallet addresses and lab progress are public.</p></div>
       <div class="tc"><i class="ic open"></i><h3>No lock-in</h3><p>The format is public, so anyone can build their own checker.</p></div>
       <div class="tc"><i class="ic revoke"></i><h3>It can be withdrawn</h3><p>Revoke one certificate or a whole batch, in public.</p></div>
     </div>
@@ -598,7 +605,7 @@
     <div class="row"><button id="crBuy" class="btn ghost" type="button">Buy credits</button><span class="hint" id="crMsg" role="status"></span></div></div></div>
 
   <div class="step"><span class="num">3</span><div class="body"><h2>Become a verified issuer</h2>
-    <p class="sub">Tell us who you are. We check it, and if it holds up your wallet is listed as verified. The fee is held until we decide, and returned in full if we say no.</p>
+    <p class="sub">Tell us who you are. The contract owner reviews each request by hand and decides: this is one party's judgement, not an on-chain vote. If it holds up your wallet is listed as verified. The fee is held until the decision, and returned in full if it is rejected.</p>
     <div class="grid3" style="grid-template-columns:1fr 1fr"><div class="field"><label for="vrName">Organization name</label><input id="vrName" type="text" maxlength="80" placeholder="Acme Bootcamp"></div><div class="field"><label for="vrUrl">Website</label><input id="vrUrl" type="text" maxlength="120" placeholder="https://acme.example"></div></div>
     <div class="row"><button id="vrGo" class="btn ghost" type="button">Request a review</button><button id="vrCancel" class="btn ghost" type="button" hidden>Cancel my request</button><button id="vrClaim" class="btn ghost" type="button" hidden>Claim my refund</button><span class="hint" id="vrMsg" role="status"></span></div>
     <p class="note" id="vrStatus"></p></div></div>
@@ -635,25 +642,25 @@
 <!-- ===== REPORT ===== -->
 <section id="reportView" class="view" hidden>
   <h1>Event outcome report</h1>
-  <p class="lede">Show a sponsor what an event produced: how many attended, how many cleared the lab, how many passed the exam. Every number is read from X Layer when you press the button.</p>
-  <div class="field"><label for="rpList">Your list (name and wallet columns, or one wallet per line)</label>
+  <p class="lede">Show a sponsor what an event produced, with each number labelled by where it comes from. Attendance is the organizer's statement. Course levels are read from the on-chain record. The exam result comes from a TapeOut processor. Nothing here counts unique people: it counts wallets.</p>
+  <div class="field"><label for="rpList">Your list (name and wallet columns, or one wallet per line). Attendance is taken from it as the organizer's statement.</label>
     <textarea id="rpList" rows="5" spellcheck="false" placeholder="name,wallet&#10;Ada Lovelace,0x…&#10;Alan Turing,"></textarea></div>
   <details class="rpopt"><summary>Count attendance from a registered batch (optional)</summary>
     <div class="grid2"><div class="field"><label for="rpIssuer">Issuer address</label><input id="rpIssuer" type="text" spellcheck="false" placeholder="0x…"></div>
     <div class="field"><label for="rpRoot">Batch fingerprint</label><input id="rpRoot" type="text" spellcheck="false" placeholder="0x… (64 characters)"></div></div>
-    <p class="sub">With these, “attended” is the certificate count the issuer registered on X Layer, not a number you typed.</p></details>
+    <p class="sub">With these, the first figure becomes the certificate count the issuer registered on X Layer instead of the length of your list. It still does not prove the people attended.</p></details>
   <div class="row"><button id="rpGo" class="btn primary" type="button">Build report</button><button id="rpSample" class="btn ghost" type="button">Try a sample</button><span class="hint" id="rpHint" role="status"></span></div>
   <article id="rpResult" class="result" data-state="valid" hidden aria-live="polite">
-    <div class="rhead"><span class="badge">✓</span><h2>Outcome, read from X Layer</h2></div>
+    <div class="rhead"><span class="badge">✓</span><h2>Outcome, with the source of every number</h2></div>
     <div id="rpOut"></div>
-    <p class="note">A wallet is not a person: one person can use several, and a wallet appears only if the person gave it to the organizer. Passing levels shows skill; the certificate shows attendance.</p>
+    <p class="note">A wallet is not a person: one person can use several, and a wallet appears only if the person gave it to the organizer. Passing levels is recorded progress and a processor result for a wallet; it does not prove who did the work.</p>
   </article>
 </section>
 
 <!-- ===== ISSUE ===== -->
 <section id="issueView" class="view" hidden>
-  <h1>Issue certificates no one can fake</h1>
-  <p class="lede">Upload your list. Each person gets a link that proves their certificate, and only a fingerprint of the whole batch goes on-chain. Names never leave your browser until you hand out the links.</p>
+  <h1>Issue certificates anyone can verify</h1>
+  <p class="lede">Upload your list. Each person gets a link that holds their own proof, and only a fingerprint of the whole batch goes on-chain. Names are not published on-chain. Each link contains that person's name and details, so hand it only to them.</p>
 
   <div class="step"><span class="num">1</span><div class="body">
     <h2>Issuer</h2>
@@ -695,6 +702,7 @@
       <div class="row"><button id="dlLinks" class="btn ghost" type="button">Download links (CSV)</button><button id="dlProofs" class="btn ghost" type="button">Download proofs (JSON)</button><button id="printAll" class="btn ghost" type="button">Print certificates</button></div>
       <div class="tablewrap"><table id="rows"><thead><tr><th>Name</th><th>Link</th></tr></thead><tbody></tbody></table></div>
       <p class="hint" id="moreRows"></p>
+      <p class="notice warn" id="privNote"><b>Each link or proof contains the person's name, course, date and salt.</b> Treat it like a printed certificate: send it only to that person. Only the batch fingerprint, count and label go on-chain, and a salt stops guessing against the fingerprint but does not keep a link private once it is shared.</p>
       <div class="publish"><h2>4 · Publish the fingerprint</h2>
         <p class="sub">One transaction records the fingerprint, the count and your label on X Layer. Until you do this, verifiers will show “not registered”.</p>
         <p class="quote" id="pubQuote" role="status"></p>

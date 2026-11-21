@@ -14,7 +14,7 @@ async function open(opts = {}) {
 const T = (p, s) => p.$eval(s, e => e.textContent);
 // ===== the live demo =====
 let p = await open();
-ok("the home page opens with the headline and the live demo", (await T(p, "#homeView h1")).startsWith("Prove your event") && await p.$eval("#forge", e => e.getBoundingClientRect().height > 200));
+ok("the home page opens with the headline and the live demo", (await T(p, "#homeView h1")).startsWith("Prove what your event") && await p.$eval("#forge", e => e.getBoundingClientRect().height > 200));
 ok("before you press anything the demo is idle", (await T(p, "#fStep")) === "Ready" && (await p.$eval("#fResult", e => e.dataset.state)) === "idle" && await p.$eval("#fTamper", e => e.disabled));
 await p.click("#fRun"); await p.waitForFunction(() => !document.getElementById("fTamper").disabled, {timeout: 20000}); await sleep(200);
 const d1 = await p.evaluate(() => ({leaf: document.getElementById("fLeaf").textContent, root: document.getElementById("fRoot").textContent, st: document.getElementById("fResult").dataset.state, title: document.getElementById("fResTitle").textContent, qr: !!document.querySelector("#fQr svg path"), nodes: document.querySelectorAll("#fTree .tn").length, mine: document.querySelectorAll("#fTree .tn.me").length, path: document.querySelectorAll("#fTree .te.path").length, lit: document.querySelectorAll("#forge .fsteps li.on").length, name: document.getElementById("fCardName").textContent}));
@@ -107,7 +107,7 @@ ok("pasting something else opens the verify page with the text filled in", (awai
 // ===== reveal: nothing is left invisible =====
 p = await open(); await p.evaluate(async () => { for (let y = 0; y <= document.body.scrollHeight; y += 300) { window.scrollTo(0, y); await new Promise(r => setTimeout(r, 120)); } }); await sleep(1000);
 await p.waitForFunction(() => [...document.querySelectorAll("#homeView .hreveal")].every(x => x.classList.contains("in")), {timeout: 8000}); await sleep(1200); const vis = await p.$$eval("#homeView .hreveal", r => r.map(x => getComputedStyle(x).opacity)); ok("after scrolling, every section has faded in (nothing stays invisible)", vis.length >= 4 && vis.every(o => +o > 0.99), vis.join());
-ok("all home links go to real destinations", await p.evaluate(() => [...document.querySelectorAll('#homeView a[href^="#"]')].every(a => ["#issue", "#verify", "#manage", "#pricing", "#play", "#exam", "#circuits", "#wallet", "#judges"].includes(a.getAttribute("href")) || a.id === "hPassBtn")));
+ok("all home links go to real destinations", await p.evaluate(() => [...document.querySelectorAll('#homeView a[href^="#"]')].every(a => ["#issue", "#verify", "#manage", "#pricing", "#play", "#exam", "#circuits", "#wallet", "#judges", "#report"].includes(a.getAttribute("href")) || a.id === "hPassBtn")));
 await p.close();
 // ===== reduced motion: no waiting, final state shown, nothing animates =====
 p = await open({reduce: true}); const t0 = Date.now(); await p.click("#fRun"); await p.waitForFunction(() => !document.getElementById("fTamper").disabled, {timeout: 10000});

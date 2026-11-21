@@ -1,8 +1,8 @@
 # CertCheck
 
-**Prove your event worked.**
+**Prove what your event achieved.**
 
-Anyone can say people attended. CertCheck lets an event prove it, and prove who learned something. The **certificate** is the receipt: tamper-proof, private, and checkable by anyone forever. The **circuit lab** is the measurement: a graded exercise on a TapeOut processor on X Layer that earns a **skill passport** with no teacher's say-so in the middle. The **registry** is the tamper-proof report: an event can say "120 attended, 64 cleared the lab, 22 passed the exam" and each number is checkable on-chain. Nothing personal goes on-chain, and nothing depends on us staying online.
+CertCheck helps events and educational programmes show not just who took part, but what people actually achieved, and it labels exactly how much each claim can be trusted. The **certificate** is a tamper-evident receipt the organizer issues: a fingerprint of the batch goes on-chain, and each holder keeps their own proof. The **circuit lab** is a graded course on a TapeOut processor on X Layer that earns a **skill passport** with no organizer in the middle. The **outcome report** puts the two side by side: how many attended (the organizer's statement), how many cleared course levels (an on-chain record), and how many passed the exam circuit (evaluated by the TapeOut processor). Names are not published on-chain, but proof links contain them, so share those carefully.
 
 Built on X Layer for the TapeOut Accelerate hackathon.
 
@@ -32,18 +32,20 @@ Events report vanity numbers: sign-ups and attendance. Sponsors and communities 
 
 The trust side of the same idea: a PDF certificate can be faked in a minute. A credential platform's database can vanish in a day, and it knows your name. A fingerprint on a public chain can be checked by anyone for as long as the chain lives, and it need not contain a single personal detail.
 
-CertCheck publishes only a fingerprint of a whole batch (a Merkle root). Each person holds their own proof. Change one letter of a name and the check fails.
+CertCheck publishes only a fingerprint of a whole batch (a Merkle root). Each person holds their own proof. Change a field that is part of the fingerprint (issuer, name, course, date, the optional skill or wallet) and the check fails; anything shown outside those fields is not covered.
 
-The second idea is the passport. A certificate asks you to trust whoever issued it. A circuit that a processor has run needs no such trust, so the course makes a credential that proves itself.
+The second idea is the passport. A certificate asks you to trust whoever issued it. A passport replaces the organizer with a different set of trusted parts: the chain, the deployed LessonVerifier contract and the configured TapeOut processor. That is a smaller and more checkable set, but it is still trust, and the passport says nothing about who did the work.
 
 ## The three rungs of trust
-An event can prove three different things, and each needs a different amount of trust. This is *how* the product works; the point of it is above.
+An event can show three different kinds of evidence, and each needs trust in something different. This is *how* the product works; the point of it is above.
 
-| Rung | What it is | Trust needed | Where |
+| Evidence | What it establishes | Who or what you must trust | Where |
 |---|---|---|---|
-| 1. **Attended** | Attendance or completion certificate for a workshop, bootcamp or meetup (an optional wallet column ties it to the holder's lab record) | The organizer | `#issue`, `#verify`, `#report` |
-| 2. **Completed** | The same certificate, carrying a skill claim anyone can re-run against the chain | The organizer, plus the chain | `#issue` (skill challenge), `#verify` |
-| 3. **Proven** | A skill passport: course levels cleared on-chain plus an exam circuit run by TapeOut | Only the chain | `#play`, `#exam`, `#verify` |
+| 1. **Organizer-attested** | The organizer says these people attended or took part. The chain makes the registered batch tamper-evident; it cannot show that the people attended. | The organizer and their attendance process | `#issue`, `#verify`, `#report` |
+| 2. **Attested, with a checkable skill claim** | The same certificate, carrying a circuit and an exam seed that anyone can re-run on the TapeOut processor | The organizer for who the person is; the chain and the configured TapeOut processor for the circuit result | `#issue` (skill challenge), `#verify` |
+| 3. **Processor-verified (passport)** | A wallet has recorded course progress and owns a circuit that the configured TapeOut processor evaluates as correct for that wallet's own exam | The blockchain, the deployed LessonVerifier contract, and the configured TapeOut processor. It is **not** trustless. | `#play`, `#exam`, `#verify` |
+
+**What a passport proves, and what it does not.** It is evidence of recorded course progress and a correctly evaluated circuit associated with a wallet. It does not prove who designed or built the circuit (someone else could build it or transfer it to the wallet), who owns the wallet, or that the holder is competent. Wallets are not unique people: one person can use several, and a wallet can be shared.
 
 Most credentials stop at rung 1. The product covers the whole ladder, so an organizer can start at the top rung they can offer and a learner can climb without leaving.
 
@@ -68,7 +70,7 @@ One single-page site, hash-routed. Open it and use the top menu, or go straight 
 Game routes: `#daily` (today's puzzle), `#race=<level>.<gates>` (a friend's challenge), `#puzzle=<table>` (a friend's puzzle).
 
 ## How a certificate works
-1. **Fingerprint.** For each person the browser builds a leaf: `SHA-256(0x00 || canon(issuer, name, course, date, salt, skill))`, with a random 16-byte salt so names cannot be guessed against the root.
+1. **Fingerprint.** For each person the browser builds a leaf: `SHA-256(0x00 || canon(issuer, name, course, date, salt, skill))`, with a random 16-byte salt, so someone who sees only the published root cannot guess names against it.
 2. **Batch.** Leaves fold into a Merkle tree (`node = SHA-256(0x01 || left || right)`). The 0x00/0x01 prefixes separate leaves from nodes.
 3. **Publish.** One transaction stores `(issuer, root, count, label)` in the registry. No names, no emails, no dates.
 4. **Hand out.** Each person gets a link (`#c=` plus the proof) and a QR code. The proof is just the credential fields and the sibling hashes up to the root.
@@ -85,10 +87,12 @@ The registry keys each batch by `(issuer, root)`, so nobody can claim someone el
 ## Skill proofs and the passport
 **Skill challenge (rung 2).** An organizer can require a TapeOut skill. Each student gets a *different* 3-input logic function, derived from a seed, builds it as a circuit, and tapes it out. The certificate carries the circuit id, and verifiers re-run it with TapeOut's free `eval(circuitId, input)` and compare it with the expected truth table. This stops copying between students. It cannot stop someone building the circuit for them.
 
-**Passport (rung 3).** `#p=<wallet>.<circuitId>` proves, from chain state alone:
+**Passport (rung 3).** `#p=<wallet>.<circuitId>` is checked against chain state and the configured TapeOut processor. It shows:
 1. the wallet cleared at least 3 on-chain course levels (the `LessonVerifier` contract);
 2. its exam circuit, derived from the wallet itself, computes its own function (TapeOut `eval`);
-3. the wallet still owns that circuit.
+3. the wallet currently owns that circuit.
+
+That is all it shows. It does not show who built the circuit, who controls the wallet, or competence.
 
 A verifier only trusts the configured TapeOut processor. A credential naming any other contract shows as "not checked".
 
@@ -125,7 +129,16 @@ All on X Layer mainnet (chain 196).
 - **`withdraw()`:** anyone can call it; only earned fees go to the treasury, never escrow or refunds.
 - **Owner caps:** price at most 0.01 OKB, free allowance at most 1,000, verification fee at most 10 OKB. Two-step ownership.
 
-### Revenue, plainly
+### Privacy: what is and is not public
+- **Public on-chain:** each batch's fingerprint (Merkle root), the issuer address, the certificate count, a label, and revocations. Wallet addresses and their lab progress (levels cleared, circuits owned) are public too.
+- **Not published as registry entries:** names, courses, dates and salts. They live in the holder's proof.
+- **A proof link contains personal information** (the name, course, date and salt). Whoever has the link can read them, so share it as you would a printed certificate, and keep it from anyone you would not show it to.
+- **The salt does not keep a shared proof private.** It stops someone who has only the on-chain root from guessing names; it does nothing once the proof has been handed over.
+- **A holder's proof is required to verify.** Losing the link means asking the organizer for another (they keep the batch file).
+- **The wallet column is optional.** Putting a wallet in a certificate links that person to a public lab record. Only do it with their agreement.
+- **Reports** built from a list contain wallet addresses, never names, and re-read the chain each time they are opened.
+
+## Revenue, plainly
 **Collected so far: nothing.** No organizer has used the registry and no sponsor has signed. Every price below is a guess.
 
 | Stream | State | Unit price |
@@ -205,8 +218,9 @@ scripts/deploy-v2.sh deploy                # sends one transaction, writes the a
 Running the paid registry (prices, approving reviews, withdrawing) is in `docs/OWNER.md`. Hosting notes are in `docs/DEPLOY.md`.
 
 ## What a result means (and does not)
-- **Certificate valid:** this issuer address recorded this certificate. It does **not** prove the issuer is who they claim; compare the address with the organization's own site. A "Verified" badge means the owner reviewed that issuer.
-- **Passport verified:** this wallet cleared the course levels and holds a correct exam circuit. It cannot prove who built the circuit; a friend can build it and transfer it in.
+- **Certificate valid:** this issuer address recorded this certificate. It does **not** prove the issuer is who they claim; compare the address with the organization's own site. A "Verified" badge means the contract owner reviewed that issuer by hand. It is one party's judgement, not a decentralised vote or an audit.
+- **Passport verified:** this wallet has recorded course levels and owns a circuit the configured TapeOut processor evaluates as correct for its own exam. It cannot prove who built the circuit; a friend can build it and transfer it in. It is not trustless: you rely on the chain, the LessonVerifier contract and that processor.
+- **Attendance:** always the organizer's statement. Registering a batch makes it tamper-evident, not true.
 - Privacy: only `(issuer, root, count, label)` is on-chain. Names, courses and dates live in the proof the holder keeps.
 
 ## Status: read this first

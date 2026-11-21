@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CertCheck — certificates anyone can verify</title>
-<meta name="description" content="Prove your event worked. Tamper-proof certificates for who attended, and a graded circuit lab on a TapeOut processor for who learned something. Checkable on X Layer, with no personal data on-chain.">
+<meta name="description" content="Prove what your event achieved. Verifiable certificates, a graded circuit lab checked by a TapeOut processor, and outcome reports that label where each number comes from. Registered on X Layer; no names are published on-chain.">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b1220'/%3E%3Cpath d='M32 9 50 16v14c0 12-8 20-18 25C22 50 14 42 14 30V16z' fill='none' stroke='%2334d399' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='M23 32l6 6 12-13' fill='none' stroke='%2334d399' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <style>
 /* FirstTape — dark, terminal-grade. Flat surfaces, 1px hairlines, one green LED.
@@ -804,6 +804,8 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 .hvstamp.go{animation:hvstamp 1.9s cubic-bezier(.2,.8,.2,1) both}
 @keyframes hvstamp{0%{opacity:0;transform:rotate(-9deg) scale(1.9)}14%{opacity:1;transform:rotate(-9deg) scale(1)}75%{opacity:1}100%{opacity:0;transform:rotate(-9deg) scale(1)}}
 @media (prefers-reduced-motion:reduce){.hvw.on,.hvw.on.surge,.hvled,.hvstamp.go{animation:none!important}}
+
+#jTrust ul{margin:8px 0 10px 18px}#jTrust li{margin:4px 0}
 </style>
 <style>
 .cc{--void:#0b0e12;--carbon:#181a1d;--slate:#303235;--fog:#5d5e61;--steel:#818284;--silver:#bababb;--bone:#dedede;--green:#00d892;--teal:#002923;--amber:#e8b64a;--coral:#ff6b6b;
@@ -967,12 +969,22 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 @media (max-width:760px){.cc .grid2{grid-template-columns:1fr}}
 .cc .rpopt{margin:4px 0 14px;border:1px solid var(--line,#26303a);padding:10px 14px}
 .cc .rpopt summary{cursor:pointer;font:12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--steel)}
-.cc .rprow{display:grid;grid-template-columns:minmax(150px,1.1fr) 2fr minmax(80px,.5fr);gap:14px;align-items:center;margin:12px 0}
-.cc .rplab{font-size:14px;color:var(--bone)}
+.cc .rprow{display:grid;grid-template-columns:minmax(190px,1.2fr) 2fr minmax(90px,.5fr);gap:6px 14px;align-items:center;margin:16px 0}
+.cc .rplab b{display:block;font-size:15px;font-weight:500;color:var(--bone);margin-bottom:4px}
 .cc .rpbar{height:12px;background:rgba(255,255,255,.07);overflow:hidden}
-.cc .rpbar i{display:block;height:100%;background:var(--accent,#34d399);transition:width .9s ease}
+.cc .rpbar i{display:block;height:100%;transition:width .9s ease;background:#34d399}
+.cc .rpbar i.org{background:#e0a84a}.cc .rpbar i.proc{background:#7aa7ff}
 .cc .rpn{font:13px var(--mono);text-align:right;color:var(--bone)}
-@media (max-width:600px){.cc .rprow{grid-template-columns:1fr 1fr}.cc .rpbar{grid-column:1/-1;order:3}}
+.cc .rpdef{grid-column:1/-1;margin:0;font-size:12.5px;color:var(--fog)}
+.cc .rptag{display:inline-block;font:10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border:1px solid currentColor}
+.cc .rptag.org{color:#e0a84a}.cc .rptag.chain{color:#34d399}.cc .rptag.proc{color:#7aa7ff}
+.cc .rplegend{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 12px}
+@media (max-width:600px){.cc .rprow{grid-template-columns:1fr 1fr}.cc .rpbar{grid-column:1/-1;order:3}.cc .rpdef{order:4}}
+/* event outcome report */
+.cc .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
+@media (max-width:760px){.cc .grid2{grid-template-columns:1fr}}
+.cc .rpopt{margin:4px 0 14px;border:1px solid var(--line,#26303a);padding:10px 14px}
+.cc .rpopt summary{cursor:pointer;font:12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--steel)}
 </style>
 <style>
 /* ===== home v2: verification rack, live terminal, figures, serif headlines ===== */
@@ -1495,7 +1507,14 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
   <main class="wrap pg">
     <span class="badge">Checkable claims</span>
     <h1 class="pgh">For judges</h1>
-    <p class="lede2">CertCheck: certificates anyone can verify, with no personal data on-chain, plus a skill passport for people who learn circuits in the Circuits course. Certificates are checked against a public record on X Layer. A passport is checked by the TapeOut processor, which re-runs the learner's own exam circuit. Everything below can be checked, and where something is not live, it says so.</p>
+    <p class="lede2">CertCheck: certificates anyone can verify, plus a skill passport for people who learn circuits in the Circuits course. Names are not published on-chain. Each claim below says what is checked, and by what.</p>
+    <div class="notice" id="jTrust"><b>Three kinds of evidence, never mixed up.</b>
+      <ul>
+        <li><b>Organizer-attested:</b> attendance and participation are the organizer's statement. The chain makes the registered batch tamper-evident; it does not confirm that people attended.</li>
+        <li><b>On-chain course record:</b> the LessonVerifier contract records which course levels a wallet cleared. Trusted: the chain and that deployed contract.</li>
+        <li><b>Processor-verified circuit:</b> a circuit's result is computed by the configured TapeOut processor. Trusted: the chain, the verification contract and that processor.</li>
+      </ul>
+      A passport shows recorded course progress and a correctly evaluated circuit associated with a wallet. It does not prove who built the circuit or that the holder is competent. Wallets are not unique people. Verified-issuer approval is decided by hand by the contract owner. <b>The contracts are unaudited and no real-wallet mainnet run is documented yet.</b></div>
 
     <div id="jNetWarn" class="notice warn" hidden>This deployment is <b>not on X Layer</b>. It is a rehearsal environment. The hackathon requires X Layer, so it does not count as the submission unless the organizers say so.</div>
 
@@ -1580,9 +1599,9 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
     <div class="hwrap hstage">
       <div class="hl">
         <p class="live"><i class="pulse"></i>Live on X Layer · registry <a class="ulink" href="https://www.oklink.com/xlayer/address/0xF965f9Fd3A6F36E000abE1288aE1363B9F920670" target="_blank" rel="noopener">0xF965…0670</a></p>
-        <h1>Prove your <em>event worked.</em></h1>
-        <p class="lede"><b>Anyone can say people attended. CertCheck lets an event prove it, and prove who learned something.</b> Tamper-proof certificates for who showed up, and a graded circuit lab on a TapeOut processor for who can do it. Every number is checkable on X Layer, and no names go on-chain.</p>
-        <div class="row ctas"><a class="btn primary" href="#issue">Issue certificates</a><a class="btn ghost" href="#verify">Check a certificate</a></div>
+        <h1>Prove what your <em>event achieved.</em></h1>
+        <p class="lede"><b>Organizers attest to who attended. The lab and the chain show who learned something.</b> CertCheck issues verifiable certificates, teaches digital logic in a graded circuit course, and builds outcome reports where every number says where it came from: the organizer, an on-chain record, or a TapeOut processor. No names are published on-chain.</p>
+        <div class="row ctas"><a class="btn primary" href="#issue">Issue certificates</a><a class="btn ghost" href="#report">Create an outcome report</a><a class="btn ghost" href="#play">Earn a passport</a><a class="btn ghost" href="#verify">Verify a certificate or passport</a></div>
 
         <div class="hterm" id="fTerm">
           <div class="termbar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="httl">certcheck · live demo, runs in your browser</span><span class="cap" id="fStep" aria-live="polite">Ready</span></div>
@@ -1647,34 +1666,34 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 
   <!-- ============ TRUST LADDER ============ -->
   <div class="hwrap hreveal" id="hLadder">
-    <h2 class="sect">An event can prove three different things. Each needs a different amount of trust.</h2>
+    <h2 class="sect">An event can show three different kinds of evidence. Each needs trust in something different.</h2>
     <div class="tladder">
       <article class="tstep t1">
-        <span class="tsn">Rung 1 · Attended</span>
+        <span class="tsn">Rung 1 · Organizer-attested</span>
         <h3>Attendance certificate</h3>
-        <p>A bootcamp, a meetup or a workshop hands out names. You paste a list, we fingerprint it, and the batch goes on-chain.</p>
+        <p>A bootcamp, meetup or workshop hands out names. You paste a list and a fingerprint of the batch is registered on X Layer. That makes the batch tamper-evident. It cannot show that the people really attended.</p>
         <div class="tsbar" data-lv="1"><i></i><i></i><i></i></div>
         <p class="tswho">Trust needed: <b>the organizer</b></p>
         <a class="btn ghost" href="#issue">Issue certificates</a>
       </article>
       <article class="tstep t2">
-        <span class="tsn">Rung 2 · Completed</span>
+        <span class="tsn">Rung 2 · Attested, with a checkable skill claim</span>
         <h3>Certificate that carries a skill</h3>
-        <p>The same certificate, with a skill claim inside: a circuit and an exam seed that anyone can re-run against the chain.</p>
+        <p>The same certificate with a circuit and an exam seed inside. Anyone can re-run that circuit on the TapeOut processor and see whether it computes the exam.</p>
         <div class="tsbar" data-lv="2"><i></i><i></i><i></i></div>
-        <p class="tswho">Trust needed: <b>the organizer, plus the chain</b></p>
+        <p class="tswho">Trust needed: <b>the organizer for who the person is, plus the chain and the configured TapeOut processor for the circuit result</b></p>
         <a class="btn ghost" href="#verify">Check one</a>
       </article>
       <article class="tstep t3">
-        <span class="tsn">Rung 3 · Proven</span>
+        <span class="tsn">Rung 3 · Processor-verified</span>
         <h3>Skill passport</h3>
-        <p>You build circuits in the course, then take an exam only your wallet can pass. A TapeOut processor runs it. Nobody signs anything.</p>
+        <p>A wallet has on-chain course progress and owns a circuit that the configured TapeOut processor evaluates correctly for that wallet's own exam. No organizer signs it. It does not show who built the circuit.</p>
         <div class="tsbar" data-lv="3"><i></i><i></i><i></i></div>
-        <p class="tswho">Trust needed: <b>only the chain</b></p>
+        <p class="tswho">Trust needed: <b>the blockchain, the deployed verification contract and the configured TapeOut processor</b></p>
         <a class="btn primary" href="#play">Earn a passport</a>
       </article>
     </div>
-    <p class="tsnote">Most events stop at rung 1: "120 people came." With CertCheck an event can say "120 attended, 64 cleared the lab, 22 passed the exam", and each number is something a sponsor can check on-chain. The certificate is the receipt, the circuit lab is the measurement, and the registry is the tamper-proof report. Counting who passed needs attendees to give their wallet to the organizer, so that part is opt-in. Try the <a class="ulink" href="#report">outcome report</a>.</p>
+    <p class="tsnote">Most events stop at rung 1: "120 people came." An event can go further and report three kinds of number, each labelled: attendance the organizer attests, course levels recorded on-chain, and assessments evaluated by the processor. Counting the last two needs wallet addresses from attendees, and a wallet is not the same as a person. Try the <a class="ulink" href="#report">outcome report</a>.</p>
   </div>
 
   <!-- ============ COMPARE ============ -->
@@ -1703,14 +1722,14 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
         <ul class="x"><li>Subscription forever</li><li>Gone if the vendor is</li><li>Your people's data on their side</li></ul>
       </article>
       <article class="cp hot">
-        <h3>CertCheck</h3><p class="sub">Anyone can check it. Nobody can fake it. Nothing to rent.</p>
+        <h3>CertCheck</h3><p class="sub">Anyone can check it. A forged or edited proof fails. Nothing to rent.</p>
 <pre class="art" aria-hidden="true">         <span class="g">root</span>   <span class="m">← the only thing public</span>
         <span class="d">╱    ╲</span>
       <span class="g">◆</span>        <span class="g">◆</span>
      <span class="d">╱ ╲      ╱ ╲</span>
    <span class="g">◇</span>   <span class="g">◆</span>    <span class="g">◇</span>   <span class="g">◇</span>
    <span class="m">each leaf is one person's proof</span></pre>
-        <ul class="hv"><li>A changed letter fails the check</li><li>Public format, anyone can verify</li><li>Names stay with the holder</li></ul>
+        <ul class="hv"><li>A changed field fails the check</li><li>Public format, anyone can verify</li><li>Names are not published on-chain</li></ul>
         <div class="row"><a class="btn primary" href="#issue">Issue certificates</a><a class="btn ghost" href="#play">Circuit passport</a></div>
       </article>
     </div>
@@ -1787,8 +1806,8 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
   <div class="hwrap hreveal">
     <h2 class="sect">Why people can trust it</h2>
     <div class="trust">
-      <div class="tc"><i class="ic lock"></i><h3>It cannot be forged</h3><p>Change one letter and the check fails. You just saw that.</p></div>
-      <div class="tc"><i class="ic blur"></i><h3>It is private</h3><p>Only a fingerprint is public. Each person holds their own proof.</p></div>
+      <div class="tc"><i class="ic lock"></i><h3>It is tamper-evident</h3><p>Change a name, course, date or other field in the proof and the check fails, as you just saw. The check covers exactly the fields in the proof; it cannot tell whether the original information was true.</p></div>
+      <div class="tc"><i class="ic blur"></i><h3>It keeps names off the chain</h3><p>Only a fingerprint of the batch is public. A person's proof, which holds their name, is shared by them, so share it with care. Wallet addresses and lab progress are public.</p></div>
       <div class="tc"><i class="ic open"></i><h3>No lock-in</h3><p>The format is public, so anyone can build their own checker.</p></div>
       <div class="tc"><i class="ic revoke"></i><h3>It can be withdrawn</h3><p>Revoke one certificate or a whole batch, in public.</p></div>
     </div>
@@ -1826,7 +1845,7 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
     <div class="row"><button id="crBuy" class="btn ghost" type="button">Buy credits</button><span class="hint" id="crMsg" role="status"></span></div></div></div>
 
   <div class="step"><span class="num">3</span><div class="body"><h2>Become a verified issuer</h2>
-    <p class="sub">Tell us who you are. We check it, and if it holds up your wallet is listed as verified. The fee is held until we decide, and returned in full if we say no.</p>
+    <p class="sub">Tell us who you are. The contract owner reviews each request by hand and decides: this is one party's judgement, not an on-chain vote. If it holds up your wallet is listed as verified. The fee is held until the decision, and returned in full if it is rejected.</p>
     <div class="grid3" style="grid-template-columns:1fr 1fr"><div class="field"><label for="vrName">Organization name</label><input id="vrName" type="text" maxlength="80" placeholder="Acme Bootcamp"></div><div class="field"><label for="vrUrl">Website</label><input id="vrUrl" type="text" maxlength="120" placeholder="https://acme.example"></div></div>
     <div class="row"><button id="vrGo" class="btn ghost" type="button">Request a review</button><button id="vrCancel" class="btn ghost" type="button" hidden>Cancel my request</button><button id="vrClaim" class="btn ghost" type="button" hidden>Claim my refund</button><span class="hint" id="vrMsg" role="status"></span></div>
     <p class="note" id="vrStatus"></p></div></div>
@@ -1863,25 +1882,25 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 <!-- ===== REPORT ===== -->
 <section id="reportView" class="view" hidden>
   <h1>Event outcome report</h1>
-  <p class="lede">Show a sponsor what an event produced: how many attended, how many cleared the lab, how many passed the exam. Every number is read from X Layer when you press the button.</p>
-  <div class="field"><label for="rpList">Your list (name and wallet columns, or one wallet per line)</label>
+  <p class="lede">Show a sponsor what an event produced, with each number labelled by where it comes from. Attendance is the organizer's statement. Course levels are read from the on-chain record. The exam result comes from a TapeOut processor. Nothing here counts unique people: it counts wallets.</p>
+  <div class="field"><label for="rpList">Your list (name and wallet columns, or one wallet per line). Attendance is taken from it as the organizer's statement.</label>
     <textarea id="rpList" rows="5" spellcheck="false" placeholder="name,wallet&#10;Ada Lovelace,0x…&#10;Alan Turing,"></textarea></div>
   <details class="rpopt"><summary>Count attendance from a registered batch (optional)</summary>
     <div class="grid2"><div class="field"><label for="rpIssuer">Issuer address</label><input id="rpIssuer" type="text" spellcheck="false" placeholder="0x…"></div>
     <div class="field"><label for="rpRoot">Batch fingerprint</label><input id="rpRoot" type="text" spellcheck="false" placeholder="0x… (64 characters)"></div></div>
-    <p class="sub">With these, “attended” is the certificate count the issuer registered on X Layer, not a number you typed.</p></details>
+    <p class="sub">With these, the first figure becomes the certificate count the issuer registered on X Layer instead of the length of your list. It still does not prove the people attended.</p></details>
   <div class="row"><button id="rpGo" class="btn primary" type="button">Build report</button><button id="rpSample" class="btn ghost" type="button">Try a sample</button><span class="hint" id="rpHint" role="status"></span></div>
   <article id="rpResult" class="result" data-state="valid" hidden aria-live="polite">
-    <div class="rhead"><span class="badge">✓</span><h2>Outcome, read from X Layer</h2></div>
+    <div class="rhead"><span class="badge">✓</span><h2>Outcome, with the source of every number</h2></div>
     <div id="rpOut"></div>
-    <p class="note">A wallet is not a person: one person can use several, and a wallet appears only if the person gave it to the organizer. Passing levels shows skill; the certificate shows attendance.</p>
+    <p class="note">A wallet is not a person: one person can use several, and a wallet appears only if the person gave it to the organizer. Passing levels is recorded progress and a processor result for a wallet; it does not prove who did the work.</p>
   </article>
 </section>
 
 <!-- ===== ISSUE ===== -->
 <section id="issueView" class="view" hidden>
-  <h1>Issue certificates no one can fake</h1>
-  <p class="lede">Upload your list. Each person gets a link that proves their certificate, and only a fingerprint of the whole batch goes on-chain. Names never leave your browser until you hand out the links.</p>
+  <h1>Issue certificates anyone can verify</h1>
+  <p class="lede">Upload your list. Each person gets a link that holds their own proof, and only a fingerprint of the whole batch goes on-chain. Names are not published on-chain. Each link contains that person's name and details, so hand it only to them.</p>
 
   <div class="step"><span class="num">1</span><div class="body">
     <h2>Issuer</h2>
@@ -1923,6 +1942,7 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
       <div class="row"><button id="dlLinks" class="btn ghost" type="button">Download links (CSV)</button><button id="dlProofs" class="btn ghost" type="button">Download proofs (JSON)</button><button id="printAll" class="btn ghost" type="button">Print certificates</button></div>
       <div class="tablewrap"><table id="rows"><thead><tr><th>Name</th><th>Link</th></tr></thead><tbody></tbody></table></div>
       <p class="hint" id="moreRows"></p>
+      <p class="notice warn" id="privNote"><b>Each link or proof contains the person's name, course, date and salt.</b> Treat it like a printed certificate: send it only to that person. Only the batch fingerprint, count and label go on-chain, and a salt stops guessing against the fingerprint but does not keep a link private once it is shared.</p>
       <div class="publish"><h2>4 · Publish the fingerprint</h2>
         <p class="sub">One transaction records the fingerprint, the count and your label on X Layer. Until you do this, verifiers will show “not registered”.</p>
         <p class="quote" id="pubQuote" role="status"></p>
@@ -4142,85 +4162,123 @@ window.CC_CONFIG = {
 })(typeof window !== "undefined" ? window : globalThis);
 </script>
 <script>
-// Event outcome report: "120 attended, 64 cleared the lab, 22 passed the exam", every number read from X Layer.
-// Input: a list with a wallet per person (the same CSV as the Issue page) and, optionally, the registered batch (issuer + root).
-// Wallets are not people (one person can use several), and a wallet only appears here if the person gave it to the organizer.
+// Event outcome report. Every number carries an evidence label, because the three kinds of evidence are NOT equally trustworthy:
+//   organizer-attested  : attendance / participation, supplied by the organizer (the chain can make a batch tamper-evident, it cannot confirm who attended)
+//   on-chain record     : course levels recorded by the LessonVerifier contract for a wallet
+//   processor-verified  : a circuit evaluated by the configured TapeOut processor and owned by the wallet
+// Counts are of WALLETS, never of unique people. Input: a list with a wallet per person (the Issue-page CSV), optionally the registered batch.
 (function (root) {
-  const $ = id => document.getElementById(id), C = root.CertCore, X = root.CertChain, P = root.CertPassport, cfg = root.CC_CONFIG;
+  const C = root.CertCore, X = root.CertChain, P = root.CertPassport, cfg = root.CC_CONFIG || {};
+  const hasDoc = typeof document !== "undefined", $ = id => document.getElementById(id);
   const ADDR = /^0x[0-9a-fA-F]{40}$/, MAXW = 300;
   const b64u = u8 => btoa(String.fromCharCode(...u8)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   const unb64u = s => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/")), ch => ch.charCodeAt(0));
   const say = (t, cls = "") => { const h = $("rpHint"); h.textContent = t; h.className = "hint " + cls; };
-  let last = null, seq = 0;
+  const EV = {
+    org: {tag: "Organizer-attested", cls: "org", why: "Supplied by the organizer. The chain cannot confirm it."},
+    chain: {tag: "On-chain record", cls: "chain", why: "Read from the LessonVerifier contract on X Layer."},
+    proc: {tag: "Processor-verified", cls: "proc", why: "A circuit evaluated by the configured TapeOut processor, owned by the wallet, plus the on-chain record."},
+    anchored: {tag: "Registered on-chain", cls: "chain", why: "The certificate count the issuer registered. The count is tamper-evident; whether those people attended is the organizer's statement."}
+  };
 
   // The list: a CSV with a header (name + wallet columns), or just wallet addresses one per line.
   function parseList(text) {
     const t = String(text || "").trim(); if (!t) return {error: "Paste your list first."};
+    let names, raw;
     if (!/name|student|recipient/i.test(t.split(/\r?\n/)[0])) {
-      const ws = t.split(/[\s,;]+/).filter(Boolean), bad = ws.find(w => !ADDR.test(w));
+      raw = t.split(/[\s,;]+/).filter(Boolean); const bad = raw.find(w => !ADDR.test(w));
       if (bad) return {error: `"${bad.slice(0, 22)}" is not a wallet address. Paste a CSV with a name and a wallet column, or one wallet per line.`};
-      return {names: ws.length, wallets: ws.map(w => w.toLowerCase())};
-    }
-    const p = C.parseCSV(t); if (p.error) return p;
-    return {names: p.rows.length, wallets: p.rows.filter(r => r.wallet).map(r => r.wallet)};
+      names = null;
+    } else { const p = C.parseCSV(t); if (p.error) return p; names = p.rows.length; raw = p.rows.filter(r => r.wallet).map(r => r.wallet); }
+    const seen = new Set(); let dupes = 0; raw = raw.map(w => w.toLowerCase()).filter(w => seen.has(w) ? (dupes++, false) : (seen.add(w), true));
+    return {names, wallets: raw, dupes};
   }
-  const pct = (n, d) => d ? Math.round(100 * n / d) : 0;
-  function bar(label, n, d, sub) {
-    const row = document.createElement("div"); row.className = "rprow";
-    row.innerHTML = '<div class="rplab"></div><div class="rpbar"><i></i></div><div class="rpn"></div>';
-    row.querySelector(".rplab").textContent = label + (sub ? " · " + sub : ""); row.querySelector("i").style.width = (d ? pct(n, d) : 100) + "%"; row.querySelector(".rpn").textContent = n + (d ? ` (${pct(n, d)}%)` : "");
-    return row;
+
+  // Pure: turn what we know into labelled metrics and honest warnings. spec: {names|null, dupes, chainCount|null}; results: [{wallet, levels:[], passport}] or null when the chain was unreadable.
+  function buildReport(spec, results, minLevels) {
+    const warnings = [], rows = results || [];
+    if (!results) return {unavailable: true, metrics: [], warnings: ["The chain could not be read, so no outcome figures are shown. This is not a report of zero."]};
+    const w = rows.length, attended = spec.chainCount != null ? spec.chainCount : spec.names;
+    if (spec.dupes) warnings.push(`${spec.dupes} duplicate wallet entr${spec.dupes === 1 ? "y was" : "ies were"} counted once.`);
+    if (attended != null && w > attended) warnings.push(`The list has more wallets (${w}) than attendance (${attended}). Check the input.`);
+    if (spec.chainCount != null && spec.names != null && spec.names !== spec.chainCount) warnings.push(`Your list has ${spec.names} names but the registered batch holds ${spec.chainCount} certificates, so they may not be the same group.`);
+    if (attended == null) warnings.push("The list is only wallets, so there is no attendance figure.");
+    const one = rows.filter(r => r.levels.length >= 1).length, min = rows.filter(r => r.levels.length >= minLevels).length, pass = rows.filter(r => r.passport).length;
+    if (!(pass <= min && min <= one && one <= w)) warnings.push("The figures are inconsistent, which should not happen. Do not share this report; reload and try again.");
+    const m = [];
+    if (attended != null) m.push({key: "attended", label: spec.chainCount != null ? "Certificates registered" : "Attendance", value: attended, base: null, ev: spec.chainCount != null ? EV.anchored : EV.org,
+      counts: spec.chainCount != null ? "certificates in the batch the issuer registered on X Layer" : "people on the organizer's list", limit: spec.chainCount != null ? "A registered count shows how many certificates were issued, not that each person attended." : "Taken from the list the organizer supplied; nothing here checks it."});
+    m.push({key: "wallets", label: "Gave a wallet", value: w, base: attended, ev: EV.org, counts: "distinct wallet addresses on the list", limit: "One person may use several wallets, and a wallet may be shared. Wallets are not unique people."});
+    m.push({key: "one", label: "Cleared 1+ course levels", value: one, base: w, ev: EV.chain, counts: "wallets with at least one on-chain course level (levels 6-16)", limit: "Shows recorded progress of the wallet, not who did the work."});
+    m.push({key: "min", label: `Cleared ${minLevels}+ levels (exam unlocked)`, value: min, base: w, ev: EV.chain, counts: `wallets with at least ${minLevels} on-chain course levels`, limit: "Shows recorded progress of the wallet, not who did the work."});
+    m.push({key: "pass", label: "Passed the exam circuit", value: pass, base: w, ev: EV.proc, counts: "wallets that own a circuit the TapeOut processor evaluates as correct for that wallet's own exam, with enough levels", limit: "Does not prove who designed or built the circuit, or competence."});
+    return {metrics: m, warnings};
   }
-  function summaryText(r) {
-    return [`Event outcome report (read from X Layer ${new Date().toISOString().slice(0, 10)})`,
-      `${r.attended} attended${r.fromChain ? " (batch registered on X Layer)" : " (from the organizer's list)"}`,
-      `${r.withWallet} gave a wallet`, `${r.one} cleared at least 1 on-chain course level`, `${r.min} cleared ${cfg.passport.minLevels}+ levels`, `${r.passports} earned a skill passport`,
-      "Wallets are not people: one person may use several."].join("\n");
+  const pct = (n, d) => d ? Math.round(100 * n / d) : null;
+  function summaryText(rep, at) {
+    return [`Event outcome report, read from X Layer ${at}`, ...rep.metrics.map(m => `${m.label}: ${m.value}${m.base ? ` of ${m.base}` : ""} [${m.ev.tag}; counts ${m.counts}]`),
+      ...rep.warnings.map(x => "Note: " + x), "Wallets are not unique people. A registered or shared report is tamper-evident; it does not make organizer-supplied information independently true."].join("\n");
   }
-  function render(r, link) {
+
+  // ---------- page ----------
+  let seq = 0, specNow = null;
+  function render(rep, link, at) {
     const out = $("rpOut"); out.replaceChildren();
-    out.append(bar("Attended", r.attended, 0, r.fromChain ? "batch registered on X Layer" : "from the organizer's list"),
-      bar("Gave a wallet", r.withWallet, r.attended), bar("Cleared 1+ on-chain levels", r.one, r.withWallet), bar(`Cleared ${cfg.passport.minLevels}+ levels (exam unlocked)`, r.min, r.withWallet), bar("Earned a skill passport", r.passports, r.withWallet));
+    const leg = document.createElement("div"); leg.className = "rplegend"; leg.innerHTML = '<span class="rptag org">Organizer-attested</span><span class="rptag chain">On-chain record</span><span class="rptag proc">Processor-verified</span>';
+    out.appendChild(leg);
+    rep.warnings.forEach(x => { const w = document.createElement("p"); w.className = "notice warn"; w.textContent = x; out.appendChild(w); });
+    rep.metrics.forEach(m => {
+      const row = document.createElement("div"); row.className = "rprow";
+      row.innerHTML = '<div class="rplab"><b></b><span class="rptag"></span></div><div class="rpbar"><i></i></div><div class="rpn"></div><p class="rpdef"></p>';
+      row.querySelector("b").textContent = m.label; const tg = row.querySelector(".rptag"); tg.textContent = m.ev.tag; tg.classList.add(m.ev.cls); tg.title = m.ev.why;
+      row.querySelector("i").style.width = (m.base ? pct(m.value, m.base) : 100) + "%"; row.querySelector("i").className = m.ev.cls;
+      row.querySelector(".rpn").textContent = m.value + (m.base ? ` of ${m.base}` : "");
+      row.querySelector(".rpdef").textContent = `Counts ${m.counts}. ${m.limit}`; out.appendChild(row);
+    });
+    const src = document.createElement("p"); src.className = "note"; src.textContent = `Read from X Layer at ${at}. Contracts: LessonVerifier ${cfg.passport && cfg.passport.verifier}, TapeOut processor ${cfg.tapeout && cfg.tapeout.processor}. Reopen the report link to read the chain again; figures change as people clear levels.`; out.appendChild(src);
     const acts = document.createElement("div"); acts.className = "row";
     const mk = (label, fn) => { const b = document.createElement("button"); b.type = "button"; b.className = "btn ghost"; b.textContent = label; b.onclick = async () => { try { await navigator.clipboard.writeText(fn()); b.textContent = "Copied"; } catch { b.textContent = "Select manually"; } setTimeout(() => b.textContent = label, 1600); }; acts.appendChild(b); };
-    mk("Copy summary", () => summaryText(r)); mk("Copy report link", () => link);
-    out.appendChild(acts);
-    const n = document.createElement("p"); n.className = "note"; n.textContent = "The report link contains the wallet addresses (never names) and re-checks the chain whenever it is opened, so the numbers are live, not a screenshot. Share it only if the people on the list agree.";
+    mk("Copy summary", () => summaryText(rep, at)); mk("Copy report link", () => link); out.appendChild(acts);
+    const n = document.createElement("p"); n.className = "note"; n.textContent = "The report link contains the wallet addresses (never names) and re-reads the chain whenever it is opened. Wallet addresses and their lab progress are public anyway, but only share the link if the people on the list agree. Anchoring or sharing a report makes it tamper-evident; it does not make organizer-supplied information independently true.";
     out.appendChild(n); $("rpResult").hidden = false;
   }
   async function build(spec, mine) {
     const my = ++seq; $("rpResult").hidden = true;
     const wallets = [...new Set(spec.w || [])]; if (wallets.length > MAXW) return say(`Too many wallets (${wallets.length}). The limit is ${MAXW} per report.`, "bad");
     if (!X.configured() || !cfg.passport || !cfg.passport.verifier) return say("This build is not connected to X Layer, so a report can't be checked.", "bad");
-    let attended = spec.n || wallets.length, fromChain = false;
+    let chainCount = null;
     if (spec.i && spec.r) {
       say("Reading the registered batch…");
-      try { const b = await X.readBatch(spec.i, spec.r); if (!b.found) return say("That batch is not registered on X Layer. Check the issuer address and the batch fingerprint.", "bad"); if (b.revoked) return say("That batch was revoked by its issuer.", "bad"); attended = b.count; fromChain = true; }
-      catch (e) { return say("Could not read the batch: " + (e.message || e), "bad"); }
+      try { const b = await X.readBatch(spec.i, spec.r); if (!b.found) return say("That batch is not registered on X Layer. Check the issuer address and the batch fingerprint.", "bad"); if (b.revoked) return say("That batch was revoked by its issuer, so no report is shown.", "bad"); chainCount = b.count; }
+      catch (e) { return say("Could not read the batch: " + (e.message || e) + ". Nothing is shown, which is not the same as zero.", "bad"); }
     }
     if (!wallets.length) return say("The list has no wallet addresses, so there is nothing to look up on-chain. Add a wallet column.", "bad");
     say(`Checking ${wallets.length} wallet${wallets.length === 1 ? "" : "s"} on X Layer…`);
     const s = await P.summarize(wallets, (d, t) => { if (my === seq) say(`Checked ${d} of ${t} wallets…`); }); if (my !== seq) return;
-    if (s.state !== "ok") return say("Could not reach X Layer: " + s.reason + ". Try again.", "bad");
-    const L = s.wallets, r = {attended: Math.max(attended, L.length), fromChain, withWallet: L.length, one: L.filter(x => x.levels.length >= 1).length, min: L.filter(x => x.levels.length >= cfg.passport.minLevels).length, passports: L.filter(x => x.passport).length};
-    const link = location.href.split("#")[0] + "#report=" + b64u(new TextEncoder().encode(JSON.stringify({...(spec.i && spec.r ? {i: spec.i, r: spec.r} : {n: attended}), w: wallets})));
-    last = {r, link}; say(""); render(r, link); if (!mine) $("rpList").value = wallets.join("\n");
+    if (s.state !== "ok") return say("Could not reach X Layer: " + s.reason + ". No figures are shown (that is not a report of zero). Try again.", "bad");
+    const at = new Date().toISOString().slice(0, 19).replace("T", " ") + " UTC";
+    const rep = buildReport({names: spec.n != null ? spec.n : null, dupes: spec.d || 0, chainCount}, s.wallets, cfg.passport.minLevels);
+    const link = location.href.split("#")[0] + "#report=" + b64u(new TextEncoder().encode(JSON.stringify({...(chainCount != null ? {i: spec.i, r: spec.r} : {}), ...(spec.n != null ? {n: spec.n} : {}), ...(spec.d ? {d: spec.d} : {}), w: wallets})));
+    say(""); render(rep, link, at); if (!mine) $("rpList").value = wallets.join("\n");
   }
   function run() {
     const list = parseList($("rpList").value); if (list.error) return say(list.error, "bad");
     const i = $("rpIssuer").value.trim(), r = $("rpRoot").value.trim();
     if ((i || r) && !(ADDR.test(i) && /^0x[0-9a-fA-F]{64}$/.test(r))) return say("To read a registered batch, give both the issuer address and the batch fingerprint (0x followed by 64 characters), or leave both empty.", "bad");
-    return build({w: list.wallets, n: list.names, ...(i && r ? {i, r} : {})}, true);
+    return build({w: list.wallets, n: list.names, d: list.dupes, ...(i && r ? {i, r} : {})}, true);
   }
   function openLink(h) {
-    try { const spec = JSON.parse(new TextDecoder().decode(unb64u(h.replace(/^#report=/, "")))); if (!Array.isArray(spec.w)) throw 0;
+    try { const spec = JSON.parse(new TextDecoder().decode(unb64u(h.replace(/^#report=/, "")))); if (!Array.isArray(spec.w) || spec.w.some(x => !ADDR.test(x))) throw 0;
+      if (spec.i && !(ADDR.test(spec.i) && /^0x[0-9a-fA-F]{64}$/.test(spec.r || ""))) throw 0;
       if (spec.i) $("rpIssuer").value = spec.i; if (spec.r) $("rpRoot").value = spec.r; return build(spec, false);
     } catch { say("That report link is not valid.", "bad"); }
   }
-  if ($("rpGo")) $("rpGo").addEventListener("click", run);
-  if ($("rpSample")) $("rpSample").addEventListener("click", () => { $("rpList").value = "name,wallet\nAda Lovelace,0x2bdbf7b365f572250ec57a865fde45a47683bd33\nAlan Turing,\nGrace Hopper,"; say("Sample loaded (the first wallet has cleared levels on-chain). Press Build report.", "ok"); });
-  root.CertReport = {parseList, openLink, summaryText};
-})(window);
+  if (hasDoc) {
+    if ($("rpGo")) $("rpGo").addEventListener("click", run);
+    if ($("rpSample")) $("rpSample").addEventListener("click", () => { $("rpList").value = "name,wallet\nAda Lovelace,0x2bdbf7b365f572250ec57a865fde45a47683bd33\nAlan Turing,\nGrace Hopper,"; say("Sample loaded (the first wallet has cleared levels on-chain). Press Build report.", "ok"); });
+  }
+  root.CertReport = {parseList, buildReport, summaryText, openLink, EV};
+})(typeof window !== "undefined" ? window : globalThis);
 </script>
 <script>
 // Compact NAND canvas for the student challenge. Click an output dot, then an input dot, to wire. Drag gates. Double-click a wire or gate to remove it.
@@ -4471,8 +4529,8 @@ window.CC_CONFIG = {
     const r = await CertPassport.check(pp.wallet, pp.circuitId); if (seq !== vSeq) return;
     const lv = r.cleared || [], facts = [FACT("Wallet", mkLink({href: X.explorerAddr(pp.wallet), text: pp.wallet}), true), FACT("Course", `${lv.length} on-chain level${lv.length === 1 ? "" : "s"} cleared${lv.length ? " (" + lv.join(", ") + ")" : ""}. ${r.min} required.`)];
     if (r.skill) facts.push(...skillFactsOf(r.skill));
-    const note = "A passport proves that this wallet cleared the course levels and built the circuit for its own exam. It does not say who owns the wallet.";
-    if (r.state === "ok") show("valid", "Passport verified", `This wallet cleared ${lv.length} on-chain levels of the Circuits course and built a TapeOut circuit that computes its own exam.`, facts, note);
+    const note = "A passport is evidence of recorded course progress and of a circuit, associated with this wallet, that the configured TapeOut processor evaluates correctly for the wallet's own exam. It does not prove who designed or built the circuit, who owns the wallet, or that the person is competent. Trusted: the blockchain, the deployed verification contract and the configured processor.";
+    if (r.state === "ok") show("valid", "Passport verified", `This wallet has ${lv.length} on-chain course levels recorded and owns a TapeOut circuit that computes its own exam.`, facts, note);
     else if (r.state === "incomplete") show("unregistered", "Exam passed, course not complete", r.reason, facts, note);
     else if (r.state === "offline") show("offline", "The passport could not be checked", "We couldn't reach X Layer to run the checks. Try again in a moment.", facts, "");
     else show("invalid", "Passport not valid", r.reason, facts, note);
@@ -4518,7 +4576,7 @@ window.CC_CONFIG = {
     if (seq !== vSeq) return;
     if (!res.ok) { show("invalid", "Not valid", res.error ? "This is not a valid CertCheck proof." : "The details or the proof were changed, or this certificate was not issued as shown. Do not trust it.", [], ""); return; }
     const facts = [FACT("Name", p.name), FACT("Course", p.course || "—"), FACT("Date", p.date || "—"), FACT("Issuer", mkLink({href: X.explorerAddr(p.issuer), text: p.issuer}), true)];
-    let issuerNote = "A valid check proves this issuer address recorded this certificate. Make sure that address really belongs to the organization you expect, for example by comparing it with the address on their website.";
+    let issuerNote = "A valid check proves this issuer address registered this certificate and that it was not changed. The details, such as attendance, are the issuer's own statement; the chain cannot confirm they are true. The proof link contains the holder's personal details, so share it with care. Make sure that address really belongs to the organization you expect, for example by comparing it with the address on their website.";
     const sk = p.skill ? await CertSkill.check(p.skill) : null; if (seq !== vSeq) return;
     const skillFacts = sk ? skillFactsOf(sk) : [];
     if (!X.configured()) { show("demo", "Proof is correct (registry not checked)", "The mathematics checks out, but the on-chain registry isn't deployed in this build, so registration and revocation were not checked.", facts.concat(skillFacts), issuerNote); return; }

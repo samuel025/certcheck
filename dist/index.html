@@ -1889,6 +1889,13 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
     <div class="grid2"><div class="field"><label for="rpIssuer">Issuer address</label><input id="rpIssuer" type="text" spellcheck="false" placeholder="0x…"></div>
     <div class="field"><label for="rpRoot">Batch fingerprint</label><input id="rpRoot" type="text" spellcheck="false" placeholder="0x… (64 characters)"></div></div>
     <p class="sub">With these, the first figure becomes the certificate count the issuer registered on X Layer instead of the length of your list. It still does not prove the people attended.</p></details>
+  <details class="rpopt" id="rpExample"><summary>See an illustrative report (made-up figures)</summary>
+    <p class="notice warn">Illustrative figures, not actual CertCheck results. No real event produced these numbers.</p>
+    <div class="rprow"><div class="rplab"><b>Registered participants</b><span class="rptag org">Organizer-attested</span></div><div class="rpbar"><i class="org" style="width:100%"></i></div><div class="rpn">100</div><p class="rpdef">Counts names on the organizer's list.</p></div>
+    <div class="rprow"><div class="rplab"><b>Reported attendance</b><span class="rptag org">Organizer-attested</span></div><div class="rpbar"><i class="org" style="width:82%"></i></div><div class="rpn">82 of 100</div><p class="rpdef">The organizer's statement. The chain can show a batch was not changed, not that people came.</p></div>
+    <div class="rprow"><div class="rplab"><b>Wallets that cleared course levels</b><span class="rptag chain">On-chain record</span></div><div class="rpbar"><i class="chain" style="width:65%"></i></div><div class="rpn">65 of 100</div><p class="rpdef">Counts wallets, only those the organizer collected, read from the LessonVerifier.</p></div>
+    <div class="rprow"><div class="rplab"><b>Wallets with a processor-checked circuit</b><span class="rptag proc">Processor-verified</span></div><div class="rpbar"><i class="proc" style="width:41%"></i></div><div class="rpn">41 of 100</div><p class="rpdef">A TapeOut-evaluated circuit owned by the wallet. It does not show who built it.</p></div>
+    <p class="note">In a real report each number is read from X Layer when the page opens, and a wallet is not a unique person.</p></details>
   <div class="row"><button id="rpGo" class="btn primary" type="button">Build report</button><button id="rpSample" class="btn ghost" type="button">Try a sample</button><span class="hint" id="rpHint" role="status"></span></div>
   <article id="rpResult" class="result" data-state="valid" hidden aria-live="polite">
     <div class="rhead"><span class="badge">✓</span><h2>Outcome, with the source of every number</h2></div>
@@ -1919,6 +1926,7 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
       <div class="field"><label for="label">Public batch label</label><input id="label" type="text" maxlength="80" placeholder="Cohort 7"></div>
     </div>
     <p class="note">The label is public and permanent. Don't put personal data in it.</p>
+    <p class="note">Wording matters: a certificate only says what the organizer attests. Use "Participation in …" or "Attended …" by default. Wording such as "passed" or "completed the practical" should be used only when the lab record (wallet column) backs it up.</p>
   </div></div>
 
   <div class="step"><span class="num">+</span><div class="body">

@@ -94,6 +94,20 @@ ok("publishing succeeds and shows a transaction link", /Published/.test(await T(
 const onchain = sh("cast", ["call", REG, "batch(address,bytes32)(address,uint64,uint32,bool,string)", ACCT, root2, "--rpc-url", RPC]).split("\n");
 ok("the chain really holds the batch (issuer, count 3, label, not revoked)", onchain[0].toLowerCase() === ACCT.toLowerCase() && onchain[2] === "3" && onchain[3] === "false" && onchain[4].includes("Cohort 7"), onchain.join(" | "));
 await p.click("#publishBtn"); await sleep(600); ok("publishing the same batch twice is refused", /already published/.test(await T(p, "#pubMsg")), await T(p, "#pubMsg"));
+// ----- optional wallet column: the certificate carries the holder's wallet and the verifier shows the lab record -----
+{
+  const HW = "0x2bdbf7b365f572250ec57a865fde45a47683bd33";
+  await setv(p, "#csvText", `name,course,wallet\nWilma Wallet,Digital Logic,${HW}\nNo Wallet,Digital Logic,`); await setv(p, "#label", "Wallet cohort"); await p.click("#genBtn"); await sleep(400);
+  await p.click("#dlLinks"); await sleep(200);
+  const wl = (await p.evaluate(() => window.__blobs)).pop().trim().split("\r\n").slice(1).map(l => l.slice(l.indexOf(",") + 1));
+  await p.click("#publishBtn"); await sleep(1500); ok("a batch with a wallet column publishes", /Published/.test(await T(p, "#pubMsg")), await T(p, "#pubMsg"));
+  const wv = await open("/" + wl[0].slice(wl[0].indexOf("#"))); await sleep(2500);
+  const wf = await wv.$eval("#vFacts", e => e.innerText);
+  ok("a certificate with a wallet verifies and shows the holder wallet and a lab record line", (await state(wv)) === "valid" && wf.toLowerCase().includes(HW) && /lab record/i.test(wf), wf.replace(/\n/g, " | "));
+  await wv.close();
+  const nv = await open("/" + wl[1].slice(wl[1].indexOf("#"))); await sleep(1200); const nf = await nv.$eval("#vFacts", e => e.innerText);
+  ok("a certificate without a wallet shows no lab record", (await state(nv)) === "valid" && !/lab record|holder wallet/i.test(nf)); await nv.close();
+}
 await p.close();
 
 // ===== verify =====

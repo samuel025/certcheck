@@ -41,7 +41,7 @@ An event can prove three different things, and each needs a different amount of 
 
 | Rung | What it is | Trust needed | Where |
 |---|---|---|---|
-| 1. **Attended** | Attendance or completion certificate for a workshop, bootcamp or meetup | The organizer | `#issue`, `#verify` |
+| 1. **Attended** | Attendance or completion certificate for a workshop, bootcamp or meetup (an optional wallet column ties it to the holder's lab record) | The organizer | `#issue`, `#verify`, `#report` |
 | 2. **Completed** | The same certificate, carrying a skill claim anyone can re-run against the chain | The organizer, plus the chain | `#issue` (skill challenge), `#verify` |
 | 3. **Proven** | A skill passport: course levels cleared on-chain plus an exam circuit run by TapeOut | Only the chain | `#play`, `#exam`, `#verify` |
 
@@ -56,6 +56,7 @@ One single-page site, hash-routed. Open it and use the top menu, or go straight 
 | `#issue` | Paste or upload a list (name, course, date). Get one link and one QR per person, plus a printable sheet. Shows a fee quote before you publish |
 | `#verify` | Paste a certificate link (`#c=`) or passport link (`#p=`) and get a plain verdict |
 | `#manage` | Your batches, revocation of a batch or a single certificate |
+| `#report` | Event outcome report: paste a list with wallets (and optionally the registered batch) and see how many attended, cleared lab levels and earned a passport, read from the chain; also a shareable report link |
 | `#pricing` | Plans, a calculator, prepaid credits, verified-issuer request, live registry totals |
 | `#wallet` | A short guide to getting a wallet and a few cents of OKB |
 | `#exam` | The final exam: a circuit derived from your own wallet |
@@ -132,7 +133,7 @@ All on X Layer mainnet (chain 196).
 | Per-certificate fee (after the free allowance) | Live on the contract, tested | 0.00024 OKB, about $0.02 at $83/OKB |
 | Prepaid credits (a sponsor can pay for others) | Live, tested | same rate |
 | Verified-issuer badge (escrowed, refundable if rejected) | Live; the owner approves each request by hand with `cast` (`docs/OWNER.md`) | 0.12 OKB, about $10 |
-| Sponsored course levels, sponsor-funded faucet, and outcome proof for event sponsors ("how many builders did this event make?") | A pitch plus live on-chain numbers on `#circuits`; no payment mechanism and no outcome report page yet | none |
+| Sponsored course levels, sponsor-funded faucet, and outcome proof for event sponsors ("how many builders did this event make?") | A pitch plus live on-chain numbers on `#circuits`; the outcome report page (`#report`) exists, but there is no payment mechanism | none |
 | Public revenue totals | Live: `stats()` on-chain, shown on `#pricing` and `#judges` | none |
 
 **What the numbers mean.** A 200-certificate batch costs an organizer 175 paid certificates x 0.00024 = 0.042 OKB, about $3.50. Fifty organizers doing that twice a year, plus ten verified badges, is roughly $450 a year. That shows the model works at small scale. It is not income, and it is not a business yet.

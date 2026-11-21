@@ -94,4 +94,18 @@ ok("walletSeed ignores address case and the 0x prefix style", (await C.walletSee
 ok("different wallets get different seeds", (await C.walletSeed("0x" + "11".repeat(20))) !== (await C.walletSeed("0x" + "22".repeat(20))));
 let wthrew = 0; for (const bad of ["", "0x12", "nope", "0x" + "zz".repeat(20)]) { try { await C.walletSeed(bad); } catch { wthrew++; } }
 ok("walletSeed refuses anything that is not an address", wthrew === 4);
+// optional holder wallet (7th leaf field): absent = same leaf as before; present = bound into the leaf and the CSV column is validated
+{
+  const W = "0x" + "12".repeat(20), salt = "ab".repeat(16), base = {issuer: ISS, name: "Ada", course: "Intro", date: "2026-11-20", salt};
+  const l0 = Buffer.from(await C.leafHash(base)).toString("hex"), l1 = Buffer.from(await C.leafHash({...base, wallet: W})).toString("hex"), l2 = Buffer.from(await C.leafHash({...base, wallet: W.toUpperCase().replace("0X", "0x")})).toString("hex");
+  ok("a wallet changes the leaf", l0 !== l1); ok("the wallet is case-insensitive in the leaf", l1 === l2);
+  const b = await C.buildBatch([{...base, wallet: W}, {issuer: ISS, name: "Bob", course: "Intro", date: "2026-11-20"}]), p0 = C.toProof(b, b.credentials[0]), p1 = C.toProof(b, b.credentials[1]);
+  ok("a certificate with a wallet verifies and carries it", (await C.verifyCredential(p0)).ok && p0.wallet === W);
+  ok("a certificate without a wallet is unchanged and verifies", (await C.verifyCredential(p1)).ok && p1.wallet === undefined);
+  { const t = JSON.parse(JSON.stringify(p0)); t.wallet = "0x" + "34".repeat(20); ok("swapping the wallet in a proof is rejected", !(await C.verifyCredential(t)).ok); }
+  { const t = JSON.parse(JSON.stringify(p0)); delete t.wallet; ok("removing the wallet from a proof is rejected", !(await C.verifyCredential(t)).ok); }
+  let threw = false; try { await C.leafHash({...base, wallet: "nope"}); } catch { threw = true; } ok("a malformed wallet is refused", threw);
+  const csv = C.parseCSV("name,course,wallet\nAda,Intro," + W + "\nBob,Intro,\n"); ok("CSV wallet column: kept when given, empty is fine", csv.rows && csv.rows[0].wallet === W && csv.rows[1].wallet === undefined);
+  ok("CSV with a bad wallet names the row", /Row 2/.test(C.parseCSV("name,wallet\nAda,0x123\n").error || ""));
+}
 console.log(fails ? `\n${fails} FAILED` : "\nall passed"); process.exit(fails ? 1 : 0);

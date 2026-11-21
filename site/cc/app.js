@@ -8,14 +8,15 @@
   const mkLink = a => { const x = document.createElement("a"); x.href = a.href; x.textContent = a.text; x.target = "_blank"; x.rel = "noopener"; return x; };
 
   // ---------- routing ----------
-  const VIEWS = ["home", "verify", "issue", "manage", "challenge", "wallet", "pricing"];
+  const VIEWS = ["home", "verify", "issue", "manage", "challenge", "wallet", "pricing", "report"];
   function route() {
     const h = location.hash;
     { const t = h.length > 1 ? document.getElementById(h.slice(1)) : null; if (["#play", "#learners", "#judges", "#circuits"].includes(h) || (t && document.getElementById("landing").contains(t))) return; }   // those pages belong to site/ft
-    let v = h.startsWith("#c=") || h.startsWith("#p=") ? "verify" : h.startsWith("#ch=") || h === "#exam" ? "challenge" : VIEWS.includes(h.slice(1)) ? h.slice(1) : "home";
+    let v = h.startsWith("#report=") ? "report" : h.startsWith("#c=") || h.startsWith("#p=") ? "verify" : h.startsWith("#ch=") || h === "#exam" ? "challenge" : VIEWS.includes(h.slice(1)) ? h.slice(1) : "home";
     VIEWS.forEach(n => { $(n + "View").hidden = n !== v; });
     document.querySelectorAll(".tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === (h === "#exam" ? "exam" : v)));
     if (h.startsWith("#c=") || h.startsWith("#p=")) { $("vInput").value = h; runVerify(); }
+    if (h.startsWith("#report=")) CertReport.openLink(h);
     if (h === "#exam") CertChallenge.openExam();
     if (h.startsWith("#ch=")) CertChallenge.open(h.slice(4));
   }
@@ -64,6 +65,20 @@
     else show("invalid", "Passport not valid", r.reason, facts, note);
   }
   let vSeq = 0;
+  // A certificate that names its holder's wallet also shows, live from the chain, what that wallet has proven in the lab.
+  async function holderLab(wallet, seq) {
+    const dd = document.createElement("span"); dd.textContent = "Checking the lab record on X Layer…"; const fact = FACT("Lab record", dd); $("vFacts").appendChild(fact);
+    try {
+      const lv = await CertPassport.levelsOf(wallet); if (seq !== vSeq) return;
+      let txt = `${lv.cleared.length} on-chain course level${lv.cleared.length === 1 ? "" : "s"} cleared${lv.cleared.length ? " (" + lv.cleared.join(", ") + ")" : ""}.`;
+      if (lv.cleared.length >= cfg.passport.minLevels) {
+        const f = await CertPassport.find(wallet); if (seq !== vSeq) return;
+        if (f.state === "found") { dd.textContent = txt + " Holds a skill passport: "; const a = document.createElement("a"); a.href = CertPassport.link(wallet, f.circuitId); a.textContent = "open it"; dd.appendChild(a); return; }
+        txt += " Eligible for the exam, no passport yet.";
+      } else txt += ` ${cfg.passport.minLevels} are needed for the exam.`;
+      dd.textContent = txt + " Attendance is proven by this certificate; skill is shown only by the lab.";
+    } catch { dd.textContent = "The lab record could not be read right now."; }
+  }
   // a passport earned on this device is remembered, so it can be reopened or copied from the verify page
   (function savedPassport() {
     let sv = null; try { sv = JSON.parse(localStorage.getItem("cc_passport") || "null"); } catch {}
@@ -104,10 +119,12 @@
     facts.push(FACT("Registered", fmtDate(b.publishedAt)), FACT("Batch", `${b.label || "(no label)"} · ${b.count} certificate${b.count === 1 ? "" : "s"}`), FACT("Fingerprint", short(p.root), true));
     if (b.revoked || leafRev) { show("revoked", "Revoked", b.revoked ? "The issuer revoked this whole batch." : "The issuer revoked this certificate.", facts, ""); return; }
     facts.push(...skillFacts);
+    if (p.wallet) facts.push(FACT("Holder wallet", mkLink({href: X.explorerAddr(p.wallet), text: p.wallet}), true));
     if (sk && sk.state === "bad") { show("invalid", "Skill proof failed", "The certificate is genuine and registered, but the TapeOut circuit it names does not compute this student's challenge. Do not accept it as proof of skill.", facts, issuerNote); return; }
     if (sk && sk.state === "untrusted") { show("unregistered", "Registered, but the skill proof was not checked", sk.reason, facts, issuerNote); return; }
     if (sk && sk.state === "offline") { show("offline", "Registered, but the skill proof could not be checked", "We couldn't reach X Layer to run the TapeOut check. Try again in a moment.", facts, issuerNote); return; }
     show("valid", sk ? "Valid · skill verified on TapeOut" : "Valid", `This certificate is part of a batch the issuer registered on ${cfg.chainName} on ${fmtDate(b.publishedAt)}.` + (sk ? " The student's circuit was checked by the TapeOut processor." : ""), facts, issuerNote);
+    if (p.wallet) holderLab(p.wallet, seq);
   }
   $("vBtn").addEventListener("click", runVerify);
   $("vInput").addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) runVerify(); });
@@ -131,8 +148,8 @@
     if ($("skillOn").checked) {
       const okRows = roster.filter(r => passed.has(r.seed));
       if (!okRows.length) return say(h, "No student has passed the skill check yet. Create challenges, collect submissions, then check them.", "bad");
-      creds = okRows.map(r => ({issuer, name: r.name, course: r.course || course, date: r.date || date, skill: passed.get(r.seed)}));
-    } else creds = p.rows.map(r => ({issuer, name: r.name, course: r.course || course, date: r.date || date}));
+      creds = okRows.map(r => ({issuer, name: r.name, course: r.course || course, date: r.date || date, skill: passed.get(r.seed), ...(r.wallet ? {wallet: r.wallet} : {})}));
+    } else creds = p.rows.map(r => ({issuer, name: r.name, course: r.course || course, date: r.date || date, ...(r.wallet ? {wallet: r.wallet} : {})}));
     if (creds.some(c => !c.course)) return say(h, "Add a default course, or a course column.", "bad");
     say(h, "Working…");
     try { batch = await C.buildBatch(creds); } catch (e) { return say(h, e.message, "bad"); }
@@ -166,7 +183,7 @@
   $("chGen").addEventListener("click", async () => {
     const h = $("chGenHint"), p = C.parseCSV($("csvText").value); if (p.error) return say(h, p.error, "bad");
     say(h, "Working…");
-    try { const seeds = await C.uniqueSeeds(p.rows.length); roster = p.rows.map((r, i) => ({name: r.name, course: r.course, date: r.date, seed: seeds[i].seed})); passed = new Map();
+    try { const seeds = await C.uniqueSeeds(p.rows.length); roster = p.rows.map((r, i) => ({name: r.name, course: r.course, date: r.date, wallet: r.wallet, seed: seeds[i].seed})); passed = new Map();
       try { localStorage.setItem("cc_roster", JSON.stringify(roster)); } catch {}
       renderRoster(); $("subWrap").hidden = true;
       say(h, `${roster.length} challenge${roster.length === 1 ? "" : "s"} created.` + (roster.length > C.CHALLENGE_FUNCTIONS ? ` Only ${C.CHALLENGE_FUNCTIONS} different functions exist, so some students share one.` : " Every student has a different function."), "ok");

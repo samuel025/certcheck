@@ -8,7 +8,7 @@ Goal: anyone can verify a credential forever, with no CertCheck server, from onl
 - `node = SHA-256(0x01 || left || right)`. The 0x00/0x01 prefixes separate leaves from nodes (second-preimage defence).
 - An unpaired node at the end of a level is promoted unchanged. It is never duplicated, so `[a,b,c]` and `[a,b,c,c]` have different roots.
 - `proof` = list of `{s:"L"|"R", h:hex32}`: which side the sibling is on, and its hash, from the leaf upward.
-- A portable proof is JSON `{v:2, root, issuer, name, course, date, salt, [skill], proof}`. A link is `#c=` + base64url(JSON).
+- A portable proof is JSON `{v:2, root, issuer, name, course, date, salt, [skill], [wallet], proof}`. A link is `#c=` + base64url(JSON).
 - The issuer address is inside every leaf and the contract keys each batch by (issuer, root), so a copied root cannot be claimed by someone else.
 - Known-answer vector (no skill): issuer `0xabab…ab` (20 bytes), two credentials (Ada Lovelace / salt `00112233445566778899aabbccddeeff`, Alan Turing / salt `ffeeddccbbaa99887766554433221100`), course `Digital Logic`, date `2026-11-20` gives root `0x997bb6bd113ec45a52a6bdbbc746edccce088a9b5b25de691cf0186f20406f18` (checked against an independent Python implementation).
 

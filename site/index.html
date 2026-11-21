@@ -340,7 +340,7 @@
 <header class="bar">
   <a class="logo" href="#" aria-label="Home"><svg viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><path d="M7 8.5l3 3 6-7" fill="none" stroke="#00d892" stroke-width="2"/></svg>certcheck</a>
   <nav class="tabs" aria-label="Sections">
-    <a href="#issue" data-tab="issue">Issue</a><a href="#verify" data-tab="verify">Verify</a><a href="#manage" data-tab="manage">Manage</a><a href="#pricing" data-tab="pricing">Pricing</a><a href="#play" data-tab="learn">Earn a passport</a><a href="#exam" data-tab="exam">Final exam</a>
+    <a href="#issue" data-tab="issue">Issue</a><a href="#verify" data-tab="verify">Verify</a><a href="#manage" data-tab="manage">Manage</a><a href="#report" data-tab="report">Report</a><a href="#pricing" data-tab="pricing">Pricing</a><a href="#play" data-tab="learn">Earn a passport</a><a href="#exam" data-tab="exam">Final exam</a>
   </nav>
   <span class="chip" id="netChip">…</span>
 </header>
@@ -446,7 +446,7 @@
         <a class="btn primary" href="#play">Earn a passport</a>
       </article>
     </div>
-    <p class="tsnote">Most events stop at rung 1: "120 people came." With CertCheck an event can say "120 attended, 64 cleared the lab, 22 passed the exam", and each number is something a sponsor can check on-chain. The certificate is the receipt, the circuit lab is the measurement, and the registry is the tamper-proof report. Counting who passed needs attendees to link their passport, so that part is opt-in.</p>
+    <p class="tsnote">Most events stop at rung 1: "120 people came." With CertCheck an event can say "120 attended, 64 cleared the lab, 22 passed the exam", and each number is something a sponsor can check on-chain. The certificate is the receipt, the circuit lab is the measurement, and the registry is the tamper-proof report. Counting who passed needs attendees to give their wallet to the organizer, so that part is opt-in. Try the <a class="ulink" href="#report">outcome report</a>.</p>
   </div>
 
   <!-- ============ COMPARE ============ -->
@@ -632,6 +632,24 @@
   </article>
 </section>
 
+<!-- ===== REPORT ===== -->
+<section id="reportView" class="view" hidden>
+  <h1>Event outcome report</h1>
+  <p class="lede">Show a sponsor what an event produced: how many attended, how many cleared the lab, how many passed the exam. Every number is read from X Layer when you press the button.</p>
+  <div class="field"><label for="rpList">Your list (name and wallet columns, or one wallet per line)</label>
+    <textarea id="rpList" rows="5" spellcheck="false" placeholder="name,wallet&#10;Ada Lovelace,0x…&#10;Alan Turing,"></textarea></div>
+  <details class="rpopt"><summary>Count attendance from a registered batch (optional)</summary>
+    <div class="grid2"><div class="field"><label for="rpIssuer">Issuer address</label><input id="rpIssuer" type="text" spellcheck="false" placeholder="0x…"></div>
+    <div class="field"><label for="rpRoot">Batch fingerprint</label><input id="rpRoot" type="text" spellcheck="false" placeholder="0x… (64 characters)"></div></div>
+    <p class="sub">With these, “attended” is the certificate count the issuer registered on X Layer, not a number you typed.</p></details>
+  <div class="row"><button id="rpGo" class="btn primary" type="button">Build report</button><button id="rpSample" class="btn ghost" type="button">Try a sample</button><span class="hint" id="rpHint" role="status"></span></div>
+  <article id="rpResult" class="result" data-state="valid" hidden aria-live="polite">
+    <div class="rhead"><span class="badge">✓</span><h2>Outcome, read from X Layer</h2></div>
+    <div id="rpOut"></div>
+    <p class="note">A wallet is not a person: one person can use several, and a wallet appears only if the person gave it to the organizer. Passing levels shows skill; the certificate shows attendance.</p>
+  </article>
+</section>
+
 <!-- ===== ISSUE ===== -->
 <section id="issueView" class="view" hidden>
   <h1>Issue certificates no one can fake</h1>
@@ -645,7 +663,7 @@
 
   <div class="step"><span class="num">2</span><div class="body">
     <h2>Recipients</h2>
-    <p class="sub">A CSV with a <code>name</code> column. <code>course</code> and <code>date</code> columns are optional. Other columns, such as email, are ignored and never used.</p>
+    <p class="sub">A CSV with a <code>name</code> column. <code>course</code> and <code>date</code> columns are optional. An optional <code>wallet</code> column puts the person's wallet inside their own certificate, so the verifier can show what they proved in the lab and you can build an <a href="#report">outcome report</a>. Other columns, such as email, are ignored and never used.</p>
     <textarea id="csvText" rows="5" spellcheck="false" placeholder="name,course,date&#10;Ada Lovelace,Digital Logic,2026-11-20"></textarea>
     <div class="row"><label class="btn ghost filebtn">Choose a CSV file<input id="csvFile" type="file" accept=".csv,text/csv,text/plain" hidden></label><button id="sampleBtn" class="btn ghost" type="button">Use sample</button><span class="hint" id="csvHint"></span></div>
     <div class="grid3">
@@ -759,6 +777,7 @@
 <script src="cc/chain.js"></script>
 <script src="cc/skill.js"></script>
 <script src="cc/passport.js"></script>
+<script src="cc/report.js"></script>
 <script src="cc/board.js"></script>
 <script src="cc/challenge.js"></script>
 <script src="cc/app.js"></script>

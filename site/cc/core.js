@@ -2,6 +2,7 @@
 // Format v2 (also documented in docs/FORMAT.md):
 //   canon(fields)  = for each field: 4-byte big-endian length + UTF-8 bytes          (no ambiguity between fields)
 //   leaf           = SHA-256( 0x00 || canon([issuer, name, course, date, salt, skill]) )   skill is "" or "fn3:<seed>:<circuitId>:<processor>"
+//                    An optional holder wallet is appended as a 7th field ONLY when present, so certificates without one keep the same leaf.
 //   node           = SHA-256( 0x01 || left || right )
 //   An unpaired node is promoted unchanged to the next level (never duplicated), so [a,b,c] and [a,b,c,c] have different roots.
 //   proof          = list of {s:"L"|"R", h:hex}: the sibling's side and hash, from the leaf upward.
@@ -18,11 +19,12 @@
     return cat(...fields.map(f => { const b = enc.encode(f), l = new Uint8Array(4); new DataView(l.buffer).setUint32(0, b.length); return cat(l, b); }));
   }
   const SKILL = /^fn3:[0-9a-f]{32}:\d{1,18}:0x[0-9a-f]{40}$/;
-  const fieldsOf = c => [String(c.issuer).toLowerCase(), norm(c.name), norm(c.course), norm(c.date), String(c.salt).toLowerCase(), String(c.skill || "").toLowerCase()];
+  const fieldsOf = c => [String(c.issuer).toLowerCase(), norm(c.name), norm(c.course), norm(c.date), String(c.salt).toLowerCase(), String(c.skill || "").toLowerCase(), ...(c.wallet ? [String(c.wallet).toLowerCase()] : [])];
   async function leafHash(c) {
     if (!ADDR.test(c.issuer)) throw new Error("issuer must be an 0x address");
     if (!norm(c.name)) throw new Error("name is empty");
     if (!/^[0-9a-f]{32}$/i.test(c.salt)) throw new Error("salt must be 16 bytes of hex");
+    if (c.wallet && !ADDR.test(c.wallet)) throw new Error("wallet must be an 0x address");
     if (c.skill && !SKILL.test(String(c.skill).toLowerCase())) throw new Error("malformed skill field");
     return sha(cat(new Uint8Array([0]), canon(fieldsOf(c))));
   }
@@ -67,7 +69,7 @@
   const b64u = u8 => btoa(String.fromCharCode(...u8)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   const unb64u = s => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/")), ch => ch.charCodeAt(0));
   // Portable proof: the fields a verifier needs, nothing else. Short keys keep links small.
-  const toProof = (batch, c) => { const o = {v: 2, root: batch.root, issuer: c.issuer.toLowerCase(), name: norm(c.name), course: norm(c.course), date: norm(c.date), salt: c.salt.toLowerCase()}; if (c.skill) o.skill = String(c.skill).toLowerCase(); o.proof = c.proof; return o; };
+  const toProof = (batch, c) => { const o = {v: 2, root: batch.root, issuer: c.issuer.toLowerCase(), name: norm(c.name), course: norm(c.course), date: norm(c.date), salt: c.salt.toLowerCase()}; if (c.skill) o.skill = String(c.skill).toLowerCase(); if (c.wallet) o.wallet = String(c.wallet).toLowerCase(); o.proof = c.proof; return o; };
   const encodeLink = p => b64u(enc.encode(JSON.stringify(p)));
   const decodeLink = s => JSON.parse(new TextDecoder().decode(unb64u(String(s).trim().replace(/^#?c=/, ""))));
 
@@ -86,8 +88,12 @@
     if (!rows.length) return {error: "The file is empty."};
     const head = rows[0].map(h => norm(h).toLowerCase()), ni = head.findIndex(h => ["name", "student", "full name", "fullname", "recipient"].includes(h));
     if (ni < 0) return {error: 'Add a header row with a "name" column.'};
-    const ci = head.indexOf("course"), di = head.indexOf("date"), out = [];
-    for (let r = 1; r < rows.length; r++) { const name = norm(rows[r][ni]); if (name) out.push({name, course: ci >= 0 ? norm(rows[r][ci]) : "", date: di >= 0 ? norm(rows[r][di]) : ""}); }
+    const ci = head.indexOf("course"), di = head.indexOf("date"), wi = head.findIndex(h => ["wallet", "wallet address", "address"].includes(h)), out = [];
+    for (let r = 1; r < rows.length; r++) {
+      const name = norm(rows[r][ni]); if (!name) continue;
+      const w = wi >= 0 ? norm(rows[r][wi]) : ""; if (w && !ADDR.test(w)) return {error: `Row ${r + 1}: "${w.slice(0, 20)}" is not a wallet address (0x followed by 40 characters). Leave the cell empty if the person has none.`};
+      const row = {name, course: ci >= 0 ? norm(rows[r][ci]) : "", date: di >= 0 ? norm(rows[r][di]) : ""}; if (w) row.wallet = w.toLowerCase(); out.push(row);
+    }
     if (!out.length) return {error: "No names found under the name column."};
     return {rows: out};
   }

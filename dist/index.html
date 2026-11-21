@@ -961,6 +961,18 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 .cc .quote{margin:0 0 12px;color:var(--silver);font-size:14px}
 @media (max-width:900px){.cc .pricegrid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (max-width:520px){.cc .pricegrid{grid-template-columns:minmax(0,1fr)}}
 .cc .foot .footlinks a{color:var(--green);text-decoration:underline;text-underline-offset:3px}
+
+/* event outcome report */
+.cc .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
+@media (max-width:760px){.cc .grid2{grid-template-columns:1fr}}
+.cc .rpopt{margin:4px 0 14px;border:1px solid var(--line,#26303a);padding:10px 14px}
+.cc .rpopt summary{cursor:pointer;font:12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--steel)}
+.cc .rprow{display:grid;grid-template-columns:minmax(150px,1.1fr) 2fr minmax(80px,.5fr);gap:14px;align-items:center;margin:12px 0}
+.cc .rplab{font-size:14px;color:var(--bone)}
+.cc .rpbar{height:12px;background:rgba(255,255,255,.07);overflow:hidden}
+.cc .rpbar i{display:block;height:100%;background:var(--accent,#34d399);transition:width .9s ease}
+.cc .rpn{font:13px var(--mono);text-align:right;color:var(--bone)}
+@media (max-width:600px){.cc .rprow{grid-template-columns:1fr 1fr}.cc .rpbar{grid-column:1/-1;order:3}}
 </style>
 <style>
 /* ===== home v2: verification rack, live terminal, figures, serif headlines ===== */
@@ -1556,7 +1568,7 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 <header class="bar">
   <a class="logo" href="#" aria-label="Home"><svg viewBox="0 0 30 16" aria-hidden="true"><rect x=".5" y=".5" width="29" height="15" fill="none" stroke="currentColor"/><path d="M7 8.5l3 3 6-7" fill="none" stroke="#00d892" stroke-width="2"/></svg>certcheck</a>
   <nav class="tabs" aria-label="Sections">
-    <a href="#issue" data-tab="issue">Issue</a><a href="#verify" data-tab="verify">Verify</a><a href="#manage" data-tab="manage">Manage</a><a href="#pricing" data-tab="pricing">Pricing</a><a href="#play" data-tab="learn">Earn a passport</a><a href="#exam" data-tab="exam">Final exam</a>
+    <a href="#issue" data-tab="issue">Issue</a><a href="#verify" data-tab="verify">Verify</a><a href="#manage" data-tab="manage">Manage</a><a href="#report" data-tab="report">Report</a><a href="#pricing" data-tab="pricing">Pricing</a><a href="#play" data-tab="learn">Earn a passport</a><a href="#exam" data-tab="exam">Final exam</a>
   </nav>
   <span class="chip" id="netChip">…</span>
 </header>
@@ -1662,7 +1674,7 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
         <a class="btn primary" href="#play">Earn a passport</a>
       </article>
     </div>
-    <p class="tsnote">Most events stop at rung 1: "120 people came." With CertCheck an event can say "120 attended, 64 cleared the lab, 22 passed the exam", and each number is something a sponsor can check on-chain. The certificate is the receipt, the circuit lab is the measurement, and the registry is the tamper-proof report. Counting who passed needs attendees to link their passport, so that part is opt-in.</p>
+    <p class="tsnote">Most events stop at rung 1: "120 people came." With CertCheck an event can say "120 attended, 64 cleared the lab, 22 passed the exam", and each number is something a sponsor can check on-chain. The certificate is the receipt, the circuit lab is the measurement, and the registry is the tamper-proof report. Counting who passed needs attendees to give their wallet to the organizer, so that part is opt-in. Try the <a class="ulink" href="#report">outcome report</a>.</p>
   </div>
 
   <!-- ============ COMPARE ============ -->
@@ -1848,6 +1860,24 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
   </article>
 </section>
 
+<!-- ===== REPORT ===== -->
+<section id="reportView" class="view" hidden>
+  <h1>Event outcome report</h1>
+  <p class="lede">Show a sponsor what an event produced: how many attended, how many cleared the lab, how many passed the exam. Every number is read from X Layer when you press the button.</p>
+  <div class="field"><label for="rpList">Your list (name and wallet columns, or one wallet per line)</label>
+    <textarea id="rpList" rows="5" spellcheck="false" placeholder="name,wallet&#10;Ada Lovelace,0x…&#10;Alan Turing,"></textarea></div>
+  <details class="rpopt"><summary>Count attendance from a registered batch (optional)</summary>
+    <div class="grid2"><div class="field"><label for="rpIssuer">Issuer address</label><input id="rpIssuer" type="text" spellcheck="false" placeholder="0x…"></div>
+    <div class="field"><label for="rpRoot">Batch fingerprint</label><input id="rpRoot" type="text" spellcheck="false" placeholder="0x… (64 characters)"></div></div>
+    <p class="sub">With these, “attended” is the certificate count the issuer registered on X Layer, not a number you typed.</p></details>
+  <div class="row"><button id="rpGo" class="btn primary" type="button">Build report</button><button id="rpSample" class="btn ghost" type="button">Try a sample</button><span class="hint" id="rpHint" role="status"></span></div>
+  <article id="rpResult" class="result" data-state="valid" hidden aria-live="polite">
+    <div class="rhead"><span class="badge">✓</span><h2>Outcome, read from X Layer</h2></div>
+    <div id="rpOut"></div>
+    <p class="note">A wallet is not a person: one person can use several, and a wallet appears only if the person gave it to the organizer. Passing levels shows skill; the certificate shows attendance.</p>
+  </article>
+</section>
+
 <!-- ===== ISSUE ===== -->
 <section id="issueView" class="view" hidden>
   <h1>Issue certificates no one can fake</h1>
@@ -1861,7 +1891,7 @@ table#truth{border-collapse:collapse;width:100%;margin:0 0 16px;font-family:var(
 
   <div class="step"><span class="num">2</span><div class="body">
     <h2>Recipients</h2>
-    <p class="sub">A CSV with a <code>name</code> column. <code>course</code> and <code>date</code> columns are optional. Other columns, such as email, are ignored and never used.</p>
+    <p class="sub">A CSV with a <code>name</code> column. <code>course</code> and <code>date</code> columns are optional. An optional <code>wallet</code> column puts the person's wallet inside their own certificate, so the verifier can show what they proved in the lab and you can build an <a href="#report">outcome report</a>. Other columns, such as email, are ignored and never used.</p>
     <textarea id="csvText" rows="5" spellcheck="false" placeholder="name,course,date&#10;Ada Lovelace,Digital Logic,2026-11-20"></textarea>
     <div class="row"><label class="btn ghost filebtn">Choose a CSV file<input id="csvFile" type="file" accept=".csv,text/csv,text/plain" hidden></label><button id="sampleBtn" class="btn ghost" type="button">Use sample</button><span class="hint" id="csvHint"></span></div>
     <div class="grid3">
@@ -3660,6 +3690,7 @@ window.FT_CARD = {
 // Format v2 (also documented in docs/FORMAT.md):
 //   canon(fields)  = for each field: 4-byte big-endian length + UTF-8 bytes          (no ambiguity between fields)
 //   leaf           = SHA-256( 0x00 || canon([issuer, name, course, date, salt, skill]) )   skill is "" or "fn3:<seed>:<circuitId>:<processor>"
+//                    An optional holder wallet is appended as a 7th field ONLY when present, so certificates without one keep the same leaf.
 //   node           = SHA-256( 0x01 || left || right )
 //   An unpaired node is promoted unchanged to the next level (never duplicated), so [a,b,c] and [a,b,c,c] have different roots.
 //   proof          = list of {s:"L"|"R", h:hex}: the sibling's side and hash, from the leaf upward.
@@ -3676,11 +3707,12 @@ window.FT_CARD = {
     return cat(...fields.map(f => { const b = enc.encode(f), l = new Uint8Array(4); new DataView(l.buffer).setUint32(0, b.length); return cat(l, b); }));
   }
   const SKILL = /^fn3:[0-9a-f]{32}:\d{1,18}:0x[0-9a-f]{40}$/;
-  const fieldsOf = c => [String(c.issuer).toLowerCase(), norm(c.name), norm(c.course), norm(c.date), String(c.salt).toLowerCase(), String(c.skill || "").toLowerCase()];
+  const fieldsOf = c => [String(c.issuer).toLowerCase(), norm(c.name), norm(c.course), norm(c.date), String(c.salt).toLowerCase(), String(c.skill || "").toLowerCase(), ...(c.wallet ? [String(c.wallet).toLowerCase()] : [])];
   async function leafHash(c) {
     if (!ADDR.test(c.issuer)) throw new Error("issuer must be an 0x address");
     if (!norm(c.name)) throw new Error("name is empty");
     if (!/^[0-9a-f]{32}$/i.test(c.salt)) throw new Error("salt must be 16 bytes of hex");
+    if (c.wallet && !ADDR.test(c.wallet)) throw new Error("wallet must be an 0x address");
     if (c.skill && !SKILL.test(String(c.skill).toLowerCase())) throw new Error("malformed skill field");
     return sha(cat(new Uint8Array([0]), canon(fieldsOf(c))));
   }
@@ -3725,7 +3757,7 @@ window.FT_CARD = {
   const b64u = u8 => btoa(String.fromCharCode(...u8)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   const unb64u = s => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/")), ch => ch.charCodeAt(0));
   // Portable proof: the fields a verifier needs, nothing else. Short keys keep links small.
-  const toProof = (batch, c) => { const o = {v: 2, root: batch.root, issuer: c.issuer.toLowerCase(), name: norm(c.name), course: norm(c.course), date: norm(c.date), salt: c.salt.toLowerCase()}; if (c.skill) o.skill = String(c.skill).toLowerCase(); o.proof = c.proof; return o; };
+  const toProof = (batch, c) => { const o = {v: 2, root: batch.root, issuer: c.issuer.toLowerCase(), name: norm(c.name), course: norm(c.course), date: norm(c.date), salt: c.salt.toLowerCase()}; if (c.skill) o.skill = String(c.skill).toLowerCase(); if (c.wallet) o.wallet = String(c.wallet).toLowerCase(); o.proof = c.proof; return o; };
   const encodeLink = p => b64u(enc.encode(JSON.stringify(p)));
   const decodeLink = s => JSON.parse(new TextDecoder().decode(unb64u(String(s).trim().replace(/^#?c=/, ""))));
 
@@ -3744,8 +3776,12 @@ window.FT_CARD = {
     if (!rows.length) return {error: "The file is empty."};
     const head = rows[0].map(h => norm(h).toLowerCase()), ni = head.findIndex(h => ["name", "student", "full name", "fullname", "recipient"].includes(h));
     if (ni < 0) return {error: 'Add a header row with a "name" column.'};
-    const ci = head.indexOf("course"), di = head.indexOf("date"), out = [];
-    for (let r = 1; r < rows.length; r++) { const name = norm(rows[r][ni]); if (name) out.push({name, course: ci >= 0 ? norm(rows[r][ci]) : "", date: di >= 0 ? norm(rows[r][di]) : ""}); }
+    const ci = head.indexOf("course"), di = head.indexOf("date"), wi = head.findIndex(h => ["wallet", "wallet address", "address"].includes(h)), out = [];
+    for (let r = 1; r < rows.length; r++) {
+      const name = norm(rows[r][ni]); if (!name) continue;
+      const w = wi >= 0 ? norm(rows[r][wi]) : ""; if (w && !ADDR.test(w)) return {error: `Row ${r + 1}: "${w.slice(0, 20)}" is not a wallet address (0x followed by 40 characters). Leave the cell empty if the person has none.`};
+      const row = {name, course: ci >= 0 ? norm(rows[r][ci]) : "", date: di >= 0 ? norm(rows[r][di]) : ""}; if (w) row.wallet = w.toLowerCase(); out.push(row);
+    }
     if (!out.length) return {error: "No names found under the name column."};
     return {rows: out};
   }
@@ -4056,29 +4092,135 @@ window.CC_CONFIG = {
     if (lv.cleared.length < min) return {...out, state: "incomplete", reason: `Only ${lv.cleared.length} of the ${min} required on-chain course levels are cleared.`};
     return {...out, state: "ok"};
   }
-  // Find a wallet's passport from the address alone. The processor is not enumerable and the public RPC caps log scans at 100 blocks,
-  // so we read the highest circuit id and ask ownerOf for each id, newest first (small batches, capped).
+  // The processor is not enumerable and the public RPC caps log scans at 100 blocks, so we read the highest circuit id and ask ownerOf
+  // for each id, newest first, in batches of 20 (capped at 400 ids). One scan answers any number of wallets: -> Map(owner -> [ids]).
+  async function scanOwners() {
+    const proc = cfg().tapeout.processor, X_ = root.CertChain, top = Number(BigInt(await X_.callAt(proc, "0x61b8ce8c"))), map = new Map(); let scanned = 0;
+    for (let id = top + 3; id >= 1 && scanned < 400; id -= 20) {
+      const ids = []; for (let k = id; k > id - 20 && k >= 1; k--) ids.push(k); scanned += ids.length;
+      const owners = await Promise.all(ids.map(k => X_.circuitOwner(proc, k).then(o => o.toLowerCase(), () => null)));
+      owners.forEach((o, i) => { if (o) { if (!map.has(o)) map.set(o, []); map.get(o).push(ids[i]); } });
+    }
+    return map;
+  }
+  // The exam circuit among a wallet's circuits that computes the wallet's own exam: -> id string or null (throws on a network error).
+  async function examCircuit(wallet, owned) {
+    const proc = cfg().tapeout.processor, seed = await C.walletSeed(wallet);
+    for (const id of owned || []) { const sk = await root.CertSkill.check(C.skillString(seed, id, proc)); if (sk.state === "offline") throw new Error(sk.reason || "offline"); if (sk.state === "ok") return String(id); }
+    return null;
+  }
+  // Find a wallet's passport from the address alone. -> {state: "found"|"none"|"offline"|"bad", wallet, circuitId?, owned?}
   async function find(wallet) {
     wallet = String(wallet).toLowerCase(); if (!ADDR.test(wallet)) return {state: "bad", reason: "That is not a wallet address."};
-    const proc = cfg().tapeout.processor, X_ = root.CertChain;
-    let top; try { top = Number(BigInt(await X_.callAt(proc, "0x61b8ce8c"))); } catch (e) { return {state: "offline", reason: String(e.message || e)}; }
-    const owned = []; let failed = 0, scanned = 0; const LIMIT = 400;
-    for (let id = top + 3; id >= 1 && scanned < LIMIT; id -= 20) {
-      const ids = []; for (let k = id; k > id - 20 && k >= 1; k--) ids.push(k);
-      scanned += ids.length;
-      const owners = await Promise.all(ids.map(k => X_.circuitOwner(proc, k).then(o => o.toLowerCase(), () => null)));
-      owners.forEach((o, i) => { if (o === wallet) owned.push(ids[i]); else if (o === null) failed++; });
-    }
-    const seed = await C.walletSeed(wallet);
-    for (const id of owned) {
-      const sk = await root.CertSkill.check(C.skillString(seed, id, proc));
-      if (sk.state === "offline") return {state: "offline", reason: sk.reason, owned};
-      if (sk.state === "ok") return {state: "found", wallet, circuitId: String(id), owned};
-    }
-    return {state: "none", wallet, owned, scanned};
+    let map; try { map = await scanOwners(); } catch (e) { return {state: "offline", reason: String(e.message || e)}; }
+    const owned = map.get(wallet) || [];
+    try { const id = await examCircuit(wallet, owned); return id ? {state: "found", wallet, circuitId: id, owned} : {state: "none", wallet, owned}; }
+    catch (e) { return {state: "offline", reason: String(e.message || e), owned}; }
   }
-  root.CertPassport = {LEVELS, link, parse, levelsOf, check, find};
+  // Many wallets at once (the event report): one ownership scan, then per wallet its on-chain levels and whether it holds a passport.
+  // -> {state:"ok", wallets:[{wallet, levels:[…], passport: bool, circuitId?}]} or {state:"offline", reason}
+  async function summarize(wallets, progress) {
+    const list = [...new Set(wallets.map(w => String(w).toLowerCase()))].filter(w => ADDR.test(w)); let map;
+    try { map = await scanOwners(); } catch (e) { return {state: "offline", reason: String(e.message || e)}; }
+    const out = new Array(list.length); let next = 0, done = 0, failed = null;
+    async function worker() {
+      while (next < list.length && !failed) {
+        const i = next++, w = list[i];
+        try {
+          const lv = await levelsOf(w); let id = null;
+          if (lv.cleared.length >= cfg().passport.minLevels) id = await examCircuit(w, map.get(w));
+          out[i] = {wallet: w, levels: lv.cleared, passport: !!id, circuitId: id || undefined};
+        } catch (e) { failed = e; }
+        if (progress) progress(++done, list.length);
+      }
+    }
+    await Promise.all(Array.from({length: Math.min(6, list.length)}, worker));
+    if (failed) return {state: "offline", reason: String(failed.message || failed)};
+    return {state: "ok", wallets: out};
+  }
+  root.CertPassport = {LEVELS, link, parse, levelsOf, check, find, summarize};
 })(typeof window !== "undefined" ? window : globalThis);
+</script>
+<script>
+// Event outcome report: "120 attended, 64 cleared the lab, 22 passed the exam", every number read from X Layer.
+// Input: a list with a wallet per person (the same CSV as the Issue page) and, optionally, the registered batch (issuer + root).
+// Wallets are not people (one person can use several), and a wallet only appears here if the person gave it to the organizer.
+(function (root) {
+  const $ = id => document.getElementById(id), C = root.CertCore, X = root.CertChain, P = root.CertPassport, cfg = root.CC_CONFIG;
+  const ADDR = /^0x[0-9a-fA-F]{40}$/, MAXW = 300;
+  const b64u = u8 => btoa(String.fromCharCode(...u8)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  const unb64u = s => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/")), ch => ch.charCodeAt(0));
+  const say = (t, cls = "") => { const h = $("rpHint"); h.textContent = t; h.className = "hint " + cls; };
+  let last = null, seq = 0;
+
+  // The list: a CSV with a header (name + wallet columns), or just wallet addresses one per line.
+  function parseList(text) {
+    const t = String(text || "").trim(); if (!t) return {error: "Paste your list first."};
+    if (!/name|student|recipient/i.test(t.split(/\r?\n/)[0])) {
+      const ws = t.split(/[\s,;]+/).filter(Boolean), bad = ws.find(w => !ADDR.test(w));
+      if (bad) return {error: `"${bad.slice(0, 22)}" is not a wallet address. Paste a CSV with a name and a wallet column, or one wallet per line.`};
+      return {names: ws.length, wallets: ws.map(w => w.toLowerCase())};
+    }
+    const p = C.parseCSV(t); if (p.error) return p;
+    return {names: p.rows.length, wallets: p.rows.filter(r => r.wallet).map(r => r.wallet)};
+  }
+  const pct = (n, d) => d ? Math.round(100 * n / d) : 0;
+  function bar(label, n, d, sub) {
+    const row = document.createElement("div"); row.className = "rprow";
+    row.innerHTML = '<div class="rplab"></div><div class="rpbar"><i></i></div><div class="rpn"></div>';
+    row.querySelector(".rplab").textContent = label + (sub ? " · " + sub : ""); row.querySelector("i").style.width = (d ? pct(n, d) : 100) + "%"; row.querySelector(".rpn").textContent = n + (d ? ` (${pct(n, d)}%)` : "");
+    return row;
+  }
+  function summaryText(r) {
+    return [`Event outcome report (read from X Layer ${new Date().toISOString().slice(0, 10)})`,
+      `${r.attended} attended${r.fromChain ? " (batch registered on X Layer)" : " (from the organizer's list)"}`,
+      `${r.withWallet} gave a wallet`, `${r.one} cleared at least 1 on-chain course level`, `${r.min} cleared ${cfg.passport.minLevels}+ levels`, `${r.passports} earned a skill passport`,
+      "Wallets are not people: one person may use several."].join("\n");
+  }
+  function render(r, link) {
+    const out = $("rpOut"); out.replaceChildren();
+    out.append(bar("Attended", r.attended, 0, r.fromChain ? "batch registered on X Layer" : "from the organizer's list"),
+      bar("Gave a wallet", r.withWallet, r.attended), bar("Cleared 1+ on-chain levels", r.one, r.withWallet), bar(`Cleared ${cfg.passport.minLevels}+ levels (exam unlocked)`, r.min, r.withWallet), bar("Earned a skill passport", r.passports, r.withWallet));
+    const acts = document.createElement("div"); acts.className = "row";
+    const mk = (label, fn) => { const b = document.createElement("button"); b.type = "button"; b.className = "btn ghost"; b.textContent = label; b.onclick = async () => { try { await navigator.clipboard.writeText(fn()); b.textContent = "Copied"; } catch { b.textContent = "Select manually"; } setTimeout(() => b.textContent = label, 1600); }; acts.appendChild(b); };
+    mk("Copy summary", () => summaryText(r)); mk("Copy report link", () => link);
+    out.appendChild(acts);
+    const n = document.createElement("p"); n.className = "note"; n.textContent = "The report link contains the wallet addresses (never names) and re-checks the chain whenever it is opened, so the numbers are live, not a screenshot. Share it only if the people on the list agree.";
+    out.appendChild(n); $("rpResult").hidden = false;
+  }
+  async function build(spec, mine) {
+    const my = ++seq; $("rpResult").hidden = true;
+    const wallets = [...new Set(spec.w || [])]; if (wallets.length > MAXW) return say(`Too many wallets (${wallets.length}). The limit is ${MAXW} per report.`, "bad");
+    if (!X.configured() || !cfg.passport || !cfg.passport.verifier) return say("This build is not connected to X Layer, so a report can't be checked.", "bad");
+    let attended = spec.n || wallets.length, fromChain = false;
+    if (spec.i && spec.r) {
+      say("Reading the registered batch…");
+      try { const b = await X.readBatch(spec.i, spec.r); if (!b.found) return say("That batch is not registered on X Layer. Check the issuer address and the batch fingerprint.", "bad"); if (b.revoked) return say("That batch was revoked by its issuer.", "bad"); attended = b.count; fromChain = true; }
+      catch (e) { return say("Could not read the batch: " + (e.message || e), "bad"); }
+    }
+    if (!wallets.length) return say("The list has no wallet addresses, so there is nothing to look up on-chain. Add a wallet column.", "bad");
+    say(`Checking ${wallets.length} wallet${wallets.length === 1 ? "" : "s"} on X Layer…`);
+    const s = await P.summarize(wallets, (d, t) => { if (my === seq) say(`Checked ${d} of ${t} wallets…`); }); if (my !== seq) return;
+    if (s.state !== "ok") return say("Could not reach X Layer: " + s.reason + ". Try again.", "bad");
+    const L = s.wallets, r = {attended: Math.max(attended, L.length), fromChain, withWallet: L.length, one: L.filter(x => x.levels.length >= 1).length, min: L.filter(x => x.levels.length >= cfg.passport.minLevels).length, passports: L.filter(x => x.passport).length};
+    const link = location.href.split("#")[0] + "#report=" + b64u(new TextEncoder().encode(JSON.stringify({...(spec.i && spec.r ? {i: spec.i, r: spec.r} : {n: attended}), w: wallets})));
+    last = {r, link}; say(""); render(r, link); if (!mine) $("rpList").value = wallets.join("\n");
+  }
+  function run() {
+    const list = parseList($("rpList").value); if (list.error) return say(list.error, "bad");
+    const i = $("rpIssuer").value.trim(), r = $("rpRoot").value.trim();
+    if ((i || r) && !(ADDR.test(i) && /^0x[0-9a-fA-F]{64}$/.test(r))) return say("To read a registered batch, give both the issuer address and the batch fingerprint (0x followed by 64 characters), or leave both empty.", "bad");
+    return build({w: list.wallets, n: list.names, ...(i && r ? {i, r} : {})}, true);
+  }
+  function openLink(h) {
+    try { const spec = JSON.parse(new TextDecoder().decode(unb64u(h.replace(/^#report=/, "")))); if (!Array.isArray(spec.w)) throw 0;
+      if (spec.i) $("rpIssuer").value = spec.i; if (spec.r) $("rpRoot").value = spec.r; return build(spec, false);
+    } catch { say("That report link is not valid.", "bad"); }
+  }
+  if ($("rpGo")) $("rpGo").addEventListener("click", run);
+  if ($("rpSample")) $("rpSample").addEventListener("click", () => { $("rpList").value = "name,wallet\nAda Lovelace,0x2bdbf7b365f572250ec57a865fde45a47683bd33\nAlan Turing,\nGrace Hopper,"; say("Sample loaded (the first wallet has cleared levels on-chain). Press Build report.", "ok"); });
+  root.CertReport = {parseList, openLink, summaryText};
+})(window);
 </script>
 <script>
 // Compact NAND canvas for the student challenge. Click an output dot, then an input dot, to wire. Drag gates. Double-click a wire or gate to remove it.
@@ -4279,14 +4421,15 @@ window.CC_CONFIG = {
   const mkLink = a => { const x = document.createElement("a"); x.href = a.href; x.textContent = a.text; x.target = "_blank"; x.rel = "noopener"; return x; };
 
   // ---------- routing ----------
-  const VIEWS = ["home", "verify", "issue", "manage", "challenge", "wallet", "pricing"];
+  const VIEWS = ["home", "verify", "issue", "manage", "challenge", "wallet", "pricing", "report"];
   function route() {
     const h = location.hash;
     { const t = h.length > 1 ? document.getElementById(h.slice(1)) : null; if (["#play", "#learners", "#judges", "#circuits"].includes(h) || (t && document.getElementById("landing").contains(t))) return; }   // those pages belong to site/ft
-    let v = h.startsWith("#c=") || h.startsWith("#p=") ? "verify" : h.startsWith("#ch=") || h === "#exam" ? "challenge" : VIEWS.includes(h.slice(1)) ? h.slice(1) : "home";
+    let v = h.startsWith("#report=") ? "report" : h.startsWith("#c=") || h.startsWith("#p=") ? "verify" : h.startsWith("#ch=") || h === "#exam" ? "challenge" : VIEWS.includes(h.slice(1)) ? h.slice(1) : "home";
     VIEWS.forEach(n => { $(n + "View").hidden = n !== v; });
     document.querySelectorAll(".tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === (h === "#exam" ? "exam" : v)));
     if (h.startsWith("#c=") || h.startsWith("#p=")) { $("vInput").value = h; runVerify(); }
+    if (h.startsWith("#report=")) CertReport.openLink(h);
     if (h === "#exam") CertChallenge.openExam();
     if (h.startsWith("#ch=")) CertChallenge.open(h.slice(4));
   }
@@ -4335,6 +4478,20 @@ window.CC_CONFIG = {
     else show("invalid", "Passport not valid", r.reason, facts, note);
   }
   let vSeq = 0;
+  // A certificate that names its holder's wallet also shows, live from the chain, what that wallet has proven in the lab.
+  async function holderLab(wallet, seq) {
+    const dd = document.createElement("span"); dd.textContent = "Checking the lab record on X Layer…"; const fact = FACT("Lab record", dd); $("vFacts").appendChild(fact);
+    try {
+      const lv = await CertPassport.levelsOf(wallet); if (seq !== vSeq) return;
+      let txt = `${lv.cleared.length} on-chain course level${lv.cleared.length === 1 ? "" : "s"} cleared${lv.cleared.length ? " (" + lv.cleared.join(", ") + ")" : ""}.`;
+      if (lv.cleared.length >= cfg.passport.minLevels) {
+        const f = await CertPassport.find(wallet); if (seq !== vSeq) return;
+        if (f.state === "found") { dd.textContent = txt + " Holds a skill passport: "; const a = document.createElement("a"); a.href = CertPassport.link(wallet, f.circuitId); a.textContent = "open it"; dd.appendChild(a); return; }
+        txt += " Eligible for the exam, no passport yet.";
+      } else txt += ` ${cfg.passport.minLevels} are needed for the exam.`;
+      dd.textContent = txt + " Attendance is proven by this certificate; skill is shown only by the lab.";
+    } catch { dd.textContent = "The lab record could not be read right now."; }
+  }
   // a passport earned on this device is remembered, so it can be reopened or copied from the verify page
   (function savedPassport() {
     let sv = null; try { sv = JSON.parse(localStorage.getItem("cc_passport") || "null"); } catch {}
@@ -4375,10 +4532,12 @@ window.CC_CONFIG = {
     facts.push(FACT("Registered", fmtDate(b.publishedAt)), FACT("Batch", `${b.label || "(no label)"} · ${b.count} certificate${b.count === 1 ? "" : "s"}`), FACT("Fingerprint", short(p.root), true));
     if (b.revoked || leafRev) { show("revoked", "Revoked", b.revoked ? "The issuer revoked this whole batch." : "The issuer revoked this certificate.", facts, ""); return; }
     facts.push(...skillFacts);
+    if (p.wallet) facts.push(FACT("Holder wallet", mkLink({href: X.explorerAddr(p.wallet), text: p.wallet}), true));
     if (sk && sk.state === "bad") { show("invalid", "Skill proof failed", "The certificate is genuine and registered, but the TapeOut circuit it names does not compute this student's challenge. Do not accept it as proof of skill.", facts, issuerNote); return; }
     if (sk && sk.state === "untrusted") { show("unregistered", "Registered, but the skill proof was not checked", sk.reason, facts, issuerNote); return; }
     if (sk && sk.state === "offline") { show("offline", "Registered, but the skill proof could not be checked", "We couldn't reach X Layer to run the TapeOut check. Try again in a moment.", facts, issuerNote); return; }
     show("valid", sk ? "Valid · skill verified on TapeOut" : "Valid", `This certificate is part of a batch the issuer registered on ${cfg.chainName} on ${fmtDate(b.publishedAt)}.` + (sk ? " The student's circuit was checked by the TapeOut processor." : ""), facts, issuerNote);
+    if (p.wallet) holderLab(p.wallet, seq);
   }
   $("vBtn").addEventListener("click", runVerify);
   $("vInput").addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) runVerify(); });
@@ -4402,8 +4561,8 @@ window.CC_CONFIG = {
     if ($("skillOn").checked) {
       const okRows = roster.filter(r => passed.has(r.seed));
       if (!okRows.length) return say(h, "No student has passed the skill check yet. Create challenges, collect submissions, then check them.", "bad");
-      creds = okRows.map(r => ({issuer, name: r.name, course: r.course || course, date: r.date || date, skill: passed.get(r.seed)}));
-    } else creds = p.rows.map(r => ({issuer, name: r.name, course: r.course || course, date: r.date || date}));
+      creds = okRows.map(r => ({issuer, name: r.name, course: r.course || course, date: r.date || date, skill: passed.get(r.seed), ...(r.wallet ? {wallet: r.wallet} : {})}));
+    } else creds = p.rows.map(r => ({issuer, name: r.name, course: r.course || course, date: r.date || date, ...(r.wallet ? {wallet: r.wallet} : {})}));
     if (creds.some(c => !c.course)) return say(h, "Add a default course, or a course column.", "bad");
     say(h, "Working…");
     try { batch = await C.buildBatch(creds); } catch (e) { return say(h, e.message, "bad"); }
@@ -4437,7 +4596,7 @@ window.CC_CONFIG = {
   $("chGen").addEventListener("click", async () => {
     const h = $("chGenHint"), p = C.parseCSV($("csvText").value); if (p.error) return say(h, p.error, "bad");
     say(h, "Working…");
-    try { const seeds = await C.uniqueSeeds(p.rows.length); roster = p.rows.map((r, i) => ({name: r.name, course: r.course, date: r.date, seed: seeds[i].seed})); passed = new Map();
+    try { const seeds = await C.uniqueSeeds(p.rows.length); roster = p.rows.map((r, i) => ({name: r.name, course: r.course, date: r.date, wallet: r.wallet, seed: seeds[i].seed})); passed = new Map();
       try { localStorage.setItem("cc_roster", JSON.stringify(roster)); } catch {}
       renderRoster(); $("subWrap").hidden = true;
       say(h, `${roster.length} challenge${roster.length === 1 ? "" : "s"} created.` + (roster.length > C.CHALLENGE_FUNCTIONS ? ` Only ${C.CHALLENGE_FUNCTIONS} different functions exist, so some students share one.` : " Every student has a different function."), "ok");
